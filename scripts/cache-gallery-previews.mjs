@@ -147,6 +147,7 @@ async function main() {
     }
   }
   console.log(`Wrote ${tasks.length} previews to ${path.relative(repoRoot, outDir)}/`);
+  console.log('Commit them: git add examples/shared/previews && git commit -m "Update gallery previews"');
 }
 
 main().catch((err) => {
