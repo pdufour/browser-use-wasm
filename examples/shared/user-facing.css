@@ -109,20 +109,15 @@
   flex-wrap: wrap;
 }
 
-.user-facing-demo .browse-clear-cache,
 .user-facing-demo .browse-retry {
-  padding: 0.4rem 0.85rem;
-  font-size: 0.8rem;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .user-facing-demo .browse-clear-cache {
-  color: var(--uf-muted, #64748b);
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.user-facing-demo .browse-clear-cache:hover:not(:disabled) {
-  color: var(--uf-accent, #6366f1);
-  border-color: color-mix(in srgb, var(--uf-accent, #6366f1) 35%, transparent);
+  font: inherit;
+  cursor: pointer;
 }
 
 .user-facing-demo .goal-bar {

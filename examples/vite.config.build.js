@@ -20,8 +20,12 @@ const mpaInput = {
   video: path.join(examplesDir, 'video/index.html'),
 };
 
+/** GitHub Pages project site: https://pdufour.github.io/browser-use-wasm/ */
+const pagesBase = process.env.PAGES_BASE ?? '/browser-use-wasm/';
+
 /** Production build — repo-root Vite root avoids cross-root MPA path errors. */
 export default defineConfig({
+  base: pagesBase,
   root: repoRoot,
   publicDir: false,
   build: {
@@ -40,8 +44,13 @@ export default defineConfig({
     wllamaWasmPlugin(),
     ...wllamaPlugins,
   ],
+  resolve: {
+    alias: {
+      'browser-use-wasm': path.join(repoRoot, 'src/index.ts'),
+    },
+  },
   optimizeDeps: {
-    exclude: ['@wllama/wllama'],
+    exclude: ['@wllama/wllama', 'browser-use-wasm'],
   },
   worker: {
     format: 'es',

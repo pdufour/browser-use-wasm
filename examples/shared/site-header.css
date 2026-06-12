@@ -117,3 +117,13 @@
   border-color: color-mix(in srgb, #6366f1 35%, transparent);
   color: #4f46e5;
 }
+
+button.site-header__github {
+  font: inherit;
+  cursor: pointer;
+}
+
+button.site-header__github:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

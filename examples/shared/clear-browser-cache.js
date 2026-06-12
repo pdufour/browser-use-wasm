@@ -50,7 +50,9 @@ export function wireClearCacheButton(container, { compact = false } = {}) {
   const idleLabel = compact ? 'Clear cache' : 'Clear browser cache';
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = compact ? 'chip-btn browse-clear-cache' : 'chip-btn dev-cache-tools__btn';
+  btn.className = compact
+    ? 'site-header__github browse-clear-cache'
+    : 'site-header__github dev-cache-tools__btn';
   btn.dataset.clearBrowserCache = '1';
   btn.title =
     'Clear wllama weights in this browser (OPFS) and reset download consent. Repo .model-cache/: npm run cache:clear';
