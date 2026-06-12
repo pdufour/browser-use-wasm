@@ -25,6 +25,8 @@ import {
 } from './user-facing.js';
 import { syncDevChrome } from './dev-details-sync.js';
 import { wireClearCacheButton } from './clear-browser-cache.js';
+import { BUILTIN_BROWSE_PATH } from './browse-defaults.js';
+import { resolveAppPath, withBase } from './app-base.js';
 
 /**
  * @param {{
@@ -37,7 +39,7 @@ import { wireClearCacheButton } from './clear-browser-cache.js';
  */
 export function initTaskRunner(options = {}) {
   const {
-    initialUrl = '/browse-fixture/index.html',
+    initialUrl = BUILTIN_BROWSE_PATH,
     initialGoal = '',
     frameTitle = 'Website',
     hideDevDetails = true,
@@ -90,7 +92,9 @@ export function initTaskRunner(options = {}) {
   const frame = getBrowseFrame();
   if (frame) {
     frame.title = frameTitle;
-    frame.src = initialUrl.startsWith('http') ? `/browse?u=${encodeURIComponent(initialUrl)}` : initialUrl;
+    frame.src = initialUrl.startsWith('http')
+      ? withBase(`browse/?u=${encodeURIComponent(initialUrl)}`)
+      : resolveAppPath(initialUrl);
   } else {
     console.error('[browse:init] #browse-frame missing — cannot load demo page');
   }

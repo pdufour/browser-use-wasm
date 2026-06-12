@@ -1,11 +1,12 @@
 import { PRODUCT_NAME, PRODUCT_TAGLINE, GITHUB_REPO_URL } from './product.js';
+import { withBase } from './app-base.js';
 
 /**
  * Shared site header — product brand + nav.
  * @param {{ active?: 'home' | 'gallery' | 'browse' }} [opts]
  */
 export function siteHeaderHtml({ active = 'home' } = {}) {
-  const nav = [{ id: 'home', href: '/', label: 'Home' }];
+  const nav = [{ id: 'home', href: withBase(''), label: 'Home' }];
   const links = nav
     .map(
       (item) =>
@@ -13,7 +14,7 @@ export function siteHeaderHtml({ active = 'home' } = {}) {
     )
     .join('');
   return `
-    <a class="site-header__brand" href="/">
+    <a class="site-header__brand" href="${withBase('')}">
       <span class="site-header__logo" aria-hidden="true">◉</span>
       <div>
         <p class="site-header__title">${PRODUCT_NAME}</p>

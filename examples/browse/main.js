@@ -3,13 +3,14 @@
  */
 import { mountSiteHeader } from '../shared/site-header.js';
 import { initTaskRunner } from '../shared/task-runner.js';
+import { withBase } from '../shared/app-base.js';
 
 const params = new URLSearchParams(location.search);
 const initialUrl = params.get('url') ?? params.get('u');
 const initialGoal = params.get('goal') ?? '';
 
 if (!initialUrl) {
-  location.replace('/gallery/');
+  location.replace(withBase('gallery/'));
 } else {
   mountSiteHeader(document.getElementById('site-header'), { active: 'gallery' });
   initTaskRunner({
