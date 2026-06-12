@@ -15,9 +15,6 @@
       "default": "./src/index.ts"
     }
   },
-  "workspaces": [
-    "examples"
-  ],
   "scripts": {
     "cache:showui": "node scripts/cache-model.mjs -- --model ShowUI-2B",
     "cache:model": "node scripts/cache-model.mjs",
@@ -47,6 +44,7 @@
     "eval:mind2web:full": "MIND2WEB_EVAL_LIMIT=7864320 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-grounding-eval.mjs",
     "eval:mind2web:models": "MIND2WEB_EVAL_LIMIT=15 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-model-benchmark.mjs",
     "cache:miniwob": "node scripts/cache-miniwob.mjs",
+    "cache:previews": "node scripts/cache-gallery-previews.mjs",
     "eval:miniwob": "node tests/miniwob/miniwob-eval.mjs"
   },
   "dependencies": {

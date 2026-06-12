@@ -43,13 +43,14 @@ npm install github:pdufour/browser-use-wasm#main
 
 ### Develop this repo
 
-Library is the root package (`browser-use-wasm@0.4.0`). Demos in `examples/` depend on that version via npm workspaces.
+Library is the root package (`browser-use-wasm`). The `examples/` app links it locally via `"browser-use-wasm": "file:.."`.
 
 ```bash
-npm install          # links examples → root browser-use-wasm
-npm run dev          # homepage at /, operator at /home/
-npm run build        # dist/lib/ + dist/examples/
-npm run typecheck    # src + examples
+npm install                              # root — tests, cache scripts, library dev
+cd examples && npm install && cd ..      # links browser-use-wasm from repo root
+npm run dev                              # homepage at /, operator at /home/
+npm run build                            # dist/lib/ + dist/examples/
+npm run typecheck                        # src + examples
 ```
 
 ### Embed browser-use in your app
