@@ -25,7 +25,7 @@ import { executeNavigationAction } from './actions/execute.ts';
 import { locateLabel, hasValidNormPoint, withTimeout } from './actions/locate.ts';
 import type { GroundingPoint } from './actions/parse-coords.ts';
 import {
-  WASM_URL,
+  resolveWasmUrl,
   CAPTURE_DPR_MAX,
   INFERENCE_TIMEOUT_MS,
   visionEncodeOpts,
@@ -168,7 +168,7 @@ export class WebOperator {
 
   constructor(options: WebOperatorOptions = {}) {
     this.#model = getModelById(options.modelId ?? DEFAULT_MODEL_ID);
-    this.#wasmUrl = options.wasmUrl ?? WASM_URL;
+    this.#wasmUrl = options.wasmUrl ?? resolveWasmUrl();
     this.#captureRoot =
       options.captureRoot ?? (() => (typeof document !== 'undefined' ? document.body : null));
     this.#inferenceTimeoutMs = options.inferenceTimeoutMs ?? INFERENCE_TIMEOUT_MS;

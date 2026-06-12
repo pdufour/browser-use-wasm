@@ -10,6 +10,8 @@ import {
   isRemoteModelLoadEnabled,
 } from 'browser-use-wasm';
 import { ensureModelDownloadConsent } from './model-download-gate.js';
+import { demoLog, demoWarn } from './demo-log.js';
+import { isGitHubPagesHost, waitForCrossOriginIsolation } from './wait-coi.js';
 
 /** Model load ceiling — matches E2E `LOAD_TIMEOUT_MS`. */
 export const BOOT_LOAD_TIMEOUT_MS = 60_000;
@@ -39,22 +41,29 @@ export function humanStatus(text, { goal } = {}) {
   if (!t) return 'Ready';
 
   if (/not cached|cache:model/i.test(t)) {
-    return 'This model needs a one-time download — tap Retry and confirm in the dialog';
+    return 'This model needs a one-time download — confirm in the dialog';
   }
   if (/download cancelled/i.test(t)) {
-    return 'Download cancelled — tap Retry when you are ready';
+    return 'Download cancelled — refresh when you are ready';
   }
   if (/Confirm the download dialog/i.test(t)) {
     return 'Confirm the dialog to load the AI model';
   }
+  if (/Cross-Origin Isolation starting/i.test(t)) {
+    return isGitHubPagesHost()
+      ? 'First visit on GitHub Pages — the page will reload once, then you can Run'
+      : 'Setting up browser isolation — reload once if this stays stuck';
+  }
   if (/COOP|COEP|Chrome|Edge|file:\/\//i.test(t)) {
-    return 'Open this page in Chrome or Edge via npm run dev';
+    return isGitHubPagesHost()
+      ? 'Use Chrome or Edge — GitHub Pages reloads once on first visit'
+      : 'Open this page in Chrome or Edge via npm run dev';
   }
   if (/failed to load|Navigation failed|frame did not become ready|Browse frame missing/i.test(t)) {
     return 'That page didn’t load — try refreshing';
   }
   if (/timed out/i.test(t)) {
-    return 'Startup timed out — tap Retry';
+    return 'Startup timed out — refresh the page';
   }
   if (/load failed|Error/i.test(t)) {
     if (/worker error|failed to fetch dynamically imported module|ERR_BLOCKED_BY_RESPONSE/i.test(t)) {
@@ -207,9 +216,25 @@ export async function autoloadAndCapture(opts) {
     return { ok: false, reason, error: err ?? new Error(msg) };
   };
 
+  demoLog('autoload', 'start', {
+    modelId,
+    goal: goal ?? null,
+    crossOriginIsolated: globalThis.crossOriginIsolated,
+    host: location.hostname,
+  });
+
+  const coi = await waitForCrossOriginIsolation();
+  demoLog('autoload', 'coi wait', coi);
+  if (!coi.ready) {
+    if (coi.reason === 'coi-reload-pending') {
+      setStatus('Cross-Origin Isolation starting — GitHub Pages reloads once on first visit, then Run works');
+      return { ok: false, reason: 'coi' };
+    }
+  }
+
   const issues = getWllamaEnvIssues();
   if (issues.length) {
-    console.error('[browse:autoload] env', issues);
+    demoWarn('autoload', 'env blocked', { issues });
     setStatus(issues[0]);
     return { ok: false, reason: 'env' };
   }
@@ -219,10 +244,16 @@ export async function autoloadAndCapture(opts) {
     return new Set();
   });
   const model = getModelById(modelId);
+  demoLog('autoload', 'cache check', {
+    modelId,
+    cached: cached.has(modelId),
+    remoteLoad: isRemoteModelLoadEnabled(),
+    canDownload: canDownloadModelInBrowser(model),
+  });
   if (!cached.has(modelId)) {
     if (!canDownloadModelInBrowser(model) || !isRemoteModelLoadEnabled()) {
       const technical = `${modelId} not available — pre-cache with npm run cache:model or open /home/ for a downloadable model`;
-      console.error('[browse:autoload] cache', technical);
+      demoWarn('autoload', 'cache miss — cannot load', { technical });
       setStatus(technical);
       return { ok: false, reason: 'cache' };
     }
@@ -230,12 +261,14 @@ export async function autoloadAndCapture(opts) {
 
   setStatus('Confirm the download dialog to load the AI model…');
   const ok = await ensureModelDownloadConsent({ model, cachedIds: cached });
+  demoLog('autoload', 'download consent', { ok });
   if (!ok) {
-    setStatus('Download cancelled — tap Retry when ready.');
+    setStatus('Download cancelled — refresh when ready.');
     return { ok: false, reason: 'consent' };
   }
 
   setStatus('Loading…');
+  demoLog('autoload', 'parallel load + frame');
 
   try {
     await Promise.all([
@@ -260,8 +293,12 @@ export async function autoloadAndCapture(opts) {
   try {
     await withBootTimeout(capture({ showSnapshot: false }), captureTimeoutMs, 'Capture');
     setStatus('ready to run a task.');
+    demoLog('autoload', 'done', { ok: true });
     return { ok: true };
   } catch (err) {
+    demoWarn('autoload', 'capture failed', {
+      message: err instanceof Error ? err.message : String(err),
+    });
     return fail('capture', err);
   }
 }

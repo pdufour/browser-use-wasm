@@ -7,6 +7,7 @@ import { fixturesPlugin } from '../vite.fixtures.js';
 import { modelCachePlugin } from '../vite.model-cache.js';
 import { wllamaWasmPlugin } from '../vite.wllama-wasm.js';
 import { coopCoepCorpPlugin } from '../vite.coop-corp.js';
+import { coiPagesPlugin } from '../vite.coi-pages.js';
 import { wllamaPlugins } from '../vite.wllama-plugins.js';
 
 const examplesDir = path.dirname(fileURLToPath(import.meta.url));
@@ -36,6 +37,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    coiPagesPlugin({ base: pagesBase }),
     react(),
     coopCoepCorpPlugin(),
     modelCachePlugin(),

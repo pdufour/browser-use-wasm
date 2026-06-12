@@ -4,10 +4,12 @@
  */
 
 import type { KvCacheType, ModelCard } from './models/types.ts';
+import { resolveWasmUrl, withAppBase } from '../util/app-base.ts';
 
 export const WLLAMA_VERSION = '3.1.0';
-/** Served by Vite at /wllama/wllama.wasm — same-origin, COEP-safe; not Node. */
-export const WASM_URL = '/wllama/wllama.wasm';
+/** Same-origin wllama WASM (respects Vite `base` on GitHub Pages). */
+export const WASM_URL = withAppBase('wllama/wllama.wasm');
+export { resolveWasmUrl };
 
 /** Default registry model id (ShowUI-2B product default). */
 export const DEFAULT_MODEL_ID = 'ShowUI-2B';

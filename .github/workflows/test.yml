@@ -33,6 +33,7 @@ jobs:
             showui-model-
 
       - run: npm ci
+      - run: npm ci --prefix examples
 
       - name: Install Playwright Chrome (WebGPU)
         run: npx playwright install chrome --with-deps

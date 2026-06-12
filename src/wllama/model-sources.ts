@@ -1,4 +1,5 @@
 import { DEFAULT_MODEL_ID } from '../config/vl.ts';
+import { modelCacheRootUrl } from '../util/app-base.ts';
 import { getCurrentModel } from '../config/models/registry.ts';
 import { SHOWUI_MODEL_SOURCE, assertShowUIModelSource } from '../config/models/ShowUI-2B.ts';
 import type { ModelCard, ModelSource } from '../config/models/types.ts';
@@ -27,7 +28,7 @@ export interface ModelCacheManifest {
 /** @param baseURI Page/worker location.href */
 async function loadManifest(baseURI: string): Promise<ModelCacheManifest | null> {
   try {
-    const cacheUrl = new URL('/model-cache/manifest.json', baseURI);
+    const cacheUrl = new URL('manifest.json', modelCacheRootUrl(baseURI));
     const res = await fetch(cacheUrl);
     if (!res.ok) return null;
     return res.json();
@@ -61,7 +62,7 @@ export async function getLocalModelUrls(
   if (!entry?.files?.llm?.name) return null;
   if (!model.llmFileRe!.test(entry.files.llm.name)) return null;
 
-  const base = new URL('/model-cache/', baseURI);
+  const base = modelCacheRootUrl(baseURI);
   const sources: ModelSource = {
     url: new URL(entry.files.llm.name, base).href,
   };

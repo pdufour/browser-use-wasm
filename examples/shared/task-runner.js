@@ -3,6 +3,7 @@
  */
 import {
   createWebOperator,
+  resolveWasmUrl,
   setBrowseHomePath,
   getBrowseFrame,
   getBrowseDocument,
@@ -27,6 +28,7 @@ import { syncDevChrome } from './dev-details-sync.js';
 import { wireClearCacheButton } from './clear-browser-cache.js';
 import { BUILTIN_BROWSE_PATH } from './browse-defaults.js';
 import { resolveAppPath, withBase } from './app-base.js';
+import { demoLog, demoWarn, logGoalBarState } from './demo-log.js';
 
 /**
  * @param {{
@@ -81,10 +83,22 @@ export function initTaskRunner(options = {}) {
   const modelStatusEl = $('model-status');
   const promptEl = $('prompt');
   const runBtn = $('btn-run');
-  const retryBtn = $('btn-retry-boot');
   const liveWrap = $('live-wrap');
   const liveCursor = createLiveCursor(liveWrap, getBrowseFrame);
   const addressEl = $('address-bar');
+
+  demoLog('task-runner', 'init', {
+    initialUrl,
+    initialGoal,
+    wireSiteHeader,
+    wasmUrl: resolveWasmUrl(),
+    hasRunBtn: !!runBtn,
+    hasGoalForm: !!$('goal-form'),
+    hasPrompt: !!promptEl,
+    hasFrame: !!getBrowseFrame(),
+  });
+  if (!runBtn) demoWarn('task-runner', '#btn-run missing from DOM');
+  logGoalBarState('task-runner:init');
 
   if (promptEl && initialGoal) promptEl.value = initialGoal;
   if (addressEl && initialUrl) addressEl.value = initialUrl;
@@ -96,7 +110,11 @@ export function initTaskRunner(options = {}) {
       ? withBase(`browse/?u=${encodeURIComponent(initialUrl)}`)
       : resolveAppPath(initialUrl);
   } else {
-    console.error('[browse:init] #browse-frame missing — cannot load demo page');
+    demoWarn('task-runner', '#browse-frame missing — cannot load demo page');
+  }
+
+  if (frame) {
+    demoLog('task-runner', 'iframe src', { src: frame.src });
   }
 
   function setTechnical(text) {
@@ -111,17 +129,25 @@ export function initTaskRunner(options = {}) {
     if (raw) raw.textContent = text;
   }
 
-  function syncRun() {
-    const canRun = !busy && !booting && modelLoaded && frameReady;
+  function syncRun(reason = 'sync') {
+    const canRun = !busy && !booting;
     if (runBtn) runBtn.disabled = !canRun;
-    if (promptEl) promptEl.disabled = busy || booting || !modelLoaded;
+    if (promptEl) promptEl.disabled = busy || booting;
+    demoLog('task-runner', `syncRun (${reason})`, {
+      canRun,
+      busy,
+      booting,
+      modelLoaded,
+      frameReady,
+      captureReady,
+      runDisabled: runBtn?.disabled ?? null,
+    });
     for (const btn of document.querySelectorAll('.preset-chips .chip-btn')) {
       btn.disabled = !canRun;
     }
     if (addressEl) addressEl.disabled = busy || booting;
     const goBtn = $('btn-navigate');
     if (goBtn) goBtn.disabled = busy || booting;
-    if (retryBtn) retryBtn.hidden = booting || (modelLoaded && captureReady);
   }
 
   async function loadModel() {
@@ -149,7 +175,7 @@ export function initTaskRunner(options = {}) {
     setTechnical(`Captured ${cap.width}×${cap.height}px — encoding…`);
     const buf = await cap.whenEncoded;
     if (!buf || operator.captureGeneration !== cap.generation) {
-      throw new Error('Capture encode failed — tap Retry');
+      throw new Error('Capture encode failed — refresh the page');
     }
     captureReady = true;
     if (modelStatusEl) modelStatusEl.dataset.captureReady = '1';
@@ -188,15 +214,24 @@ export function initTaskRunner(options = {}) {
       setTechnical('Enter a goal first.');
       return;
     }
-    if (busy || booting || !modelLoaded || !frameReady) {
-      setTechnical(
-        booting || !modelLoaded
-          ? 'Still starting — wait for Ready or tap Retry'
-          : 'Demo still loading — wait a moment'
-      );
+    if (busy || booting) {
+      setTechnical('Still starting — wait a moment');
       return;
     }
     if (promptEl) promptEl.value = goal;
+    if (!modelLoaded || !frameReady) {
+      demoLog('task-runner', 'runTask booting first', { modelLoaded, frameReady });
+      const boot = await startBoot('run-click');
+      if (!boot?.ok && (!modelLoaded || !frameReady)) {
+        demoWarn('task-runner', 'runTask aborted — boot incomplete', {
+          bootOk: boot?.ok ?? false,
+          bootReason: boot?.reason ?? null,
+          modelLoaded,
+          frameReady,
+        });
+        return;
+      }
+    }
     if (!captureReady) {
       try {
         await capturePage({ showSnapshot: false });
@@ -277,18 +312,18 @@ export function initTaskRunner(options = {}) {
     });
   }
 
-  async function startBoot() {
+  async function startBoot(trigger = 'autoload') {
     const gen = ++bootGeneration;
+    demoLog('task-runner', 'startBoot', { trigger, generation: gen });
     booting = true;
     frameReady = false;
-    if (retryBtn) retryBtn.hidden = true;
     modelLoaded = false;
     captureReady = false;
     if (modelStatusEl) {
       delete modelStatusEl.dataset.modelLoaded;
       delete modelStatusEl.dataset.captureReady;
     }
-    syncRun();
+    syncRun('boot-start');
 
     let result;
     try {
@@ -308,27 +343,31 @@ export function initTaskRunner(options = {}) {
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      demoWarn('task-runner', 'startBoot error', { message: msg });
       setTechnical(`Error — ${msg}`);
       result = { ok: false, reason: 'boot' };
     } finally {
       if (gen === bootGeneration) {
         booting = false;
-        syncRun();
+        syncRun('boot-finally');
       }
     }
 
     if (gen !== bootGeneration) return result;
 
-    if (!result.ok && retryBtn) retryBtn.hidden = false;
-    syncRun();
+    demoLog('task-runner', 'startBoot done', {
+      ok: result?.ok ?? false,
+      reason: result?.reason ?? null,
+      modelLoaded,
+      frameReady,
+      captureReady,
+    });
+    logGoalBarState('task-runner:boot-done');
+    syncRun('boot-done');
     return result;
   }
 
-  retryBtn?.addEventListener('click', () => {
-    void startBoot();
-  });
-
-  void startBoot();
+  void startBoot('page-load');
 
   return { operator, runTask, navigateTo, capturePage, startBoot };
 }

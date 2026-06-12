@@ -119,8 +119,10 @@
 }
 
 button.site-header__github {
-  font: inherit;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 button.site-header__github:disabled {

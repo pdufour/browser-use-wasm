@@ -6,7 +6,10 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
+
+const require = createRequire(import.meta.url);
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const rawDist = path.join(repoRoot, 'dist');
@@ -93,6 +96,16 @@ for (const { src, dest } of STATIC_TREES) {
 }
 
 fs.writeFileSync(path.join(stageDir, '.nojekyll'), '');
+
+const coiSrc = path.join(
+  path.dirname(require.resolve('coi-serviceworker/package.json')),
+  'coi-serviceworker.min.js'
+);
+if (fs.existsSync(coiSrc)) {
+  copyFile(coiSrc, path.join(stageDir, 'coi-serviceworker.js'));
+} else {
+  console.warn('[stage-pages] coi-serviceworker missing — GitHub Pages may need COOP/COEP');
+}
 
 rmrf(rawDist);
 fs.renameSync(stageDir, rawDist);

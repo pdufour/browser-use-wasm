@@ -84,8 +84,8 @@ export function requestModelDownloadConsent({ model, preCached = false }) {
       model.id === 'ShowUI-2B' ? '~1.8 GB' : 'several GB (model size varies)';
     const eyebrow = preCached ? 'Before you load' : 'Before you download';
     const lead = preCached
-      ? `This vision model loads <strong>${sizeHint}</strong> of weights into your browser (from the dev server cache). Inference stays local — <strong>$0</strong> per task.`
-      : `This vision model downloads <strong>${sizeHint}</strong> from Hugging Face into your browser. Inference stays local — <strong>$0</strong> per task after the first download.`;
+      ? `This loads <strong>${sizeHint}</strong> of model weights into your browser from the local cache.`
+      : `This downloads <strong>${sizeHint}</strong> from Hugging Face into your browser.`;
     const cacheNote = preCached
       ? '<li>Weights served from <code>/model-cache/</code> on this dev server</li>'
       : '<li>No npm run cache:model required for public models</li>';

@@ -63,12 +63,6 @@ body.browse-app {
   letter-spacing: -0.01em;
 }
 
-.browse-retry {
-  padding: 0.38rem 0.7rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
 .browse-main {
   flex: 1;
   display: flex;
@@ -87,6 +81,7 @@ body.browse-app {
   align-items: center;
   position: relative;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .browse-main .goal-bar input {

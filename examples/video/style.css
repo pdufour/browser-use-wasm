@@ -62,6 +62,7 @@ body.video-app {
   display: flex;
   gap: 0.55rem;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .video-main .goal-bar input {

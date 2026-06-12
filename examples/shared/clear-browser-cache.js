@@ -4,16 +4,31 @@
  */
 import { clearStoredDownloadConsent } from './model-download-gate.js';
 
+/** OPFS (`navigator.storage.getDirectory`) requires a secure context — localhost/https, not `.local` http. */
+export function isOpfsCacheAvailable() {
+  return (
+    globalThis.isSecureContext === true &&
+    typeof navigator.storage?.getDirectory === 'function'
+  );
+}
+
 /**
- * @returns {Promise<{ opfsFiles: number }>}
+ * @returns {Promise<{ opfsFiles: number, opfsAvailable: boolean }>}
  */
 export async function clearBrowserModelCache() {
-  const { CacheManager } = await import('@wllama/wllama');
-  const cache = new CacheManager();
-  const entries = await cache.list().catch(() => []);
-  await cache.clear();
+  const opfsAvailable = isOpfsCacheAvailable();
+  let opfsFiles = 0;
+
+  if (opfsAvailable) {
+    const { CacheManager } = await import('@wllama/wllama');
+    const cache = new CacheManager();
+    const entries = await cache.list().catch(() => []);
+    await cache.clear().catch(() => {});
+    opfsFiles = entries.length;
+  }
+
   clearStoredDownloadConsent();
-  return { opfsFiles: entries.length };
+  return { opfsFiles, opfsAvailable };
 }
 
 /**
@@ -21,16 +36,22 @@ export async function clearBrowserModelCache() {
  * @param {string} idleLabel
  */
 async function onClearCacheClick(btn, idleLabel) {
+  const opfsAvailable = isOpfsCacheAvailable();
   const ok = confirm(
-    'Clear downloaded model weights from this browser and reset the consent dialog?\n\nThe page will reload.'
+    opfsAvailable
+      ? 'Clear downloaded model weights from this browser and reset the consent dialog?\n\nThe page will reload.'
+      : 'Model cache (OPFS) is not available on this origin — use https:// or http://localhost.\n\nReset the download consent dialog and reload?'
   );
   if (!ok) return;
   btn.disabled = true;
   btn.textContent = 'Clearing…';
   try {
-    const { opfsFiles } = await clearBrowserModelCache();
-    btn.textContent =
-      opfsFiles > 0 ? `Cleared ${opfsFiles} file(s) — reloading…` : 'Reloading…';
+    const { opfsFiles, opfsAvailable: clearedOpfs } = await clearBrowserModelCache();
+    btn.textContent = !clearedOpfs
+      ? 'Consent reset — reloading…'
+      : opfsFiles > 0
+        ? `Cleared ${opfsFiles} file(s) — reloading…`
+        : 'Reloading…';
     location.reload();
   } catch (err) {
     btn.disabled = false;

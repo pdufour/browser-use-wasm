@@ -109,16 +109,6 @@
   flex-wrap: wrap;
 }
 
-.user-facing-demo .browse-retry {
-  padding: 0.38rem 0.7rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.user-facing-demo .browse-clear-cache {
-  font: inherit;
-  cursor: pointer;
-}
 
 .user-facing-demo .goal-bar {
   display: flex;
@@ -127,6 +117,7 @@
   flex-wrap: wrap;
   position: relative;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .user-facing-demo .goal-bar input[type='text'] {

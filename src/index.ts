@@ -81,6 +81,7 @@ export {
 export type { ModelCard } from './config/models/types.ts';
 export {
   WASM_URL,
+  resolveWasmUrl,
   INFERENCE_TIMEOUT_MS,
   AUTO_LOAD_MODEL,
   resolveLlamaLogLevel,

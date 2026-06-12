@@ -227,10 +227,6 @@ body.has-command-bar:has(.command-bar.is-running) .operator-page {
   gap: 0.35rem 0.75rem;
 }
 
-.command-bar__clear-cache .browse-clear-cache {
-  font: inherit;
-  cursor: pointer;
-}
 
 .model-row {
   display: flex;

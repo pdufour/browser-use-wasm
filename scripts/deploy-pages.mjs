@@ -12,6 +12,19 @@ const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(repoRoot, 'dist');
 const pagesBase = process.env.PAGES_BASE ?? '/browser-use-wasm/';
 
+function pagesBuildId() {
+  if (process.env.PAGES_BUILD_ID?.trim()) return process.env.PAGES_BUILD_ID.trim();
+  try {
+    const sha = execSync('git rev-parse --short HEAD', {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    }).trim();
+    return `${sha}-${Date.now().toString(36)}`;
+  } catch {
+    return Date.now().toString(36);
+  }
+}
+
 function rmrf(target) {
   fs.rmSync(target, { recursive: true, force: true });
 }
@@ -20,8 +33,10 @@ function run(cmd, opts = {}) {
   execSync(cmd, { stdio: 'inherit', cwd: repoRoot, ...opts });
 }
 
+const buildId = pagesBuildId();
+console.log(`[deploy-pages] build id ${buildId}`);
 run('npm run build:examples', {
-  env: { ...process.env, PAGES_BASE: pagesBase },
+  env: { ...process.env, PAGES_BASE: pagesBase, PAGES_BUILD_ID: buildId },
 });
 run('node scripts/stage-pages-dist.mjs');
 

@@ -40,6 +40,8 @@ export default defineConfig({
     plugins: () => wllamaPlugins,
   },
   server: {
+    host: true,
+    allowedHosts: true,
     fs: {
       allow: [repoRoot],
     },
@@ -50,6 +52,8 @@ export default defineConfig({
     },
   },
   preview: {
+    host: true,
+    allowedHosts: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',

@@ -8,15 +8,23 @@ function navigatorGpu(): unknown {
   return (navigator as Navigator & { gpu?: unknown }).gpu;
 }
 
+function isGitHubPagesHost(): boolean {
+  return typeof location !== 'undefined' && /\.github\.io$/i.test(location.hostname);
+}
+
 /** Blocking issues that prevent the WASM worker from loading a model. */
 export function getWllamaEnvIssues(): string[] {
   const issues: string[] = [];
-  if (!globalThis.crossOriginIsolated) {
-    issues.push(
-      'Cross-Origin Isolation off — WASM needs COOP/COEP (run npm run dev or npm run preview, not file://)'
-    );
-  } else if (typeof SharedArrayBuffer === 'undefined') {
-    issues.push('SharedArrayBuffer unavailable — use Chrome/Edge with npm run dev');
+  if (typeof SharedArrayBuffer === 'undefined') {
+    if (!globalThis.crossOriginIsolated) {
+      issues.push(
+        isGitHubPagesHost()
+          ? 'Cross-Origin Isolation starting — GitHub Pages reloads once on first visit, then Run works'
+          : 'Cross-Origin Isolation off — WASM needs COOP/COEP (run npm run dev or npm run preview, not file://)'
+      );
+    } else {
+      issues.push('SharedArrayBuffer unavailable — use Chrome or Edge');
+    }
   }
   if (!navigatorGpu()) {
     issues.push('WebGPU not supported in this browser');

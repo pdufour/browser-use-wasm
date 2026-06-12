@@ -24,7 +24,7 @@
     "verify:models": "node scripts/verify-model-urls.mjs",
     "cache:all": "node scripts/cache-model.mjs --all",
     "start": "npm run cache:showui && npm run dev",
-    "dev": "npm run dev --prefix examples",
+    "dev": "npm run dev --prefix examples --",
     "build": "npm run build:src && npm run build --prefix examples",
     "build:src": "npm run typecheck:src && vite build --config vite.config.src.js",
     "build:examples": "npm run build --prefix examples",
@@ -58,6 +58,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "coi-serviceworker": "^0.1.7",
     "typescript": "^6.0.3",
     "vite": "^6.3.5"
   }
