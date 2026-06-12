@@ -1,0 +1,1 @@
+import{m as e}from"./site-header-C-Wmj6X-.js";import{i}from"./task-runner-D5bnYhTP.js";import"./clear-browser-cache-Clp_Wfpf.js";e(document.getElementById("site-header"),{active:"video"});i({initialUrl:"/sites/find-it/index.html",initialGoal:"search for cats",frameTitle:"FindIt search",hideDevDetails:!0,wireSiteHeader:!0});

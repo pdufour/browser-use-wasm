@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Run a task on a demo</title>
+    <script type="module" crossorigin src="/browser-use-wasm/assets/browse-CHujH_mr.js"></script>
+    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/site-header-C-Wmj6X-.js">
+    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/clear-browser-cache-Clp_Wfpf.js">
+    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/task-runner-D5bnYhTP.js">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/site-header-TkDl9i09.css">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/task-runner-CjgHpFDK.css">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/browse-CPir5G5i.css">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/dev-details-D5GCigIh.css">
+  </head>
+  <body class="browse-app user-facing-demo" data-viewport="live">
+    <header id="site-header"></header>
+    <div class="browse-status-row browse-status-row--floating">
+      <p id="hero-status" class="hero-status" aria-live="polite">Starting…</p>
+      <button id="btn-retry-boot" type="button" class="chip-btn browse-retry" hidden>
+        Retry
+      </button>
+    </div>
+
+    <main class="browse-main">
+      <form id="goal-form" class="goal-bar" autocomplete="off">
+        <input
+          id="prompt"
+          type="text"
+          placeholder="Tell the browser what to do…"
+          spellcheck="false"
+          aria-label="Goal"
+        />
+        <button id="btn-run" type="submit" class="chip-btn chip-btn--primary">Run</button>
+      </form>
+
+      <div class="live-hero">
+        <div class="live-frame-wrap" id="live-wrap">
+          <iframe id="browse-frame" title="Demo"></iframe>
+        </div>
+      </div>
+    </main>
+
+    <div class="dev-details-shell">
+    <details id="dev-details" class="dev-details">
+      <summary class="dev-details__summary">
+        <span class="dev-details__title">Developer details</span>
+        <span id="dev-status-badge" class="dev-status-badge" data-state="idle">Ready</span>
+      </summary>
+      <div class="dev-details__body">
+        <div id="dev-action-pipeline" class="dev-action-pipeline" hidden></div>
+        <p id="arena-status" class="arena-technical" hidden></p>
+        <span id="model-status" class="dev-chrome-line" data-testid="model-status"></span>
+
+        <section class="dev-panel">
+          <header class="dev-panel__head">
+            <h3 class="dev-panel__title">Screenshot buffer</h3>
+            <p class="dev-panel__hint">SnapDOM capture the model sees — red dot is the grounded click</p>
+          </header>
+          <div
+            id="screenshot-stage"
+            class="screenshot-stage dev-capture-mount empty"
+            data-testid="screenshot-stage"
+          ></div>
+        </section>
+
+        <section class="dev-panel dev-panel--output">
+          <header class="dev-panel__head">
+            <h3 class="dev-panel__title">Model output</h3>
+          </header>
+          <pre id="raw-output" class="raw-output">Model output will appear here.</pre>
+        </section>
+      </div>
+    </details>
+    </div>
+
+  </body>
+</html>
