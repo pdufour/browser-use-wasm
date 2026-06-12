@@ -1,6 +1,7 @@
 /**
  * User-facing demo helpers — human status, autoload, hide dev chrome.
  */
+import './examples-policy.js';
 import {
   getWllamaEnvIssues,
   loadCachedModelIds,
@@ -38,7 +39,13 @@ export function humanStatus(text, { goal } = {}) {
   if (!t) return 'Ready';
 
   if (/not cached|cache:model/i.test(t)) {
-    return 'AI isn’t installed yet — developers run npm run cache:model';
+    return 'This model needs a one-time download — tap Retry and confirm in the dialog';
+  }
+  if (/download cancelled/i.test(t)) {
+    return 'Download cancelled — tap Retry when you are ready';
+  }
+  if (/Confirm the download dialog/i.test(t)) {
+    return 'Confirm the dialog to load the AI model';
   }
   if (/COOP|COEP|Chrome|Edge|file:\/\//i.test(t)) {
     return 'Open this page in Chrome or Edge via npm run dev';
@@ -50,14 +57,21 @@ export function humanStatus(text, { goal } = {}) {
     return 'Startup timed out — tap Retry';
   }
   if (/load failed|Error/i.test(t)) {
+    if (/worker error|failed to fetch dynamically imported module|ERR_BLOCKED_BY_RESPONSE/i.test(t)) {
+      return 'Model worker failed to start — hard refresh (Cmd+Shift+R) and try again';
+    }
     return t.replace(/^Error — /, 'Something went wrong — ');
   }
 
+  if (/^Downloading .*?(\d+)%/i.test(t)) {
+    const m = t.match(/(\d+)%/);
+    return m ? `Downloading model… ${m[1]}%` : 'Downloading model weights…';
+  }
   if (/^Downloading /i.test(t) || /from Hugging Face/i.test(t)) {
     return 'Downloading model weights…';
   }
-  if (/^Loading /i.test(t) || /loaded — [\d?]+ GPU/i.test(t)) {
-    return 'Getting AI ready…';
+  if (/^Loading…$/i.test(t) || /^Loading /i.test(t) || /loaded — [\d?]+ GPU/i.test(t)) {
+    return 'Loading model into your browser…';
   }
   if (/encoding/i.test(t)) {
     return 'Looking at the page…';
@@ -207,16 +221,18 @@ export async function autoloadAndCapture(opts) {
   const model = getModelById(modelId);
   if (!cached.has(modelId)) {
     if (!canDownloadModelInBrowser(model) || !isRemoteModelLoadEnabled()) {
-      const technical = `${modelId} not available — open /home/ and pick a downloadable model`;
+      const technical = `${modelId} not available — pre-cache with npm run cache:model or open /home/ for a downloadable model`;
       console.error('[browse:autoload] cache', technical);
       setStatus(technical);
       return { ok: false, reason: 'cache' };
     }
-    const ok = await ensureModelDownloadConsent({ model, cachedIds: cached });
-    if (!ok) {
-      setStatus('Download cancelled — reload to try again.');
-      return { ok: false, reason: 'consent' };
-    }
+  }
+
+  setStatus('Confirm the download dialog to load the AI model…');
+  const ok = await ensureModelDownloadConsent({ model, cachedIds: cached });
+  if (!ok) {
+    setStatus('Download cancelled — tap Retry when ready.');
+    return { ok: false, reason: 'consent' };
   }
 
   setStatus('Loading…');
@@ -230,6 +246,13 @@ export async function autoloadAndCapture(opts) {
     const msg = err instanceof Error ? err.message : String(err);
     if (/page load/i.test(msg)) {
       return fail('frame', err, 'Sample page failed to load — refresh the page');
+    }
+    if (/worker error|ERR_BLOCKED_BY_RESPONSE|dynamically imported module/i.test(msg)) {
+      return fail(
+        'boot',
+        err,
+        'Error — model worker blocked (refresh with Cmd+Shift+R; needs npm run dev, not a static file server)'
+      );
     }
     return fail('boot', err);
   }

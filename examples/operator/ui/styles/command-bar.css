@@ -227,6 +227,22 @@ body.has-command-bar:has(.command-bar.is-running) .operator-page {
   gap: 0.35rem 0.75rem;
 }
 
+.command-bar__clear-cache .browse-clear-cache {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.command-bar__clear-cache .browse-clear-cache:hover:not(:disabled) {
+  color: #4f46e5;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
 .model-row {
   display: flex;
   align-items: center;

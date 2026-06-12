@@ -102,6 +102,29 @@
   font-weight: 600;
 }
 
+.user-facing-demo .browse-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.user-facing-demo .browse-clear-cache,
+.user-facing-demo .browse-retry {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.user-facing-demo .browse-clear-cache {
+  color: var(--uf-muted, #64748b);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.user-facing-demo .browse-clear-cache:hover:not(:disabled) {
+  color: var(--uf-accent, #6366f1);
+  border-color: color-mix(in srgb, var(--uf-accent, #6366f1) 35%, transparent);
+}
+
 .user-facing-demo .goal-bar {
   display: flex;
   gap: var(--uf-gap, 0.65rem);

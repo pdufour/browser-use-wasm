@@ -2,6 +2,12 @@
 
 **browser-use in WASM** — vision-language automation with no backend. **browser-use-wasm** runs the full **browser-use** loop client-side: SnapDOM screenshot → ShowUI grounding → live-page click/type/select. Default model is **ShowUI-2B**; swap others from the built-in model selector. Chrome or Edge only (WebGPU + WASM workers).
 
+## Demo
+
+<video src="demo-vid.mp4" controls playsinline width="100%">
+  <a href="demo-vid.mp4">Download demo-vid.mp4</a>
+</video>
+
 ## How browser-use works
 
 **browser-use** here means: look at the page like a human (screenshot), decide what to do (VLA), act on the real DOM at the grounded point.

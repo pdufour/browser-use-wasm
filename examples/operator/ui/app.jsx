@@ -120,7 +120,7 @@ export function App() {
       cachedIds: ui.cachedIds,
     });
     if (!ok) {
-      set({ status: 'Download cancelled — pick another model or try again.' });
+      set({ status: 'Download cancelled — tap Load to try again.' });
       return;
     }
     set({ busy: true, loadDisabled: true });

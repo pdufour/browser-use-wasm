@@ -2,6 +2,7 @@
  * Operator session helpers — browse-frame singleton for the gate app, plus a
  * thin embed wrapper for minimal / embed examples.
  */
+import './examples-policy.js';
 import {
   createWebOperator,
   drawMarker,
@@ -17,6 +18,7 @@ import {
   getBrowseDocument,
 } from 'browser-use-wasm';
 import { clearCaptureStage, mountCaptureCanvas } from './capture-ui.js';
+import { ensureModelDownloadConsent } from './model-download-gate.js';
 
 export { $ } from './dom.js';
 
@@ -83,6 +85,15 @@ function createEmbedSession(options) {
 
   async function load() {
     if (busy) return;
+    const cachedIds = await loadCachedModelIds().catch(() => new Set());
+    const ok = await ensureModelDownloadConsent({
+      model: operator.model,
+      cachedIds,
+    });
+    if (!ok) {
+      onStatus('Download cancelled — try Load again when ready.');
+      return;
+    }
     busy = true;
     try {
       await operator.load({ onStatus });

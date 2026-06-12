@@ -1,5 +1,6 @@
 import { humanStatus } from '../../../shared/user-facing.js';
 import { ModelSwitcher } from './ModelSwitcher.jsx';
+import { ClearCacheButton } from './ClearCacheButton.jsx';
 // Voice disabled for now — DOM hooks render only under ?e2e=1 for Playwright.
 import { VoicePanel } from './VoicePanel.jsx';
 
@@ -72,6 +73,7 @@ export function CommandBar({
         <div className="command-bar__human-status" aria-live="polite">
           {humanStatus(status)}
         </div>
+        <ClearCacheButton />
         {isE2e ? (
           <ModelSwitcher value={modelId} cachedIds={cachedIds} onSwitch={onSwitchModel} />
         ) : (

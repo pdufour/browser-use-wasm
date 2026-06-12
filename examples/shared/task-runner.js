@@ -24,6 +24,7 @@ import {
   BOOT_FRAME_TIMEOUT_MS,
 } from './user-facing.js';
 import { syncDevChrome } from './dev-details-sync.js';
+import { wireClearCacheButton } from './clear-browser-cache.js';
 
 /**
  * @param {{
@@ -66,6 +67,12 @@ export function initTaskRunner(options = {}) {
       document.querySelector('.browse-status-row');
     if (aside && statusRow) aside.appendChild(statusRow);
   }
+
+  const statusRow =
+    document.querySelector('.browse-status-row--floating') ??
+    document.querySelector('.browse-status-row');
+  wireClearCacheButton(statusRow, { compact: true });
+  wireClearCacheButton(document.querySelector('#dev-details .dev-details__body'));
 
   const heroStatusEl = $('hero-status');
   const heroStatus = bindHumanStatus(heroStatusEl);
@@ -180,7 +187,7 @@ export function initTaskRunner(options = {}) {
     if (busy || booting || !modelLoaded || !frameReady) {
       setTechnical(
         booting || !modelLoaded
-          ? 'Getting AI ready…'
+          ? 'Still starting — wait for Ready or tap Retry'
           : 'Demo still loading — wait a moment'
       );
       return;

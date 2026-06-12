@@ -18,6 +18,7 @@
   "scripts": {
     "cache:showui": "node scripts/cache-model.mjs -- --model ShowUI-2B",
     "cache:model": "node scripts/cache-model.mjs",
+    "cache:clear": "node scripts/clear-model-cache.mjs",
     "cache:repair": "node scripts/cache-model.mjs --repair",
     "cache:public": "node scripts/cache-public-models.mjs",
     "verify:models": "node scripts/verify-model-urls.mjs",

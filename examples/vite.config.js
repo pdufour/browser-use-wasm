@@ -28,7 +28,12 @@ export default defineConfig({
     ...wllamaPlugins,
   ],
   optimizeDeps: {
-    exclude: ['@wllama/wllama'],
+    exclude: ['@wllama/wllama', 'browser-use-wasm'],
+  },
+  resolve: {
+    alias: {
+      'browser-use-wasm': path.join(repoRoot, 'src/index.ts'),
+    },
   },
   worker: {
     format: 'es',

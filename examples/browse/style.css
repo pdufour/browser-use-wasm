@@ -68,6 +68,19 @@ body.browse-app {
   font-size: 0.8rem;
 }
 
+.browse-clear-cache {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  color: var(--uf-muted, #64748b);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.browse-clear-cache:hover:not(:disabled) {
+  color: var(--uf-accent, #6366f1);
+  border-color: color-mix(in srgb, var(--uf-accent, #6366f1) 35%, transparent);
+}
+
 .browse-main {
   flex: 1;
   display: flex;

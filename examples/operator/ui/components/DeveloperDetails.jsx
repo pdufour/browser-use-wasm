@@ -1,9 +1,17 @@
+import { useEffect, useRef } from 'react';
 import { ScreenshotStage } from './ScreenshotStage.jsx';
+import { wireClearCacheButton } from '../../../shared/clear-browser-cache.js';
 
 /**
  * Collapsible developer panel — matches browse / gallery task runner layout.
  */
 export function DeveloperDetails({ status, raw }) {
+  const cacheToolsRef = useRef(null);
+
+  useEffect(() => {
+    wireClearCacheButton(cacheToolsRef.current);
+  }, []);
+
   return (
     <div className="dev-details-shell">
       <details id="dev-details" className="dev-details">
@@ -24,6 +32,7 @@ export function DeveloperDetails({ status, raw }) {
           >
             {status}
           </span>
+          <div ref={cacheToolsRef} />
 
           <section className="dev-panel">
             <header className="dev-panel__head">

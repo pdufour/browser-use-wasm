@@ -32,6 +32,7 @@ import {
   VL_LLAMA_LOG_LEVEL,
 } from './config/vl.ts';
 import { resolveModelLoadCaps } from './env/model-gating.ts';
+import { resolveRegistryModelSourceDetailed } from './wllama/model-sources.ts';
 import {
   getModelById,
   BROWSER_VALIDATED_MODEL_IDS,
@@ -226,8 +227,26 @@ export class WebOperator {
     const model = this.#model;
     const browserValidated = BROWSER_VALIDATED_MODEL_IDS.includes(model.id);
     const loadCaps = resolveModelLoadCaps(model, { browserValidated });
-    options.onStatus?.(`Loading ${model.label}…`);
-    if (options.onProgress) this.llm.onProgress(options.onProgress);
+    const baseURI = typeof location !== 'undefined' ? location.href : '';
+    const { origin } = await resolveRegistryModelSourceDetailed(baseURI, model.id);
+    if (origin === 'remote') {
+      options.onStatus?.(`Downloading ${model.label} from Hugging Face…`);
+    } else {
+      options.onStatus?.(`Loading ${model.label}…`);
+    }
+
+    let lastReportedPct = -1;
+    const progressHandler = ({ loaded, total }: { loaded: number; total: number }) => {
+      options.onProgress?.({ loaded, total });
+      if (total > 0 && loaded < total) {
+        const pct = Math.min(99, Math.floor((loaded / total) * 100));
+        if (pct > lastReportedPct) {
+          lastReportedPct = pct;
+          options.onStatus?.(`Downloading ${model.label}… ${pct}%`);
+        }
+      }
+    };
+    this.llm.onProgress(progressHandler);
     try {
       const { nGpuLayers, imageMaxTokens } = await this.llm.load(this.#wasmUrl, {
         modelId: model.id,
@@ -250,9 +269,7 @@ export class WebOperator {
       void prewarmNavigationPrefix(this.llm);
       return { nGpuLayers, imageMaxTokens, browserValidated, loadCaps };
     } finally {
-      if (options.onProgress) {
-        this.llm.onProgress(() => {});
-      }
+      this.llm.onProgress(() => {});
     }
   }
 
