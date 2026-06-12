@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- pages-build:5ef7910-mqaqq6rr -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <script>
+      window.__PAGES_BUILD__ = "5ef7910-mqaqq6rr";
+      (function () {
+        var KEY = 'pages-build-id';
+        var next = window.__PAGES_BUILD__;
+        var prev = sessionStorage.getItem(KEY);
+        if (prev && prev !== next && navigator.serviceWorker) {
+          sessionStorage.setItem(KEY, next);
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }).then(function () { location.reload(); });
+          return;
+        }
+        sessionStorage.setItem(KEY, next);
+      })();
       window.coi = {
-        coepCredentialless: () => true,
-        coepDegrade: () => true,
+        coepCredentialless: function () { return true; },
+        coepDegrade: function () { return true; },
         quiet: false,
       };
     </script>
-    <script src="/browser-use-wasm/coi-serviceworker.js"></script>
+    <script src="/browser-use-wasm/coi-serviceworker.js?v=5ef7910-mqaqq6rr"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>browser-use-wasm · vision AI for your browser</title>
