@@ -1,11 +1,12 @@
 # browser-use-wasm
 
+Live demo → https://pdufour.github.io/browser-use-wasm/
+
 **browser-use in WASM** — vision-language automation with no backend. **browser-use-wasm** runs the full **browser-use** loop client-side: SnapDOM screenshot → ShowUI grounding → live-page click/type/select. Default model is **ShowUI-2B**; swap others from the built-in model selector. Chrome or Edge only (WebGPU + WASM workers).
 
 ## Demo
 
 https://github.com/user-attachments/assets/61723bbd-bf2e-4a63-b019-1bdadac586dc
-
 
 ## How browser-use works
 
