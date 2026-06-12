@@ -1,4 +1,4 @@
-import{m as n}from"./site-header-SCfu4a9Y.js";import{S as c,o as i,a as d,g as t,b as o}from"./gallery-tasks-D-misDNW.js";n(document.getElementById("site-header"),{active:"gallery"});const s=document.getElementById("gallery-grid");function l(a){return`
+import{m as n}from"./site-header-CMgM3nJn.js";import{S as c,o as i,a as d,g as t,b as o}from"./gallery-tasks-Bh31Hz-S.js";n(document.getElementById("site-header"),{active:"gallery"});const s=document.getElementById("gallery-grid");function l(a){return`
     <div class="task-card__visual demo-preview brainwave-frame brainwave-frame--compact is-idle has-preview"
          style="--demo-accent: ${a.hue??"#6366f1"}"
          aria-hidden="true">

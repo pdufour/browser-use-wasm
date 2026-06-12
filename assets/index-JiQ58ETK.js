@@ -1,4 +1,4 @@
-import{m}from"./site-header-SCfu4a9Y.js";import{c as o,a as d,g as i}from"./gallery-tasks-D-misDNW.js";m(document.getElementById("site-header"),{active:"home"});const c=document.getElementById("home-featured"),t=document.getElementById("home-examples-grid");function l(e){return`
+import{m}from"./site-header-CMgM3nJn.js";import{c as o,a as d,g as i}from"./gallery-tasks-Bh31Hz-S.js";m(document.getElementById("site-header"),{active:"home"});const c=document.getElementById("home-featured"),t=document.getElementById("home-examples-grid");function l(e){return`
     <div class="home-card__visual demo-preview brainwave-frame brainwave-frame--compact is-idle has-preview"
          style="--demo-accent: ${e.hue??"#6366f1"}"
          aria-hidden="true">
