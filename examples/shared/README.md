@@ -23,7 +23,7 @@ Import the library as a real package dependency:
 import { createWebOperator } from 'browser-use-wasm';
 ```
 
-The examples app depends on `"browser-use-wasm": "0.4.0"` (npm workspace). After `npm install` at the repo root, imports resolve from `node_modules/browser-use-wasm`.
+The examples app depends on `"browser-use-wasm": "file:.."`. Run `npm install` inside `examples/` — imports resolve from `node_modules/browser-use-wasm` (symlink to the repo root).
 
 ## Conventions (workers 2–7)
 

@@ -9,7 +9,7 @@
     "preview": "vite preview --config vite.config.js"
   },
   "dependencies": {
-    "browser-use-wasm": "0.4.0",
+    "browser-use-wasm": "github:pdufour/browser-use-wasm#main",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
