@@ -4,9 +4,7 @@
 
 ## Demo
 
-<video src="demo-vid.mp4" controls playsinline width="100%">
-  <a href="demo-vid.mp4">Download demo-vid.mp4</a>
-</video>
+![Demo](https://github.com/user-attachments/assets/61723bbd-bf2e-4a63-b019-1bdadac586dc)
 
 ## How browser-use works
 
