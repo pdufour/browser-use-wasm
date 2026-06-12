@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopDemo — Checkout</title>
+    <link rel="stylesheet" href="/browse-fixture/fixture.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="stage">
+      <div class="stage-bar">
+        <span class="stage-url">shop.demo / checkout</span>
+        <nav class="stage-nav">
+          <a href="#">Home</a>
+          <a href="#">Products</a>
+          <a href="#" id="nav-sign-in">Sign in</a>
+        </nav>
+      </div>
+
+      <main class="checkout-main">
+        <h2>Complete your order</h2>
+        <p class="checkout-lead">Review your details and continue to payment.</p>
+        <p class="checkout-hint">
+          <button type="button" class="btn-link-help" id="btn-help" data-testid="btn-help">
+            Help
+          </button>
+          — opens a dialog to close.
+        </p>
+        <form class="checkout-form" onsubmit="return false">
+          <label>
+            Email
+            <input type="email" placeholder="you@example.com" />
+          </label>
+          <label>
+            Promo code
+            <input type="text" placeholder="SAVE10" />
+          </label>
+          <label class="checkout-checkbox">
+            <input type="checkbox" id="checkout-remember" data-testid="checkout-remember" />
+            Remember me
+          </label>
+          <label>
+            Country
+            <select id="checkout-country" data-testid="checkout-country">
+              <option>United States</option>
+              <option>Canada</option>
+              <option>United Kingdom</option>
+            </select>
+          </label>
+          <p class="checkout-scroll-filler">
+            Extra form notes (scroll the page): billing matches shipping address.
+            Use voice “scroll down” then capture again to see lower controls.
+          </p>
+        </form>
+      </main>
+
+      <footer class="checkout__footer">
+        <button type="button" class="btn-cancel" id="btn-cancel" data-testid="btn-cancel">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn-submit"
+          id="btn-submit"
+          data-testid="btn-submit"
+          aria-label="Submit"
+        >
+          Submit
+        </button>
+      </footer>
+
+      <div
+        id="checkout-modal"
+        class="checkout-modal"
+        hidden
+        role="dialog"
+        aria-label="Help"
+        data-testid="checkout-modal"
+      >
+        <div class="checkout-modal-panel">
+          <p class="checkout-modal-lead">
+            Need assistance? Leave your contact email and close this dialog.
+          </p>
+          <label class="checkout-modal-field">
+            Contact email
+            <input
+              type="email"
+              id="modal-email"
+              data-testid="modal-email"
+              placeholder="Enter your email address"
+            />
+          </label>
+          <button
+            type="button"
+            id="btn-modal-close"
+            class="checkout-modal-close"
+            data-testid="btn-modal-close"
+            aria-label="Close"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <script>
+      document.getElementById('btn-help')?.addEventListener('click', () => {
+        document.getElementById('checkout-modal')?.removeAttribute('hidden');
+      });
+      document.getElementById('btn-modal-close')?.addEventListener('click', () => {
+        document.getElementById('checkout-modal')?.setAttribute('hidden', '');
+      });
+    </script>
+  </body>
+</html>

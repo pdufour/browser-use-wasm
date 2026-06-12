@@ -1,0 +1,151 @@
+/**
+ * Curated demos for the gallery — same-origin sample task sites at /sites/.
+ */
+
+/** @typedef {{ id: string; name: string; goal: string; url: string; tag: string; hue?: string }} GalleryTask */
+
+/** @type {GalleryTask[]} */
+export const SAMPLE_SITES = [
+  {
+    id: 'confirm-dialog',
+    name: 'Dialog',
+    goal: 'click OK on the dialog',
+    url: '/sites/confirm-dialog/index.html',
+    tag: 'Popup',
+    hue: '#6366f1',
+  },
+  {
+    id: 'pick-date',
+    name: 'Calendar',
+    goal: 'select March 15 on the calendar',
+    url: '/sites/pick-date/index.html',
+    tag: 'Date picker',
+    hue: '#0ea5e9',
+  },
+  {
+    id: 'find-it',
+    name: 'Search',
+    goal: 'search for cats',
+    url: '/sites/find-it/index.html',
+    tag: 'Search box',
+    hue: '#22c55e',
+  },
+  {
+    id: 'color-pick',
+    name: 'Color buttons',
+    goal: 'click the blue button',
+    url: '/sites/color-pick/index.html',
+    tag: 'Buttons',
+    hue: '#3b82f6',
+  },
+  {
+    id: 'order-lunch',
+    name: 'Food order',
+    goal: 'order a burger',
+    url: '/sites/order-lunch/index.html',
+    tag: 'Menu',
+    hue: '#f97316',
+  },
+  {
+    id: 'shell',
+    name: 'Terminal',
+    goal: 'type ls in the terminal',
+    url: '/sites/shell/index.html',
+    tag: 'CLI',
+    hue: '#18181b',
+  },
+  {
+    id: 'sign-in',
+    name: 'Login',
+    goal: 'log in as user',
+    url: '/sites/sign-in/index.html',
+    tag: 'Form',
+    hue: '#8b5cf6',
+  },
+  {
+    id: 'inbox',
+    name: 'Email inbox',
+    goal: 'mark the first email as important',
+    url: '/sites/inbox/index.html',
+    tag: 'Inbox',
+    hue: '#ec4899',
+  },
+  {
+    id: 'book-trip',
+    name: 'Flight booking',
+    goal:
+      'type New York in the To field, pick a departure date in Depart, and click Search flights',
+    url: '/sites/book-trip/index.html',
+    tag: 'Travel',
+    hue: '#14b8a6',
+  },
+  {
+    id: 'volume',
+    name: 'Slider',
+    goal: 'set the volume slider to 50',
+    url: '/sites/volume/index.html',
+    tag: 'Control',
+    hue: '#a855f7',
+  },
+  {
+    id: 'settings',
+    name: 'Tabs',
+    goal: 'click on the Billing tab',
+    url: '/sites/settings/index.html',
+    tag: 'Navigation',
+    hue: '#eab308',
+  },
+  {
+    id: 'game',
+    name: 'Tic-tac-toe',
+    goal: 'click the center square',
+    url: '/sites/game/index.html',
+    tag: 'Game',
+    hue: '#ef4444',
+  },
+];
+
+/** @type {GalleryTask} */
+export const SHOP_DEMO_TASK = {
+  id: 'shop-checkout',
+  name: 'browser-use-wasm',
+  goal: 'type Joe in the email field',
+  url: '/browse-fixture/index.html',
+  tag: 'Main app',
+  hue: '#6366f1',
+};
+
+/** @param {GalleryTask} task */
+export function browseRunnerHref(task) {
+  const params = new URLSearchParams({ url: task.url, goal: task.goal });
+  return `/browse/?${params}`;
+}
+
+/** Main operator (`/home/`) with optional prefilled goal. */
+export function operatorHref(goal = '') {
+  const trimmed = String(goal).trim();
+  if (!trimmed) return '/home/';
+  return `/home/?${new URLSearchParams({ goal: trimmed })}`;
+}
+
+/** Live cursor follow-along demo (same FindIt task, dedicated runner). */
+export const VIDEO_DEMO_TASK = {
+  id: 'video',
+  name: 'Cursor follow-along',
+  goal: 'search for cats',
+  url: '/sites/find-it/index.html',
+  tag: 'Live cursor',
+  hue: '#6366f1',
+};
+
+/**
+ * All demos for the homepage — main app, browse tasks, video runner.
+ * @returns {Array<GalleryTask & { href: string; accent?: boolean }>}
+ */
+export function allHomeExamples() {
+  return [
+    { ...SHOP_DEMO_TASK, href: operatorHref(SHOP_DEMO_TASK.goal), accent: true },
+    ...SAMPLE_SITES.map((task) => ({ ...task, href: browseRunnerHref(task) })),
+    { ...VIDEO_DEMO_TASK, href: '/video/' },
+  ];
+}

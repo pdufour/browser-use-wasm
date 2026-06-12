@@ -1,0 +1,50 @@
+[
+  {
+    "name": "01_baseline",
+    "score": "99.47%"
+  },
+  {
+    "name": "02_subpixel_geom",
+    "score": "99.50%"
+  },
+  {
+    "name": "03_anti_legibility_crisp",
+    "score": "99.50%"
+  },
+  {
+    "name": "04_subpixel_speed",
+    "score": "99.47%"
+  },
+  {
+    "name": "05_anti_legibility_nokerning",
+    "score": "99.47%"
+  },
+  {
+    "name": "06_subpixel_legibility_tracking",
+    "score": "99.49%"
+  },
+  {
+    "name": "07_fast_anti",
+    "score": "99.50%"
+  },
+  {
+    "name": "08_fast_subpixel",
+    "score": "99.47%"
+  },
+  {
+    "name": "09_no_embed_fonts_anti",
+    "score": "99.50%"
+  },
+  {
+    "name": "10_scale_2_anti",
+    "score": "98.70%"
+  },
+  {
+    "name": "11_anti_svg_crisp_edges",
+    "score": "99.50%"
+  },
+  {
+    "name": "12_anti_linear_rgb",
+    "score": "99.50%"
+  }
+]

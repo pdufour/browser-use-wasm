@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Volume — Audio mixer</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <header class="panel-head">
+        <span class="icon">🔊</span>
+        <h1>Master volume</h1>
+      </header>
+      <div class="slider-wrap">
+        <span class="label-min">0</span>
+        <input
+          type="range"
+          class="volume-slider"
+          min="0"
+          max="100"
+          step="1"
+          value="25"
+          aria-label="Volume slider"
+        />
+        <span class="label-max">100</span>
+      </div>
+      <p class="value-readout">Current: <strong id="vol-value">25</strong></p>
+    </article>
+    <script>
+      const slider = document.querySelector('.volume-slider');
+      const readout = document.getElementById('vol-value');
+      const sync = () => {
+        if (readout) readout.textContent = slider.value;
+      };
+      slider?.addEventListener('input', sync);
+      slider?.addEventListener('change', sync);
+    </script>
+  </body>
+</html>

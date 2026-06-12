@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FindIt — Search</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <header class="hero">
+        <span class="logo">Find<span>It</span></span>
+        <form class="search-form" id="search-form">
+          <input type="search" class="search-input" placeholder="Search the web…" aria-label="Search" id="search-input" />
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+      </header>
+      <main class="results">
+        <p class="results-hint" id="results-hint">Try searching for cats, recipes, or travel tips.</p>
+        <ul class="results-list" id="results-list">
+          <li><a href="#">How to care for indoor cats</a></li>
+          <li><a href="#">Best cat breeds for families</a></li>
+          <li><a href="#">Cat photography tips</a></li>
+        </ul>
+      </main>
+    </article>
+    <script>
+      const form = document.getElementById('search-form');
+      const input = document.getElementById('search-input');
+      const list = document.getElementById('results-list');
+      const hint = document.getElementById('results-hint');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const query = input.value.trim().toLowerCase();
+        if (!query) return;
+
+        hint.textContent = `Showing results for "${query}"`;
+        list.innerHTML = `
+          <li><a href="#">Everything about ${query}</a></li>
+          <li><a href="#">Top 10 ${query} facts</a></li>
+          <li><a href="#">The ultimate guide to ${query}</a></li>
+        `;
+        // Add a "success" state for the agent to potentially see
+        const success = document.createElement('div');
+        success.id = 'search-success';
+        success.style.display = 'none';
+        success.textContent = 'Search successful';
+        document.body.appendChild(success);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(160deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0c4a6e;
+}
+
+#capture-target.page {
+  min-height: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toolbar {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.toolbar h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+}
+
+.calendar {
+  width: min(22rem, 100%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 12px 30px rgba(14, 116, 144, 0.15);
+}
+
+.calendar-head {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.month {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+}
+
+.weekdays {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+}
+
+.day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 8px;
+  background: #f0f9ff;
+  color: #0369a1;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.day.muted {
+  background: transparent;
+  color: #94a3b8;
+}
+
+.day--target {
+  background: #0ea5e9;
+  color: #fff;
+  font-weight: 700;
+}
+
+.day:hover:not(.muted) {
+  background: #38bdf8;
+  color: #fff;
+}

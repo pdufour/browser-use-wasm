@@ -1,0 +1,64 @@
+{
+  "name": "browser-use-wasm",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "dist/lib"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "workspaces": [
+    "examples"
+  ],
+  "scripts": {
+    "cache:showui": "node scripts/cache-model.mjs -- --model ShowUI-2B",
+    "cache:model": "node scripts/cache-model.mjs",
+    "cache:repair": "node scripts/cache-model.mjs --repair",
+    "cache:public": "node scripts/cache-public-models.mjs",
+    "verify:models": "node scripts/verify-model-urls.mjs",
+    "cache:all": "node scripts/cache-model.mjs --all",
+    "start": "npm run cache:showui && npm run dev",
+    "dev": "npm run dev --prefix examples",
+    "build": "npm run build:src && npm run build --prefix examples",
+    "build:src": "npm run typecheck:src && vite build --config vite.config.src.js",
+    "build:examples": "npm run build --prefix examples",
+    "preview": "npm run preview --prefix examples",
+    "typecheck": "npm run typecheck:src && npm run typecheck --prefix examples",
+    "typecheck:src": "tsc -p tsconfig.src.json",
+    "typecheck:examples": "npm run typecheck --prefix examples",
+    "test": "playwright test",
+    "test:benchmark": "E2E_BENCHMARK=1 playwright test",
+    "test:expensive": "E2E_BENCHMARK=1 playwright test",
+    "test:verbose": "PWDEBUG=0 playwright test --reporter=line",
+    "test:e2e": "playwright test",
+    "test:e2e:benchmark": "E2E_BENCHMARK=1 playwright test",
+    "test:e2e:expensive": "E2E_BENCHMARK=1 playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "eval:mind2web": "node tests/mind2web/mind2web-grounding-eval.mjs",
+    "eval:mind2web:smoke": "MIND2WEB_EVAL_LIMIT=1572864 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-grounding-eval.mjs",
+    "eval:mind2web:full": "MIND2WEB_EVAL_LIMIT=7864320 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-grounding-eval.mjs",
+    "eval:mind2web:models": "MIND2WEB_EVAL_LIMIT=15 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-model-benchmark.mjs",
+    "cache:miniwob": "node scripts/cache-miniwob.mjs",
+    "eval:miniwob": "node tests/miniwob/miniwob-eval.mjs"
+  },
+  "dependencies": {
+    "@wllama/wllama": "^3.1.0",
+    "@zumer/snapdom": "^2.12.8",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "^6.0.3",
+    "vite": "^6.3.5"
+  }
+}

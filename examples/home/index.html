@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>browser-use-wasm · vision AI for your browser</title>
+    <link rel="stylesheet" href="../shared/user-facing.css" />
+    <link rel="stylesheet" href="../shared/site-header.css" />
+    <link rel="stylesheet" href="../shared/brainwave.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="home-page">
+    <header id="site-header"></header>
+
+    <main class="home-main">
+      <section class="home-hero">
+        <div class="home-hero__content">
+          <p class="home-hero__eyebrow">browser-use · 100% in your browser</p>
+          <h1 class="home-hero__title">Tell your browser what to do</h1>
+          <p class="home-lead">
+            Vision AI that screenshots, grounds, and clicks, without sending your page to a server.
+          </p>
+        </div>
+
+        <div class="home-zero-cost" aria-label="Zero-cost browser automation">
+          <p class="home-zero-cost__price" aria-hidden="true">$0</p>
+          <div class="home-zero-cost__body">
+            <h2>Runs directly in your browser. Zero inference cost.</h2>
+            <p>
+              No API keys. No per-click billing. No backend holding your screenshots. Every capture,
+              every model call, every action happens <strong>locally in your tab</strong>. Free to
+              run as many tasks as you want.
+            </p>
+            <ul class="home-zero-cost__checks">
+              <li>No server inference</li>
+              <li>No cloud GPU rental</li>
+              <li>Your page stays on-device</li>
+            </ul>
+          </div>
+        </div>
+
+        <section class="home-tech" aria-labelledby="home-tech-title">
+          <h2 id="home-tech-title">Cutting-edge stack, all client-side</h2>
+          <p class="home-tech__lead">
+            browser-use-wasm combines three modern pieces. None of them need a server.
+          </p>
+          <div class="home-tech__grid">
+            <article class="home-tech__card">
+              <p class="home-tech__name">SnapDOM</p>
+              <p class="home-tech__role">Capture</p>
+              <p>Pixel-accurate DOM screenshots. Exactly what the vision model sees.</p>
+            </article>
+            <article class="home-tech__card">
+              <p class="home-tech__name">wllama</p>
+              <p class="home-tech__role">Inference</p>
+              <p>llama.cpp compiled to WASM with WebGPU. Full GGUF models in a worker.</p>
+            </article>
+            <article class="home-tech__card home-tech__card--highlight">
+              <p class="home-tech__name">ShowUI-2B</p>
+              <p class="home-tech__role">Grounding</p>
+              <p>Reads the screenshot and outputs <code>CLICK</code>, <code>INPUT</code>, or
+                <code>SELECT</code> with a point on the image.</p>
+            </article>
+          </div>
+        </section>
+
+        <ol class="home-pipeline" aria-label="How browser-use works">
+          <li class="home-pipeline__step">
+            <span class="home-pipeline__num" aria-hidden="true">1</span>
+            <div>
+              <h3>SnapDOM</h3>
+              <p>Live page → canvas screenshot, entirely in the browser.</p>
+            </div>
+          </li>
+          <li class="home-pipeline__step">
+            <span class="home-pipeline__num" aria-hidden="true">2</span>
+            <div>
+              <h3>wllama + ShowUI-2B</h3>
+              <p>You type a goal. wllama runs ShowUI-2B in the browser to pick where to click or
+                type on the screenshot.</p>
+            </div>
+          </li>
+          <li class="home-pipeline__step">
+            <span class="home-pipeline__num" aria-hidden="true">3</span>
+            <div>
+              <h3>Act</h3>
+              <p>Click, type, and toggle on the live site at the grounded point.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="home-examples" id="home-examples" aria-labelledby="home-examples-title">
+        <div class="home-examples__head">
+          <h2 id="home-examples-title">Try it now</h2>
+          <p class="home-examples__lead">
+            Fourteen live demos. Each opens with a preset goal. Edit the text, hit Run, watch the
+            model work.
+          </p>
+          <p id="home-preview-status" class="home-preview-status" hidden aria-live="polite">
+            Capturing previews…
+          </p>
+        </div>
+        <div id="home-featured" class="home-featured-slot"></div>
+        <div id="home-examples-grid" class="home-cards" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="home-footer">
+      <p>Chrome or Edge · WebGPU + WASM · <strong>$0</strong> per task</p>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

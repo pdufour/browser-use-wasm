@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vite
+.vite/
+
+# Playwright / tests
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Local model weights (download with npm run cache:model)
+.model-cache/
+
+# Scratch / debug
+.tmp/
+e2e-results-multi.txt
+e2e-results.txt
+e2e-benchmark-results.txt
+mind2web-grounding-results.txt
+mind2web-model-comparison.txt
+intent-parsing-results.txt
+examples/operator/fixtures/eval-snapshot/cache/*.png
+miniwob-results.txt
+examples/operator/fixtures/miniwob/cache/
+
+
+# Python (optional scripts)
+.venv/
+__pycache__/
+*.pyc
+
+# Editor (keep project rules; ignore local IDE noise)
+.idea/
+*.swp
+*.swo
+
+# Visual diff output (local tooling — scripts write here)
+assets/visual-diff/
+.cursor/visual-diff/
+
+# Design mockups (local only — served via vite.fixtures.js when present)
+public/design-mockups/

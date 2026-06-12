@@ -1,0 +1,88 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #faf5ff;
+  color: #3b0764;
+}
+
+#capture-target.page {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%);
+  color: #fff;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.form-panel {
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-panel h1 {
+  margin: 0 0 1.5rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 18rem;
+}
+
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.login-form input {
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #ddd6fe;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.login-btn {
+  margin-top: 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.7rem;
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  #capture-target.page {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    padding: 1.5rem;
+  }
+}

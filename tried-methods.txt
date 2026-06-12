@@ -1,0 +1,39 @@
+
+## Evolve-100k: 2026-05-24T15:34:03.929Z
+Philosophy: keep high-impact mutants (≥0.5% swing on acc/fullPage/txtΔY/hdrΔY) as parents even when txtΔY is worse — children may swing the right way.
+Target 25000 | attempted 25000 | survivors 6645 | parents 4307 | pruned 13448
+Structural gate: genome L1 >= 0.005 | Impact gate: any |metric-baseline| >= 0.5
+Prune: error | duplicate genome | low-impact only. NOT pruned for worse txtΔY if high-impact.
+Survivors: beats baseline txtΔY OR Pareto (txtΔY, fullPagePct, accuracyPct). Parents: high-impact non-survivors.
+Scoring: textCentroidDeltaY asc, fullPagePct desc, accuracyPct desc, headerCentroidDeltaY asc, headerBandPct desc
+Baseline: acc=99.2% txtΔY=62.9 fullPage=98.3% (measured-control)
+highImpactParents: 4427 | lowImpactPruned: 19 | diversityRejected: 0
+Best survivor: ev-s0-015199 genome:4fbbf6ce6ffd6f71 txtΔY=0.1 fullPage=0% acc=9.8%
+Resume: EVOLVE_TARGET=25000 npm run visual-diff:evolve-100k
+Pools: survivors.jsonl, parents.jsonl, high-impact/
+
+## Evolve-100k: 2026-05-24T15:34:34.152Z
+Philosophy: keep high-impact mutants (≥0.5% swing on acc/fullPage/txtΔY/hdrΔY) as parents even when txtΔY is worse — children may swing the right way.
+Target 25000 | attempted 25000 | survivors 6780 | parents 4491 | pruned 13329
+Structural gate: genome L1 >= 0.005 | Impact gate: any |metric-baseline| >= 0.5
+Prune: error | duplicate genome | low-impact only. NOT pruned for worse txtΔY if high-impact.
+Survivors: beats baseline txtΔY OR Pareto (txtΔY, fullPagePct, accuracyPct). Parents: high-impact non-survivors.
+Scoring: textCentroidDeltaY asc, fullPagePct desc, accuracyPct desc, headerCentroidDeltaY asc, headerBandPct desc
+Baseline: acc=99.2% txtΔY=62.9 fullPage=98.3% (measured-control)
+highImpactParents: 4561 | lowImpactPruned: 21 | diversityRejected: 0
+Best survivor: ev-s2-011026 genome:b4dc31272bc17574 txtΔY=0 fullPage=0% acc=9.7%
+Resume: EVOLVE_TARGET=25000 npm run visual-diff:evolve-100k
+Pools: survivors.jsonl, parents.jsonl, high-impact/
+
+## Evolve-100k: 2026-05-24T15:35:48.803Z
+Philosophy: keep high-impact mutants (≥0.5% swing on acc/fullPage/txtΔY/hdrΔY) as parents even when txtΔY is worse — children may swing the right way.
+Target 25000 | attempted 25000 | survivors 6727 | parents 4469 | pruned 13204
+Structural gate: genome L1 >= 0.005 | Impact gate: any |metric-baseline| >= 0.5
+Prune: error | duplicate genome | low-impact only. NOT pruned for worse txtΔY if high-impact.
+Survivors: beats baseline txtΔY OR Pareto (txtΔY, fullPagePct, accuracyPct). Parents: high-impact non-survivors.
+Scoring: textCentroidDeltaY asc, fullPagePct desc, accuracyPct desc, headerCentroidDeltaY asc, headerBandPct desc
+Baseline: acc=99.2% txtΔY=62.9 fullPage=98.3% (measured-control)
+highImpactParents: 4567 | lowImpactPruned: 24 | diversityRejected: 0
+Best survivor: ev-s1-016141 genome:eea7ae7ee5a621b3 txtΔY=0.1 fullPage=0.1% acc=26%
+Resume: EVOLVE_TARGET=25000 npm run visual-diff:evolve-100k
+Pools: survivors.jsonl, parents.jsonl, high-impact/

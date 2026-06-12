@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preferences — Settings</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <nav class="tabs" aria-label="Sections" role="tablist">
+        <button type="button" class="tab" role="tab" data-tab="profile" aria-selected="false">
+          Profile
+        </button>
+        <button
+          type="button"
+          class="tab tab--active"
+          role="tab"
+          data-tab="settings"
+          aria-selected="true"
+        >
+          Settings
+        </button>
+        <button type="button" class="tab" role="tab" data-tab="billing" aria-selected="false">
+          Billing
+        </button>
+      </nav>
+
+      <section class="tab-panel" role="tabpanel" data-panel="profile" hidden>
+        <h1>Profile</h1>
+        <label class="field-row">
+          <span>Display name</span>
+          <input type="text" value="Alex Chen" aria-label="Display name" />
+        </label>
+        <label class="field-row">
+          <span>Email</span>
+          <input type="email" value="alex@example.com" aria-label="Email" />
+        </label>
+      </section>
+
+      <section class="tab-panel" role="tabpanel" data-panel="settings">
+        <h1>Settings</h1>
+        <label class="toggle-row">
+          <span>Dark mode</span>
+          <input type="checkbox" aria-label="Dark mode" />
+        </label>
+        <label class="toggle-row">
+          <span>Email notifications</span>
+          <input type="checkbox" checked aria-label="Email notifications" />
+        </label>
+        <label class="toggle-row">
+          <span>Two-factor auth</span>
+          <input type="checkbox" aria-label="Two-factor auth" />
+        </label>
+      </section>
+
+      <section class="tab-panel" role="tabpanel" data-panel="billing" hidden>
+        <h1>Billing</h1>
+        <p class="billing-plan">Pro plan — $12 / month</p>
+        <label class="field-row">
+          <span>Card on file</span>
+          <input type="text" value="Visa •••• 4242" readonly aria-label="Card on file" />
+        </label>
+        <button type="button" class="billing-btn">Update payment method</button>
+      </section>
+    </article>
+    <script>
+      const tabs = document.querySelectorAll('.tab[data-tab]');
+      const panels = document.querySelectorAll('.tab-panel[data-panel]');
+
+      function showTab(id) {
+        for (const tab of tabs) {
+          const active = tab.dataset.tab === id;
+          tab.classList.toggle('tab--active', active);
+          tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        }
+        for (const panel of panels) {
+          const show = panel.dataset.panel === id;
+          panel.hidden = !show;
+        }
+      }
+
+      for (const tab of tabs) {
+        tab.addEventListener('click', () => showTab(tab.dataset.tab));
+      }
+    </script>
+  </body>
+</html>

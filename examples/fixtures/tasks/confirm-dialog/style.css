@@ -1,0 +1,102 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #f0ebff;
+  color: #2d2640;
+}
+
+#capture-target.page {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #5b21b6;
+}
+
+.status {
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: #7c6a9a;
+}
+
+.page-main h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.checklist {
+  margin: 1.5rem 0 0;
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 38, 64, 0.45);
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(22rem, 90%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(91, 33, 182, 0.25);
+  font-family: system-ui, sans-serif;
+}
+
+.modal h2 {
+  margin: 0 0 0.5rem;
+  font-family: Georgia, serif;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.btn-ok {
+  background: #16a34a;
+  color: #fff;
+  font-weight: 600;
+}

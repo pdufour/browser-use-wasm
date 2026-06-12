@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkyRoute — Book a trip</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <header class="hero">
+        <span class="brand">SkyRoute</span>
+        <h1>Find your next flight</h1>
+      </header>
+      <form class="search-card" onsubmit="return false">
+        <label>
+          From
+          <input type="text" value="San Francisco" aria-label="From" placeholder="Departure city" />
+        </label>
+        <label>
+          To
+          <input type="text" placeholder="e.g. New York" aria-label="To" />
+        </label>
+        <label>
+          Depart
+          <input type="date" aria-label="Depart" />
+        </label>
+        <button type="submit" class="book-btn">Search flights</button>
+      </form>
+      <p class="promo">Deals to New York from $189 round trip.</p>
+    </article>
+  </body>
+</html>

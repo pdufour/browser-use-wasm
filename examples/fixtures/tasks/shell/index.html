@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shell — Terminal</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <div class="titlebar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+        <span class="title">bash — ~/projects</span>
+      </div>
+      <div class="terminal">
+        <p class="line">Welcome to Shell. Type a command below.</p>
+        <p class="line muted">Last login: Thu Jun 11 09:42:01</p>
+        <form class="prompt-line" onsubmit="return false">
+          <label for="cmd-input" class="prompt">$</label>
+          <input id="cmd-input" type="text" class="cmd-input" autocomplete="off" spellcheck="false" aria-label="Terminal command" />
+        </form>
+      </div>
+    </article>
+  </body>
+</html>
