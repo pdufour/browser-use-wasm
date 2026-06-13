@@ -91,7 +91,7 @@ export function initTaskRunner(options = {}) {
   const promptEl = $('prompt');
   const runBtn = $('btn-run');
   const liveWrap = $('live-wrap');
-  const liveCursor = createLiveCursor(liveWrap, getBrowseFrame);
+  const liveCursor = createLiveCursor(liveWrap, getBrowseFrame, getCaptureElement);
   const addressEl = $('address-bar');
 
   demoLog('task-runner', 'init', {

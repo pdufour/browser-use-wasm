@@ -21,8 +21,9 @@ function sleep(ms) {
 /**
  * @param {HTMLElement | null} wrapEl `#live-wrap` — positions relative to iframe
  * @param {() => HTMLIFrameElement | null} getFrame
+ * @param {() => HTMLElement | null} [getCaptureRoot] Optional: element the model is scoped to (default: frame body)
  */
-export function createLiveCursor(wrapEl, getFrame) {
+export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
   let el = null;
   let pos = { x: 0.12, y: 0.12 };
   let animFrame = null;
@@ -67,28 +68,58 @@ export function createLiveCursor(wrapEl, getFrame) {
     }
   }
 
-  function frameRect() {
+  /**
+   * Calculate mapping from capture-norm coords (0-1 on the grounded element)
+   * to pixel coords relative to `wrapEl`.
+   */
+  function getMapping() {
     const frame = getFrame();
     const wrap = wrapEl;
     if (!frame || !wrap) return null;
-    const f = frame.getBoundingClientRect();
-    const w = wrap.getBoundingClientRect();
+
+    const fRect = frame.getBoundingClientRect();
+    const wRect = wrap.getBoundingClientRect();
+    
+    // Default to the whole frame
+    let targetRect = { left: 0, top: 0, width: fRect.width, height: fRect.height };
+
+    // If we have a specific capture root (like #capture-target), use its rect relative to the frame.
+    const root = getCaptureRoot?.();
+    if (root) {
+      const rRect = root.getBoundingClientRect(); // relative to iframe viewport
+      targetRect = {
+        left: rRect.left,
+        top: rRect.top,
+        width: rRect.width,
+        height: rRect.height,
+      };
+    }
+
     return {
-      left: f.left - w.left,
-      top: f.top - w.top,
-      width: f.width,
-      height: f.height,
+      // Offset from wrapEl to frame content origin
+      offsetX: fRect.left - wRect.left,
+      offsetY: fRect.top - wRect.top,
+      // Target area within the frame
+      target: targetRect,
     };
   }
 
   function layout(normX, normY) {
     const cursor = ensureElement();
-    const rect = frameRect();
-    if (!cursor || !rect) return;
-    const x = Math.min(1, Math.max(0, normX));
-    const y = Math.min(1, Math.max(0, normY));
-    cursor.style.left = `${rect.left + x * rect.width}px`;
-    cursor.style.top = `${rect.top + y * rect.height}px`;
+    const map = getMapping();
+    if (!cursor || !map) return;
+    
+    const nx = Math.min(1, Math.max(0, normX));
+    const ny = Math.min(1, Math.max(0, normY));
+    
+    // 1. Scale norm coords by target element size
+    // 2. Add target element's offset within the iframe
+    // 3. Add iframe's offset within the wrap
+    const x = map.offsetX + map.target.left + nx * map.target.width;
+    const y = map.offsetY + map.target.top + ny * map.target.height;
+    
+    cursor.style.left = `${x}px`;
+    cursor.style.top = `${y}px`;
   }
 
   function cancelAnim() {
