@@ -134,7 +134,10 @@ body.browse-app {
 }
 
 .browse-main .live-frame-wrap {
-  height: calc(100vh - 160px);
+  flex: 1;
+  min-height: 320px;
+  height: auto;
+  max-height: min(72vh, 900px);
   border: none;
   border-radius: 16px;
   padding: 0.5rem;

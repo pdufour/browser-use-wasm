@@ -110,7 +110,7 @@ export {
 export type { ModelSourceOrigin } from './wllama/model-sources.ts';
 
 // Screenshot click-marker overlay
-export { drawMarker, clearMarker } from './ui/marker.ts';
+export { drawMarker, clearMarker, relayoutMarker } from './ui/marker.ts';
 
 // Embedded browser frame (iframe chrome for demos / embeds)
 export {

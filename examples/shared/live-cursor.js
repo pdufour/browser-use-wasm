@@ -86,10 +86,10 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
     // If we have a specific capture root (like #capture-target), use its rect relative to the frame.
     const root = getCaptureRoot?.();
     if (root) {
-      const rRect = root.getBoundingClientRect(); // relative to iframe viewport
+      const rRect = root.getBoundingClientRect();
       targetRect = {
-        left: rRect.left,
-        top: rRect.top,
+        left: rRect.left - fRect.left,
+        top: rRect.top - fRect.top,
         width: rRect.width,
         height: rRect.height,
       };
@@ -120,6 +120,12 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
     
     cursor.style.left = `${x}px`;
     cursor.style.top = `${y}px`;
+    cursor.dataset.normX = String(nx);
+    cursor.dataset.normY = String(ny);
+  }
+
+  function relayout() {
+    if (el && !el.hidden) layout(pos.x, pos.y);
   }
 
   function cancelAnim() {
@@ -199,6 +205,7 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
     ripple.remove();
     burst.remove();
     setMode('pointer');
+    layout(pos.x, pos.y);
   }
 
   async function playType(value) {
@@ -214,6 +221,7 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
     label.remove();
     cursor.classList.remove('is-typing');
     setMode('pointer');
+    layout(pos.x, pos.y);
   }
 
   async function playEnter() {
@@ -231,9 +239,19 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
   }
 
   function onResize() {
-    if (el && !el.hidden) layout(pos.x, pos.y);
+    relayout();
   }
   window.addEventListener('resize', onResize);
+
+  let resizeObserver = null;
+  if (typeof ResizeObserver !== 'undefined' && wrapEl) {
+    resizeObserver = new ResizeObserver(() => relayout());
+    resizeObserver.observe(wrapEl);
+    const frame = getFrame();
+    if (frame) resizeObserver.observe(frame);
+    const details = document.getElementById('dev-details');
+    if (details) resizeObserver.observe(details);
+  }
 
   return {
     /** Show pointer at default entry position (call when Run starts). */
@@ -283,15 +301,19 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
       if (action === 'CLICK' || action === 'SELECT') {
         await moveTo(point.x, point.y, { travelMode: 'hand' });
         await playClick();
+        layout(pos.x, pos.y);
         return;
       }
       if (action === 'INPUT') {
         await moveTo(point.x, point.y, { travelMode: 'pointer' });
         await playType(step.value);
+        layout(pos.x, pos.y);
         return;
       }
       await moveTo(point.x, point.y, { travelMode: 'pointer' });
+      layout(pos.x, pos.y);
     },
+    relayout,
     hide() {
       cancelAnim();
       if (el) {
@@ -304,6 +326,8 @@ export function createLiveCursor(wrapEl, getFrame, getCaptureRoot) {
     },
     destroy() {
       window.removeEventListener('resize', onResize);
+      resizeObserver?.disconnect();
+      resizeObserver = null;
       cancelAnim();
       el?.remove();
       el = null;

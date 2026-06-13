@@ -2061,6 +2061,207 @@ export function appendE2eResult(modelId, row) {
 /** Gemma-nano demo — Prompt API page (not the operator /home gate). */
 export const GEMMA_NANO_E2E_PATH = '/gemma-nano/';
 
+/** Default mock CLICK norm for gemma-nano alignment / smoke tests. */
+export const GEMMA_NANO_MOCK_CLICK_NX = 0.8;
+export const GEMMA_NANO_MOCK_CLICK_NY = 0.8;
+
+/** Max L2 distance between screenshot marker and live pointer (capture-norm). */
+export const GEMMA_NANO_MARKER_POINTER_ALIGN_MAX = 0.02;
+
+/**
+ * Open the `#dev-details` disclosure (screenshot buffer + model output).
+ * @param {import('@playwright/test').Page} page
+ */
+export async function openDeveloperDetails(page) {
+  await page.evaluate(() => {
+    const details = document.getElementById('dev-details');
+    if (details instanceof HTMLDetailsElement) details.open = true;
+  });
+  await expect(page.locator('#dev-details')).toHaveAttribute('open', '');
+  await expect(page.locator('#screenshot-stage')).toBeVisible();
+}
+
+/**
+ * Mock Chrome Prompt API (globalThis.LanguageModel + legacy window.ai) before navigation.
+ * No real on-device model — returns a fixed ShowUI-style CLICK dict.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ nx?: number; ny?: number }} [opts]
+ */
+export async function installGemmaNanoMockPromptApi(
+  page,
+  { nx = GEMMA_NANO_MOCK_CLICK_NX, ny = GEMMA_NANO_MOCK_CLICK_NY } = {}
+) {
+  await page.addInitScript(({ nx, ny }) => {
+    const response = `{'action': 'CLICK', 'value': None, 'position': [${nx}, ${ny}]}`;
+    const session = {
+      prompt: async () => response,
+      destroy: () => {},
+    };
+    const LanguageModel = {
+      create: async () => session,
+      availability: async () => 'available',
+      capabilities: async () => ({ available: 'readily' }),
+    };
+    globalThis.LanguageModel = LanguageModel;
+    globalThis.ai = { languageModel: LanguageModel };
+  }, { nx, ny });
+}
+
+/**
+ * Visual capture-norm marker center on the displayed screenshot bitmap.
+ * Uses painted pixels, not dataset.normX/Y (those are intent, not placement).
+ * @param {import('@playwright/test').Page} page
+ */
+export async function sampleMarkerNormOnScreenshot(page) {
+  return page.evaluate(() => {
+    const marker = document.getElementById('click-marker');
+    const img = document.getElementById('screenshot-img');
+    if (!marker || !img) return null;
+
+    const viewport = img.getBoundingClientRect();
+    const nw = img instanceof HTMLCanvasElement ? img.width : img.naturalWidth;
+    const nh = img instanceof HTMLCanvasElement ? img.height : img.naturalHeight;
+    if (!nw || !nh || !viewport.width || !viewport.height) return null;
+
+    const scale = Math.min(viewport.width / nw, viewport.height / nh);
+    const bitmapW = nw * scale;
+    const bitmapH = nh * scale;
+    const bitmapLeft = viewport.left + (viewport.width - bitmapW) / 2;
+    const bitmapTop = viewport.top + (viewport.height - bitmapH) / 2;
+
+    const mRect = marker.getBoundingClientRect();
+    return {
+      x: (mRect.left + mRect.width / 2 - bitmapLeft) / bitmapW,
+      y: (mRect.top + mRect.height / 2 - bitmapTop) / bitmapH,
+    };
+  });
+}
+
+/**
+ * Visual capture-norm live pointer hotspot on `#capture-target`.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function sampleLiveCursorNormOnCapture(page) {
+  return page.evaluate(() => {
+    const cursor = document.getElementById('live-cursor');
+    const frame = document.getElementById('browse-frame');
+    const root = frame?.contentDocument?.getElementById('capture-target');
+    if (!cursor || !root) return null;
+
+    const rRect = root.getBoundingClientRect();
+    if (!rRect.width || !rRect.height) return null;
+
+    const cRect = cursor.getBoundingClientRect();
+    const cs = getComputedStyle(cursor);
+    const hx = parseFloat(cs.getPropertyValue('--live-cursor-hotspot-x')) || 0;
+    const hy = parseFloat(cs.getPropertyValue('--live-cursor-hotspot-y')) || 0;
+    const tipX = cRect.left + hx;
+    const tipY = cRect.top + hy;
+    return {
+      x: (tipX - rRect.left) / rRect.width,
+      y: (tipY - rRect.top) / rRect.height,
+    };
+  });
+}
+
+/**
+ * Wait until gemma-nano autoload exits "Starting…" and Run is enabled.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function waitForGemmaNanoBootReady(page) {
+  await page.waitForSelector('#browse-frame', { timeout: 15_000 });
+  await expect.poll(
+    async () => {
+      const text = (await page.locator('#hero-status').textContent()) ?? '';
+      if (text.includes('Error')) throw new Error(`Boot error: ${text}`);
+      return text;
+    },
+    { timeout: 30_000 }
+  ).toMatch(/Ready|ready to run/i);
+
+  await expect(page.locator('#btn-run')).toBeEnabled({ timeout: 5_000 });
+  await expect(page.locator('#model-status')).toHaveAttribute('data-model-id', 'gemini-nano');
+  await expect(page.locator('#model-status')).toHaveAttribute('data-model-loaded', '1');
+}
+
+/**
+ * Mocked gemma-nano: grounded marker on screenshot aligns with live pointer at the mock point.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ * @param {{ nx?: number; ny?: number }} [opts]
+ */
+export async function runE2EGemmaNanoMarkerPointerAlignment(
+  page,
+  baseURL,
+  { nx = GEMMA_NANO_MOCK_CLICK_NX, ny = GEMMA_NANO_MOCK_CLICK_NY } = {}
+) {
+  installE2eConsole(page);
+  await installGemmaNanoMockPromptApi(page, { nx, ny });
+  await openGemmaNanoE2ePage(page, baseURL);
+  await waitForGemmaNanoBootReady(page);
+  await openDeveloperDetails(page);
+
+  await page.locator('#prompt').fill('click something');
+  await page.locator('#btn-run').click();
+
+  const raw = page.locator('#raw-output');
+  await expect(raw).toContainText('Parsed actions', { timeout: INFERENCE_TIMEOUT_MS + 8_000 });
+  await expect(page.locator('#click-marker')).toBeVisible();
+  await expect(page.locator('#click-marker')).toHaveAttribute('data-norm-x', String(nx));
+  await expect(page.locator('#click-marker')).toHaveAttribute('data-norm-y', String(ny));
+
+  const rawText = (await raw.textContent()) ?? '';
+  expect(rawText).toMatch(/CLICK/i);
+  expect(rawText).toMatch(new RegExp(`@\\s*\\[${nx.toFixed(2)},\\s*${ny.toFixed(2)}\\]`));
+
+  const markerPos = await sampleMarkerNormOnScreenshot(page);
+  expect(markerPos).not.toBeNull();
+  expect(markerPos.x).toBeCloseTo(nx, 1);
+  expect(markerPos.y).toBeCloseTo(ny, 1);
+
+  await page.evaluate(() => {
+    document.body.dataset.viewport = 'live';
+  });
+  await page.waitForFunction(
+    () => {
+      const c = document.getElementById('live-cursor');
+      return c && !c.hidden && !c.classList.contains('is-moving');
+    },
+    { timeout: 5_000 }
+  );
+
+  const pointerPos = await sampleLiveCursorNormOnCapture(page);
+  expect(pointerPos).not.toBeNull();
+  expect(pointerPos.x).toBeCloseTo(nx, 1);
+  expect(pointerPos.y).toBeCloseTo(ny, 1);
+
+  const dist = Math.hypot(markerPos.x - pointerPos.x, markerPos.y - pointerPos.y);
+  expect(dist).toBeLessThan(GEMMA_NANO_MARKER_POINTER_ALIGN_MAX);
+
+  // Opening/closing dev details must not desync marker vs live pointer.
+  await page.evaluate(() => {
+    const details = document.getElementById('dev-details');
+    if (details instanceof HTMLDetailsElement) {
+      details.open = false;
+      details.open = true;
+    }
+    globalThis.dispatchEvent(new CustomEvent('dev-details-layout'));
+  });
+  await page.waitForTimeout(100);
+
+  const markerAfter = await sampleMarkerNormOnScreenshot(page);
+  const pointerAfter = await sampleLiveCursorNormOnCapture(page);
+  expect(markerAfter?.x).toBeCloseTo(nx, 1);
+  expect(pointerAfter?.x).toBeCloseTo(nx, 1);
+  expect(
+    Math.hypot((markerAfter?.x ?? 0) - (pointerAfter?.x ?? 0), (markerAfter?.y ?? 0) - (pointerAfter?.y ?? 0))
+  ).toBeLessThan(GEMMA_NANO_MARKER_POINTER_ALIGN_MAX);
+
+  appendE2eResult('gemma-nano', {
+    status: `SUCCESS (marker/pointer alignment @ [${nx}, ${ny}])`,
+  });
+}
+
 /**
  * Open gemma-nano with `?e2e=1` (exposes `__e2ePromptApiTurnShape`).
  * @param {import('@playwright/test').Page} page

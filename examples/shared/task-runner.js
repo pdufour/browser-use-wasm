@@ -13,6 +13,7 @@ import {
   navigateBrowseFrame,
   drawMarker,
   clearMarker,
+  relayoutMarker,
 } from 'browser-use-wasm';
 import { $ } from './dom.js';
 import { mountCaptureCanvas } from './capture-ui.js';
@@ -93,6 +94,18 @@ export function initTaskRunner(options = {}) {
   const liveWrap = $('live-wrap');
   const liveCursor = createLiveCursor(liveWrap, getBrowseFrame, getCaptureElement);
   const addressEl = $('address-bar');
+
+  function relayoutOverlays() {
+    liveCursor.relayout();
+    relayoutMarker();
+  }
+
+  const devDetails = $('dev-details');
+  devDetails?.addEventListener('toggle', () => {
+    if (devDetails.open) relayoutOverlays();
+    else requestAnimationFrame(relayoutOverlays);
+  });
+  globalThis.addEventListener('dev-details-layout', relayoutOverlays);
 
   demoLog('task-runner', 'init', {
     initialUrl,
@@ -279,8 +292,10 @@ export function initTaskRunner(options = {}) {
       });
 
       const grounded = [...result.steps].reverse().find((s) => s.point);
-      if (grounded?.point) drawMarker(grounded.point.x, grounded.point.y);
-      else clearMarker();
+      if (grounded?.point) {
+        drawMarker(grounded.point.x, grounded.point.y);
+        liveCursor.showAt(grounded.point.x, grounded.point.y);
+      } else clearMarker();
 
       const lines = result.steps.map(
         (s) =>

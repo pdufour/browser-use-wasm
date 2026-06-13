@@ -76,5 +76,10 @@ export function syncDevChrome(text, { busy = false } = {}) {
 /** Open the developer details panel (snapshot / explicit capture). */
 export function openDevDetails() {
   const details = document.getElementById('dev-details');
-  if (details instanceof HTMLDetailsElement) details.open = true;
+  if (details instanceof HTMLDetailsElement) {
+    details.open = true;
+    requestAnimationFrame(() => {
+      globalThis.dispatchEvent(new CustomEvent('dev-details-layout'));
+    });
+  }
 }

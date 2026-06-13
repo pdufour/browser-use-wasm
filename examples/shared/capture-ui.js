@@ -39,11 +39,10 @@ export function mountCaptureCanvas(a, b) {
   cap.canvas.id = 'screenshot-img';
   cap.canvas.className = 'screenshot-img';
   cap.canvas.dataset.testid = 'screenshot-img';
-  cap.canvas.style.width = '100%';
+  cap.canvas.style.width = 'auto';
+  cap.canvas.style.maxWidth = '100%';
   cap.canvas.style.height = 'auto';
-  const cw = cap.captureWidth ?? cap.canvas.width ?? cap.width;
-  const ch = cap.captureHeight ?? cap.canvas.height ?? cap.height;
-  cap.canvas.style.aspectRatio = `${cw} / ${ch}`;
+  cap.canvas.style.maxHeight = '320px';
   inner.appendChild(cap.canvas);
   stage.appendChild(inner);
 
