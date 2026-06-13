@@ -28,7 +28,7 @@ function taskPreviewHtml(task) {
  */
 function renderExampleCard(task, { featured = false } = {}) {
   const card = document.createElement('a');
-  card.className = `home-card${featured ? ' home-card--featured' : ''}`;
+  card.className = `home-card${featured ? ' home-card--featured' : ''}${task.accent && !featured ? ' home-card--accent' : ''}`;
   card.href = task.href;
   card.style.setProperty('--task-hue', task.hue ?? '#6366f1');
   card.innerHTML = `
@@ -46,7 +46,8 @@ function renderExampleCard(task, { featured = false } = {}) {
 function renderHomeExamples() {
   const examples = allHomeExamples();
   const featured = examples.find((t) => t.accent) ?? SHOP_DEMO_TASK;
-  const rest = examples.filter((t) => !t.accent);
+  // All other examples (including other accents) go into the grid
+  const rest = examples.filter((t) => t !== featured);
 
   if (featuredSlot) {
     featuredSlot.replaceChildren(renderExampleCard(featured, { featured: true }));

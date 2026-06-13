@@ -188,12 +188,7 @@ function clamp01(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
 
-/**
- * Normalize card position field: [x,y], [[x1,y1],[x2,y2]], or null.
- */
-export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
-  if (!Array.isArray(pos) || pos.length === 0) return null;
-  const pair = Array.isArray(pos[0]) ? pos[0] : pos;
+function normalizeCoordPair(pair: unknown): GroundingPoint | null {
   if (!Array.isArray(pair) || pair.length < 2) return null;
   let x = Number(pair[0]);
   let y = Number(pair[1]);
@@ -206,6 +201,31 @@ export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
     y /= div;
   }
   return { x: clamp01(x), y: clamp01(y) };
+}
+
+/**
+ * Normalize card position field: [x,y], [[x1,y1],[x2,y2]], or null.
+ * Two corner pairs → bbox center (models often emit a box for CLICK, not a point).
+ */
+export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
+  if (!Array.isArray(pos) || pos.length === 0) return null;
+
+  if (
+    Array.isArray(pos[0]) &&
+    Array.isArray(pos[1]) &&
+    pos[0].length >= 2 &&
+    pos[1].length >= 2
+  ) {
+    const p0 = normalizeCoordPair(pos[0]);
+    const p1 = normalizeCoordPair(pos[1]);
+    if (!p0 || !p1) return null;
+    return {
+      x: clamp01((p0.x + p1.x) / 2),
+      y: clamp01((p0.y + p1.y) / 2),
+    };
+  }
+
+  return normalizeCoordPair(Array.isArray(pos[0]) ? pos[0] : pos);
 }
 
 /**
@@ -269,7 +289,7 @@ export async function runNavigation(
 ): Promise<NavigationResult> {
   const messages = buildShowUINavigationMessages(imageBuffer, task, history);
   const { text: raw, inferMs } = await client.completion(messages, NAV_SAMPLING);
-  console.info(`[ShowUI:raw] "${raw}"`);
+  console.info(`[nav:raw] "${raw}"`);
   const { text, actions } = parseNavigationActions(raw);
   return {
     text,

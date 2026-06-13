@@ -10,6 +10,7 @@ import { CONFIG as KVGroundQwen3VL4B } from './KV-Ground-Qwen3VL-4B.ts';
 import { CONFIG as UIAGILE3B } from './UI-AGILE-3B.ts';
 import { CONFIG as UIAGILE2B } from './UI-AGILE-2B.ts';
 import { CONFIG as Qwen25VL3BInstruct } from './Qwen2.5-VL-3B-Instruct.ts';
+import { CONFIG as GeminiNano } from './Gemini-Nano.ts';
 
 export type { ModelCard, ModelSource } from './types.ts';
 
@@ -30,6 +31,7 @@ export const MODELS: ModelCard[] = [
   UIAGILE3B,
   UIAGILE2B,
   Qwen25VL3BInstruct,
+  GeminiNano,
 ];
 
 /** All registry ids (GGUF-backed). */

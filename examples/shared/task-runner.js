@@ -3,6 +3,7 @@
  */
 import {
   createWebOperator,
+  createPromptApiOperator,
   resolveWasmUrl,
   setBrowseHomePath,
   getBrowseFrame,
@@ -46,16 +47,22 @@ export function initTaskRunner(options = {}) {
     frameTitle = 'Website',
     hideDevDetails = true,
     wireSiteHeader = false,
+    useNativeAi = false,
   } = options;
 
   setBrowseHomePath(initialUrl);
   if (hideDevDetails) hideDevChrome({ detailsId: 'dev-details' });
   ensureHiddenCaptureMount();
 
-  const operator = createWebOperator({
-    captureRoot: () => getCaptureElement(),
-    targetDocument: () => getBrowseDocument(),
-  });
+  const operator = useNativeAi
+    ? createPromptApiOperator({
+        captureRoot: () => getCaptureElement(),
+        targetDocument: () => getBrowseDocument(),
+      })
+    : createWebOperator({
+        captureRoot: () => getCaptureElement(),
+        targetDocument: () => getBrowseDocument(),
+      });
 
   let busy = false;
   let booting = true;

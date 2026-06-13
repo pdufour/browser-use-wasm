@@ -13,6 +13,7 @@ export const DEMO_PAGES = [
   { id: 'gallery', route: '/gallery', dir: 'examples/gallery' },
   { id: 'browse', route: '/browse', dir: 'examples/browse' },
   { id: 'video', route: '/video', dir: 'examples/video' },
+  { id: 'gemma-nano', route: '/gemma-nano', dir: 'examples/gemma-nano' },
 ];
 
 /** Old per-fixture demo routes → gallery or browse presets. */

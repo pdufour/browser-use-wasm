@@ -55,6 +55,9 @@ export function humanStatus(text, { goal } = {}) {
       : 'Setting up browser isolation — reload once if this stays stuck';
   }
   if (/COOP|COEP|Chrome|Edge|file:\/\//i.test(t)) {
+    // DO NOT rewrite if it's a Prompt API instruction or Error
+    if (/Prompt API|#prompt-api|Gemma|Nano/i.test(t)) return t;
+
     return isGitHubPagesHost()
       ? 'Use Chrome or Edge — GitHub Pages reloads once on first visit'
       : 'Open this page in Chrome or Edge via npm run dev';
@@ -232,25 +235,30 @@ export async function autoloadAndCapture(opts) {
     }
   }
 
-  const issues = getWllamaEnvIssues();
-  if (issues.length) {
-    demoWarn('autoload', 'env blocked', { issues });
-    setStatus(issues[0]);
-    return { ok: false, reason: 'env' };
+  const model = getModelById(modelId);
+  const isNativeModel = model.source?.url === 'native';
+
+  if (!isNativeModel) {
+    const issues = getWllamaEnvIssues();
+    if (issues.length) {
+      demoWarn('autoload', 'env blocked', { issues });
+      setStatus(issues[0]);
+      return { ok: false, reason: 'env' };
+    }
   }
 
   const cached = await loadCachedModelIds().catch((err) => {
     console.error('[browse:autoload] manifest', err);
     return new Set();
   });
-  const model = getModelById(modelId);
   demoLog('autoload', 'cache check', {
     modelId,
+    isNativeModel,
     cached: cached.has(modelId),
     remoteLoad: isRemoteModelLoadEnabled(),
     canDownload: canDownloadModelInBrowser(model),
   });
-  if (!cached.has(modelId)) {
+  if (!isNativeModel && !cached.has(modelId)) {
     if (!canDownloadModelInBrowser(model) || !isRemoteModelLoadEnabled()) {
       const technical = `${modelId} not available — pre-cache with npm run cache:model or open /home/ for a downloadable model`;
       demoWarn('autoload', 'cache miss — cannot load', { technical });
@@ -259,15 +267,17 @@ export async function autoloadAndCapture(opts) {
     }
   }
 
-  setStatus('Confirm the download dialog to load the AI model…');
-  const ok = await ensureModelDownloadConsent({ model, cachedIds: cached });
-  demoLog('autoload', 'download consent', { ok });
-  if (!ok) {
-    setStatus('Download cancelled — refresh when ready.');
-    return { ok: false, reason: 'consent' };
+  if (!isNativeModel) {
+    setStatus('Confirm the download dialog to load the AI model…');
+    const ok = await ensureModelDownloadConsent({ model, cachedIds: cached });
+    demoLog('autoload', 'download consent', { ok });
+    if (!ok) {
+      setStatus('Download cancelled — refresh when ready.');
+      return { ok: false, reason: 'consent' };
+    }
   }
 
-  setStatus('Loading…');
+  setStatus(isNativeModel ? 'Checking built-in AI…' : 'Loading…');
   demoLog('autoload', 'parallel load + frame');
 
   try {

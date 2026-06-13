@@ -16,9 +16,10 @@ import type { KvCacheType, ModelCard } from '../config/models/types.ts';
 
 /** Registry models that need the heavy browser vision cap (load + capture). */
 export function isBrowserHeavyVlModel(
-  model: Partial<Pick<ModelCard, 'id' | 'image_max_tokens'>> | null | undefined
+  model: Partial<Pick<ModelCard, 'id' | 'image_max_tokens' | 'source'>> | null | undefined
 ): boolean {
   if (!model?.id) return false;
+  if (model.source?.url === 'native') return false;
   const cardMax = model.image_max_tokens ?? 0;
   return cardMax >= 512 || /(?:^|-)(3B|4B|8B|13B|14B|35B)(?:$|-)/i.test(model.id);
 }

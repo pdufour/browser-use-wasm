@@ -57,6 +57,7 @@ export async function getLocalModelUrls(
   forcedModelId: string | null = null
 ): Promise<ModelSource | null> {
   const model = getCurrentModel(forcedModelId);
+  if (model.source.url === 'native') return model.source;
   const manifest = await loadManifest(baseURI);
   const entry = manifestEntryForModel(manifest, model.id);
   if (!entry?.files?.llm?.name) return null;
@@ -88,18 +89,19 @@ export async function loadCachedModelIds(
   baseURI: string = typeof location !== 'undefined' ? location.href : ''
 ): Promise<Set<string>> {
   const manifest = await loadManifest(baseURI);
-  if (!manifest) return new Set();
-  if (manifest.version === 2 && manifest.models) {
-    return new Set(
+  const ids = new Set<string>();
+  if (manifest) {
+    if (manifest.version === 2 && manifest.models) {
       Object.entries(manifest.models)
         .filter(([, entry]) => manifestFilesReady(entry))
-        .map(([id]) => id)
-    );
+        .forEach(([id]) => ids.add(id));
+    } else if (manifest.model && manifestFilesReady(manifest)) {
+      ids.add(manifest.model);
+    }
   }
-  if (manifest.model && manifestFilesReady(manifest)) {
-    return new Set([manifest.model]);
-  }
-  return new Set();
+  // Native models are always considered "cached" (available)
+  ids.add('gemini-nano');
+  return ids;
 }
 
 export async function resolveLocalModelSource(
@@ -107,6 +109,7 @@ export async function resolveLocalModelSource(
   forcedModelId: string | null = null
 ): Promise<ModelSource | null> {
   const model = getCurrentModel(forcedModelId);
+  if (model.source.url === 'native') return model.source;
   const manifest = await loadManifest(baseURI);
   const entry = manifestEntryForModel(manifest, model.id);
   if (!manifestFilesReady(entry)) return null;
@@ -114,6 +117,7 @@ export async function resolveLocalModelSource(
 }
 
 export function assertModelSource(source: ModelSource, model: ModelCard): void {
+  if (source.url === 'native') return;
   const llmFile = new URL(source.url).pathname.split('/').pop() ?? '';
   if (!model.llmFileRe!.test(llmFile)) {
     throw new Error(
@@ -176,6 +180,7 @@ export function isRemoteModelLoadEnabled(): boolean {
 
 /** Public registry models can stream GGUFs from Hugging Face when not pre-cached. */
 export function canDownloadModelInBrowser(model: ModelCard): boolean {
+  if (model.source.url === 'native') return true;
   return !model.requiresHfToken && !!model.source?.url && !!model.llmFileRe;
 }
 

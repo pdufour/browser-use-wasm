@@ -1,12 +1,8 @@
 /**
  * Public embed API: add browser-use to a website.
- *
- * High level — `createWebOperator()` then `operator.instruct('…')` (capture →
- * ShowUI navigation inference in a WASM worker → execute on the live page).
- * Lower-level pieces are exported for custom pipelines.
  */
 
-export { createWebOperator, WebOperator } from './operator.ts';
+export { createWebOperator, WebOperator, createPromptApiOperator } from './operator.ts';
 export type {
   WebOperatorOptions,
   OperatorLoadOptions,
@@ -18,6 +14,9 @@ export type {
   InstructResult,
   LocateResult,
 } from './operator.ts';
+
+// Native AIs
+export { PromptApiCompletionClient, checkPromptApiAvailability } from './actions/prompt-api.ts';
 
 // Inference
 export { WllamaWorkerClient, CaptureWorkerClient } from './wllama/client.ts';

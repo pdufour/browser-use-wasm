@@ -4,14 +4,13 @@
  * ```ts
  * import { createWebOperator } from '…';
  *
- * const operator = createWebOperator({ captureRoot: () => document.body });
+ * const operator = createWebOperator({ native: true });
  * await operator.load();
  * await operator.instruct('type paul in the email field');
  * ```
  *
- * One instruct = SnapDOM capture → one ShowUI navigation inference (browser WASM
- * worker) → execute every parsed action from that generation on the live page.
- * Coordinates come from the model on the screenshot only — never from DOM layout.
+ * One instruct = SnapDOM capture → one inference (local WASM or native AI) →
+ * execute every parsed action from that generation on the live page.
  */
 
 import { snapdom } from '@zumer/snapdom';
@@ -20,7 +19,8 @@ import { snapdomCaptureToCanvas, snapdomCanvasToCssSize } from './snapdom/captur
 import { prepareVisionCapture, remapVisionNormToCaptureNorm } from './snapdom/vision-resize.ts';
 import type { VisionCropRect } from './snapdom/vision-resize.ts';
 import { runNavigation, prewarmNavigationPrefix } from './actions/navigation.ts';
-import type { NavigationAction } from './actions/navigation.ts';
+import type { NavigationAction, CompletionClient } from './actions/navigation.ts';
+import { PromptApiCompletionClient, checkPromptApiAvailability } from './actions/prompt-api.ts';
 import { executeNavigationAction } from './actions/execute.ts';
 import { locateLabel, hasValidNormPoint, withTimeout } from './actions/locate.ts';
 import type { GroundingPoint } from './actions/parse-coords.ts';
@@ -44,8 +44,12 @@ import { scrollToElement, setBrowserToolDocument } from './browser-tools/dom-act
 export interface WebOperatorOptions {
   /** Registry model id (default `ShowUI-2B`). */
   modelId?: string;
+  /** Use Chrome built-in AI (Prompt API / Gemini Nano). Bypasses wllama. */
+  native?: boolean;
   /** Same-origin wllama WASM URL (default `/wllama/wllama.wasm`). */
   wasmUrl?: string;
+  /** Custom completion client. If provided, overrides `native` and wllama. */
+  llm?: CompletionClient;
   /** Element to capture and act on (default `document.body`). */
   captureRoot?: () => HTMLElement | null;
   /**
@@ -154,7 +158,7 @@ interface CaptureState {
 }
 
 export class WebOperator {
-  readonly llm: WllamaWorkerClient;
+  readonly llm: CompletionClient;
   readonly #encoder: CaptureWorkerClient;
   #model: ModelCard;
   #loaded = false;
@@ -167,7 +171,7 @@ export class WebOperator {
   #targetDocument: (() => Document | null) | null;
 
   constructor(options: WebOperatorOptions = {}) {
-    this.#model = getModelById(options.modelId ?? DEFAULT_MODEL_ID);
+    this.#model = getModelById(options.modelId ?? (options.native ? 'gemini-nano' : DEFAULT_MODEL_ID));
     this.#wasmUrl = options.wasmUrl ?? resolveWasmUrl();
     this.#captureRoot =
       options.captureRoot ?? (() => (typeof document !== 'undefined' ? document.body : null));
@@ -175,15 +179,22 @@ export class WebOperator {
     this.#onPerfMark = options.onPerfMark ?? null;
     this.#targetDocument = options.targetDocument ?? null;
     this.#syncToolDocument();
-    this.llm = new WllamaWorkerClient();
+    
+    // Choose the LLM backend. 
+    // If native flag or gemini-nano model id, use Prompt API.
+    if (options.llm) {
+      this.llm = options.llm;
+    } else if (options.native || this.#model.id === 'gemini-nano') {
+      this.llm = new PromptApiCompletionClient();
+    } else {
+      this.llm = new WllamaWorkerClient();
+    }
+    
     this.#encoder = new CaptureWorkerClient();
   }
 
   /**
    * Re-point the dom-actions module at this operator's target document.
-   * That module keeps the resolver in module state, which dev-server HMR
-   * resets on re-eval while this operator instance is persisted across hot
-   * updates — so it is re-applied before every capture / locate / execute.
    */
   #syncToolDocument(): void {
     if (this.#targetDocument) setBrowserToolDocument(this.#targetDocument);
@@ -201,32 +212,57 @@ export class WebOperator {
     return this.#captureGeneration;
   }
 
-  /** Switch the registry model; the worker must be loaded again. */
+  /** Switch the registry model. */
   setModel(modelId: string): ModelCard {
     this.#model = getModelById(modelId);
     this.#loaded = false;
+    
+    // Switch LLM backend if needed
+    const isNative = modelId === 'gemini-nano';
+    if (isNative && this.llm instanceof WllamaWorkerClient) {
+      this.llm.terminate();
+      (this as { llm: CompletionClient }).llm = new PromptApiCompletionClient();
+    } else if (!isNative && this.llm instanceof PromptApiCompletionClient) {
+      (this as { llm: CompletionClient }).llm = new WllamaWorkerClient();
+    }
+    
     return this.#model;
   }
 
-  /** Terminate and replace the inference worker (e.g. after a corrupt load). */
+  /** Terminate and replace the inference worker. */
   recreateWorker(): void {
-    this.llm.terminate();
-    this.#loaded = false;
-    // readonly for callers, swapped on recovery only
-    (this as { llm: WllamaWorkerClient }).llm = new WllamaWorkerClient();
+    if (this.llm instanceof WllamaWorkerClient) {
+      this.llm.terminate();
+      this.#loaded = false;
+      (this as { llm: CompletionClient }).llm = new WllamaWorkerClient();
+    }
   }
 
-  /** Probe the inference worker's environment (WebGPU availability). */
+  /** Probe the environment. */
   async probe(): Promise<{ webgpu: boolean }> {
-    const result = await this.llm.probe(this.#wasmUrl);
-    return { webgpu: !!result.webgpu };
+    if (this.llm instanceof WllamaWorkerClient) {
+      const result = await this.llm.probe(this.#wasmUrl);
+      return { webgpu: !!result.webgpu };
+    }
+    return { webgpu: true };
   }
 
-  /** Load GGUF weights in the browser WASM worker (`/model-cache/` or HF download on demand). */
+  /** Load weights (wllama) or just mark ready (native). */
   async load(options: OperatorLoadOptions = {}): Promise<OperatorLoadResult> {
     const model = this.#model;
     const browserValidated = BROWSER_VALIDATED_MODEL_IDS.includes(model.id);
     const loadCaps = resolveModelLoadCaps(model, { browserValidated });
+
+    if (!(this.llm instanceof WllamaWorkerClient)) {
+      const probe = await checkPromptApiAvailability();
+      if (!probe.ok) {
+        throw new Error(probe.message);
+      }
+      this.#loaded = true;
+      options.onStatus?.(probe.message);
+      return { nGpuLayers: 0, imageMaxTokens: loadCaps.imageMaxTokens, browserValidated, loadCaps };
+    }
+
     const baseURI = typeof location !== 'undefined' ? location.href : '';
     const { origin } = await resolveRegistryModelSourceDetailed(baseURI, model.id);
     if (origin === 'remote') {
@@ -235,20 +271,17 @@ export class WebOperator {
       options.onStatus?.(`Loading ${model.label}…`);
     }
 
-    let lastReportedPct = -1;
-    const progressHandler = ({ loaded, total }: { loaded: number; total: number }) => {
+    const client = this.llm as WllamaWorkerClient;
+    client.onProgress(({ loaded, total }) => {
       options.onProgress?.({ loaded, total });
       if (total > 0 && loaded < total) {
         const pct = Math.min(99, Math.floor((loaded / total) * 100));
-        if (pct > lastReportedPct) {
-          lastReportedPct = pct;
-          options.onStatus?.(`Downloading ${model.label}… ${pct}%`);
-        }
+        options.onStatus?.(`Downloading ${model.label}… ${pct}%`);
       }
-    };
-    this.llm.onProgress(progressHandler);
+    });
+
     try {
-      const { nGpuLayers, imageMaxTokens } = await this.llm.load(this.#wasmUrl, {
+      const { nGpuLayers, imageMaxTokens } = await client.load(this.#wasmUrl, {
         modelId: model.id,
         nCtx: loadCaps.nCtx,
         nGpuLayers: model.n_gpu_layers,
@@ -264,12 +297,10 @@ export class WebOperator {
       });
       this.#loaded = true;
       options.onStatus?.(`${model.label} loaded — ${nGpuLayers ?? '?'} GPU layers`);
-      // Fire-and-forget: prefill the shared navigation system prompt into the
-      // worker KV cache so the first task inference skips ~half the text prefill.
       void prewarmNavigationPrefix(this.llm);
       return { nGpuLayers, imageMaxTokens, browserValidated, loadCaps };
     } finally {
-      this.llm.onProgress(() => {});
+      client.onProgress(() => {});
     }
   }
 
@@ -279,43 +310,29 @@ export class WebOperator {
     return !!c.buffer?.byteLength || !!c.bufferPromise;
   }
 
-  /** Drop the current screenshot (next instruct needs a fresh capture). */
+  /** Drop the current screenshot. */
   clearCapture(): void {
     this.#capture = null;
     this.#captureGeneration += 1;
   }
 
-  /**
-   * SnapDOM-capture the target root, resize to the model's vision budget, and
-   * encode the inference image off the main thread.
-   */
+  /** SnapDOM-capture the target root. */
   async capture(): Promise<OperatorCapture> {
     this.#syncToolDocument();
     const mark = this.#onPerfMark ?? (() => {});
     const captureRoot = this.#captureRoot();
     if (!captureRoot) throw new Error('Capture root not available');
 
-    // Capture what the user sees: inner scrollers keep their position (SnapDOM
-    // preserves scroll state), so below-the-fold targets can be scrolled into
-    // view and then grounded on the screenshot. Only the window is aligned so
-    // the capture box sits at the viewport origin.
     scrollToElement(captureRoot);
     const captureRect = captureRoot.getBoundingClientRect();
     const dpr = Math.min(CAPTURE_DPR_MAX, globalThis.devicePixelRatio ?? 1);
-    mark(
-      'prepareCaptureTarget',
-      `${Math.round(captureRect.width)}x${Math.round(captureRect.height)}px dpr=${dpr}`
-    );
+    mark('prepareCaptureTarget', `${Math.round(captureRect.width)}x${Math.round(captureRect.height)}px dpr=${dpr}`);
 
     const snapCanvas = await snapdomCaptureToCanvas(snapdom, captureRoot);
     mark('snapdom.toCanvas', `${snapCanvas.width}×${snapCanvas.height}`);
 
     const { width: cssWidth, height: cssHeight } = snapdomCanvasToCssSize(snapCanvas, dpr);
-
-    const { canvas: resized, visionCrop, tokenTarget } = await prepareVisionCapture(
-      snapCanvas,
-      this.#model
-    );
+    const { canvas: resized, visionCrop, tokenTarget } = await prepareVisionCapture(snapCanvas, this.#model);
     mark('canvasToShowUISize', `${resized.width}×${resized.height}`);
 
     const bitmap = resized instanceof ImageBitmap ? resized : await createImageBitmap(resized);
@@ -340,7 +357,6 @@ export class WebOperator {
     };
     this.#capture = state;
 
-    // encodeBitmap transfers the bitmap to the encode worker.
     state.bufferPromise = this.#encoder
       .encodeBitmap(bitmap, visionEncodeOpts())
       .then((encoded) => {
@@ -351,7 +367,6 @@ export class WebOperator {
         return encoded.buffer;
       })
       .catch(() => null);
-    mark('captureJpegEncodeQueued');
 
     return {
       width: state.width,
@@ -368,7 +383,7 @@ export class WebOperator {
     };
   }
 
-  /** Model coords are on the vision crop; remap to full capture norm space. */
+  /** Remap vision-norm to capture-norm. */
   toCaptureNormPoint(point: GroundingPoint | null): GroundingPoint | null {
     if (!hasValidNormPoint(point)) return point ?? null;
     return remapVisionNormToCaptureNorm(point, this.#capture?.visionCrop) ?? point;
@@ -380,34 +395,22 @@ export class WebOperator {
       await shot.bufferPromise;
       if (this.#capture === shot && shot.buffer?.byteLength) return shot.buffer.slice(0);
     }
-    throw new Error('Capture buffer missing — capture the page again, then run the task.');
+    throw new Error('Capture buffer missing');
   }
 
   #requireCapture(): CaptureState {
-    if (!this.#loaded) {
-      throw new Error(`Load ${this.#model.label} first.`);
-    }
-    if (!this.hasCapture() || !this.#capture) {
-      throw new Error('Capture the page first.');
-    }
+    if (!this.#loaded) throw new Error(`Load ${this.#model.label} first.`);
+    if (!this.hasCapture() || !this.#capture) throw new Error('Capture the page first.');
     return this.#capture;
   }
 
-  /** Execute one capture-norm navigation action on the live page. */
-  executeAction(nav: {
-    action: string;
-    value: string | null;
-    point: GroundingPoint | null;
-  }): { ok: boolean; detail: string } {
+  /** Execute one action. */
+  executeAction(nav: { action: string; value: string | null; point: GroundingPoint | null }): { ok: boolean; detail: string } {
     this.#syncToolDocument();
     return executeNavigationAction(nav);
   }
 
-  /**
-   * One ShowUI navigation inference + execution (model-card UI Navigation mode):
-   * the model may emit a comma-separated action sequence in one decode pass
-   * (e.g. CLICK → INPUT → ENTER); each step runs on the page in card order.
-   */
+  /** Full instruct loop. */
   async instruct(task: string, options: InstructOptions = {}): Promise<InstructResult> {
     const shot = this.#requireCapture();
     const generation = this.#captureGeneration;
@@ -422,19 +425,11 @@ export class WebOperator {
       `${this.#model.label} navigation timed out after ${timeoutMs / 1000}s.`
     );
     if (this.#capture !== shot || this.#captureGeneration !== generation) {
-      throw new Error('Capture changed during inference — run again on the latest screenshot.');
+      throw new Error('Capture changed during inference');
     }
 
     if (result.degenerate || !result.actions.length) {
-      return {
-        ok: false,
-        degenerate: true,
-        text: result.text,
-        summary: '',
-        inferMs: result.inferMs,
-        wallMs: Math.round(performance.now() - t0),
-        steps: [],
-      };
+      return { ok: false, degenerate: true, text: result.text, summary: '', inferMs: result.inferMs, wallMs: Math.round(performance.now() - t0), steps: [] };
     }
 
     const actions = result.actions;
@@ -457,57 +452,32 @@ export class WebOperator {
       options.onStep?.(step);
       if (!exec.ok) break;
 
-      const more = i < actions.length - 1;
-      if (more && UI_CHANGING_ACTIONS.has(action.action)) {
+      if (i < actions.length - 1 && UI_CHANGING_ACTIONS.has(action.action)) {
         options.onStatus?.('Observing…');
         const cap = await this.capture();
-        const buffer = await cap.whenEncoded;
-        if (!buffer) throw new Error('Re-capture failed between actions.');
+        await cap.whenEncoded;
         await options.onRecapture?.(cap);
       }
     }
 
-    return {
-      ok: allOk,
-      degenerate: false,
-      text: result.text,
-      summary: actions.map((a) => a.action).join(' → '),
-      inferMs: result.inferMs,
-      wallMs: Math.round(performance.now() - t0),
-      steps,
-    };
+    return { ok: allOk, degenerate: false, text: result.text, summary: actions.map((a) => a.action).join(' → '), inferMs: result.inferMs, wallMs: Math.round(performance.now() - t0), steps };
   }
 
-  /**
-   * Locate a UI element on the current screenshot via one navigation inference
-   * (`click <label>`) without executing anything.
-   */
+  /** Locate element without execution. */
   async locate(label: string): Promise<LocateResult> {
     this.#syncToolDocument();
     const shot = this.#requireCapture();
     const image = await this.#inferenceImage(shot);
-    const result = await locateLabel(this.llm, image, label, {
-      timeoutMs: this.#inferenceTimeoutMs,
-      timeoutMessage:
-        `${this.#model.label} inference timed out after ${this.#inferenceTimeoutMs / 1000}s. ` +
-        'Check WebGPU (Chrome/Edge), reload the model, capture again.',
-    });
-    if (this.#capture !== shot) {
-      throw new Error('Capture changed during inference — run again on the latest screenshot.');
-    }
+    const result = await locateLabel(this.llm, image, label, { timeoutMs: this.#inferenceTimeoutMs });
+    if (this.#capture !== shot) throw new Error('Capture changed during inference');
     if (!result.ok) return { ok: false, point: null, text: result.text, inferMs: result.inferMs };
     const point = this.toCaptureNormPoint(result.point);
-    return {
-      ok: hasValidNormPoint(point),
-      point: point ? { x: point.x, y: point.y } : null,
-      text: result.text,
-      inferMs: result.inferMs,
-    };
+    return { ok: hasValidNormPoint(point), point: point ? { x: point.x, y: point.y } : null, text: result.text, inferMs: result.inferMs };
   }
 
-  /** Terminate both workers. */
+  /** Terminate workers. */
   dispose(): void {
-    this.llm.terminate();
+    if (this.llm instanceof WllamaWorkerClient) this.llm.terminate();
     this.#encoder.terminate();
     this.#capture = null;
     this.#loaded = false;
@@ -516,4 +486,8 @@ export class WebOperator {
 
 export function createWebOperator(options: WebOperatorOptions = {}): WebOperator {
   return new WebOperator(options);
+}
+
+export function createPromptApiOperator(options: WebOperatorOptions = {}): WebOperator {
+  return new WebOperator({ ...options, native: true });
 }
