@@ -106,6 +106,11 @@
       document.getElementById('btn-modal-close')?.addEventListener('click', () => {
         document.getElementById('checkout-modal')?.setAttribute('hidden', '');
       });
+      document.getElementById('btn-submit')?.addEventListener('click', () => {
+        const h2 = document.querySelector('h2');
+        if (h2) h2.textContent = 'Order Submitted!';
+        document.body.style.backgroundColor = '#ecfdf5'; // Light green
+      });
     </script>
   </body>
 </html>

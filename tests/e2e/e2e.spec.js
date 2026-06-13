@@ -48,6 +48,7 @@ import {
   runE2EGemmaNanoPromptApiTurnShape,
   runE2EGemmaNanoBootSmoke,
   runE2EGemmaNanoPixelPositionNorm,
+  runE2EGemmaNanoClickSubmit,
 } from './e2e.js';
 
 /** @type {Set<string>} */
@@ -237,6 +238,10 @@ test.describe('gemma-nano Prompt API page', () => {
 
   test('normalizes pixel position using vision JPEG size', async ({ page, baseURL }) => {
     await runE2EGemmaNanoPixelPositionNorm(page, baseURL);
+  });
+
+  test('click Submit task works (Real Prompt API)', async ({ page, baseURL }) => {
+    await runE2EGemmaNanoClickSubmit(page, baseURL);
   });
 });
 

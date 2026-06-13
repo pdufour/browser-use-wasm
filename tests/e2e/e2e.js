@@ -2137,3 +2137,67 @@ export async function runE2EGemmaNanoBootSmoke(page, baseURL) {
   );
   appendE2eResult('gemma-nano', { status: 'SUCCESS (boot smoke)' });
 }
+
+/**
+ * E2E test for Gemma Nano that shows click Submit works.
+ * This test uses the real Prompt API. Ensure flags are enabled in playwright.config.js.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ */
+export async function runE2EGemmaNanoClickSubmit(page, baseURL) {
+  const url = new URL(GEMMA_NANO_E2E_PATH, baseURL || 'http://127.0.0.1:5173');
+  // Model benchmark mode often exposes more technical status
+  url.searchParams.set('model', 'gemini-nano');
+  
+  await page.goto(url.href, { waitUntil: 'domcontentloaded' });
+
+  // Wait for the page to boot. If the API is missing, it will show an Error in #hero-status.
+  await page.waitForSelector('#browse-frame', { timeout: 15_000 });
+  
+  await page.waitForFunction(
+    () => {
+      const hero = document.getElementById('hero-status');
+      const run = document.getElementById('btn-run');
+      if (!hero) return false;
+      const text = hero.textContent || '';
+      // If we see "Error", fail early with the descriptive error from the page
+      if (text.includes('Error')) return true;
+      return text.includes('ready to run') && run && !run.disabled;
+    },
+    { timeout: 30_000 }
+  );
+
+  const heroText = await page.locator('#hero-status').textContent();
+  if (heroText?.includes('Error')) {
+    throw new Error(`Gemma Nano not available in E2E: ${heroText}`);
+  }
+
+  // Fill the prompt and click Run
+  await page.locator('#prompt').fill('click Submit');
+  await page.getByTestId('btn-run').click();
+
+  // Wait for the task to finish (Gemma Nano is on-device, usually fast but give it time)
+  const raw = page.getByTestId('raw-output');
+  await expect.poll(
+    async () => {
+      const t = (await raw.textContent()) ?? '';
+      return /Parsed actions/i.test(t) ? t : null;
+    },
+    { timeout: 30_000 }
+  ).not.toBeNull();
+
+  // Verify the marker is visible (indicates successful grounding)
+  await expect(page.locator('#click-marker')).toBeVisible();
+
+  // Verify the action was logged correctly
+  const text = await raw.textContent();
+  expect(text).toContain('CLICK');
+
+  // Verify the button was ACTUALLY clicked by checking the fixture side-effect
+  // The browse-frame is an iframe, so we need to check inside it
+  const frame = page.frameLocator('[data-testid="browse-frame"]');
+  await expect(frame.locator('h2')).toHaveText('Order Submitted!', { timeout: 5_000 });
+
+  appendE2eResult('gemma-nano', { status: 'SUCCESS (click Submit works)' });
+  setE2ePhase('done');
+}

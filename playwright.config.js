@@ -30,7 +30,11 @@ export default defineConfig({
     actionTimeout: 20_000,
     navigationTimeout: 30_000,
     launchOptions: {
-      args: ['--enable-unsafe-webgpu'],
+      args: [
+        '--enable-unsafe-webgpu',
+        '--enable-features=LanguageModelAPI,OptimizationGuideOnDeviceModel',
+        '--optimization-guide-on-device-model-bypass-perf-requirement',
+      ],
     },
   },
   webServer: {
