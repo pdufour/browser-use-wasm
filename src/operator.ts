@@ -420,7 +420,10 @@ export class WebOperator {
 
     const image = await this.#inferenceImage(shot);
     const result = await withTimeout(
-      runNavigation(this.llm, image, task),
+      runNavigation(this.llm, image, task, [], {
+        width: shot.width,
+        height: shot.height,
+      }),
       timeoutMs,
       `${this.#model.label} navigation timed out after ${timeoutMs / 1000}s.`
     );
@@ -468,7 +471,10 @@ export class WebOperator {
     this.#syncToolDocument();
     const shot = this.#requireCapture();
     const image = await this.#inferenceImage(shot);
-    const result = await locateLabel(this.llm, image, label, { timeoutMs: this.#inferenceTimeoutMs });
+    const result = await locateLabel(this.llm, image, label, {
+      timeoutMs: this.#inferenceTimeoutMs,
+      visionSize: { width: shot.width, height: shot.height },
+    });
     if (this.#capture !== shot) throw new Error('Capture changed during inference');
     if (!result.ok) return { ok: false, point: null, text: result.text, inferMs: result.inferMs };
     const point = this.toCaptureNormPoint(result.point);

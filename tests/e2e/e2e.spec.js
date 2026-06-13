@@ -45,6 +45,9 @@ import {
   resolveBenchmarkModelIds,
   runE2EModelExpensiveSmoke,
   runE2ESwitchRoundTrip,
+  runE2EGemmaNanoPromptApiTurnShape,
+  runE2EGemmaNanoBootSmoke,
+  runE2EGemmaNanoPixelPositionNorm,
 } from './e2e.js';
 
 /** @type {Set<string>} */
@@ -220,6 +223,20 @@ test.describe(`e2e ${E2E_MODEL_ID}`, () => {
 
   test(`Model ${E2E_MODEL_ID}: address-bar navigation then Submit task`, async () => {
     await runE2EAddressBarNavigationTask(page, E2E_MODEL_ID);
+  });
+});
+
+test.describe('gemma-nano Prompt API page', () => {
+  test('maps ShowUI messages to one multimodal user turn', async ({ page, baseURL }) => {
+    await runE2EGemmaNanoPromptApiTurnShape(page, baseURL);
+  });
+
+  test('boot finishes without stuck Starting', async ({ page, baseURL }) => {
+    await runE2EGemmaNanoBootSmoke(page, baseURL);
+  });
+
+  test('normalizes pixel position using vision JPEG size', async ({ page, baseURL }) => {
+    await runE2EGemmaNanoPixelPositionNorm(page, baseURL);
   });
 });
 

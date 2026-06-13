@@ -22,6 +22,7 @@ export const MODELS: ModelCard[] = [
     ggufRepo: 'localattention/ShowUI-2B-Q4_K_M-GGUF',
     mmprojRepo: 'ggml-org/Qwen2-VL-2B-Instruct-GGUF',
   },
+  GeminiNano,
   GUIG23B,
   MAIUI2B,
   UIVenus152B,
@@ -31,7 +32,6 @@ export const MODELS: ModelCard[] = [
   UIAGILE3B,
   UIAGILE2B,
   Qwen25VL3BInstruct,
-  GeminiNano,
 ];
 
 /** All registry ids (GGUF-backed). */
@@ -68,7 +68,7 @@ export { DEFAULT_MODEL_ID };
  * Production gate model(s) — chosen after `npm run test:benchmark`, not by default E2E.
  * Others stay experimental in the switcher until promoted here.
  */
-export const BROWSER_VALIDATED_MODEL_IDS = [DEFAULT_MODEL_ID];
+export const BROWSER_VALIDATED_MODEL_IDS = [DEFAULT_MODEL_ID, 'gemini-nano'];
 
 /** Playwright gate model — must match `BROWSER_VALIDATED_MODEL_IDS[0]` (see `blackbox-e2e.mdc`). */
 export const E2E_MODEL_ID = DEFAULT_MODEL_ID;

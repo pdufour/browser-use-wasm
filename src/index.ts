@@ -16,11 +16,20 @@ export type {
 } from './operator.ts';
 
 // Native AIs
-export { PromptApiCompletionClient, checkPromptApiAvailability } from './actions/prompt-api.ts';
+export {
+  PromptApiCompletionClient,
+  checkPromptApiAvailability,
+  mapShowUIMessagesToPromptApiTurns,
+} from './actions/prompt-api.ts';
 
 // Inference
 export { WllamaWorkerClient, CaptureWorkerClient } from './wllama/client.ts';
 export { runNavigation } from './actions/navigation.ts';
+export {
+  buildShowUINavigationMessages,
+  navigationPositionToPoint,
+} from './actions/navigation.ts';
+export type { NavigationVisionSize } from './actions/navigation.ts';
 export type {
   NavigationAction,
   NavigationResult,

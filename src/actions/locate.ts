@@ -6,7 +6,7 @@
  */
 
 import { runNavigation } from './navigation.ts';
-import type { CompletionClient } from './navigation.ts';
+import type { CompletionClient, NavigationVisionSize } from './navigation.ts';
 import type { GroundingPoint } from './parse-coords.ts';
 
 export interface LocateLabelResult {
@@ -20,6 +20,7 @@ export interface LocateLabelResult {
 export interface LocateLabelOptions {
   timeoutMs?: number;
   timeoutMessage?: string;
+  visionSize?: NavigationVisionSize;
 }
 
 export function hasValidNormPoint(
@@ -49,7 +50,7 @@ export async function locateLabel(
   label: string,
   opts: LocateLabelOptions = {}
 ): Promise<LocateLabelResult> {
-  const run = runNavigation(client, imageBuffer, `click ${label}`);
+  const run = runNavigation(client, imageBuffer, `click ${label}`, [], opts.visionSize);
   const result = await (opts.timeoutMs
     ? withTimeout(
         run,

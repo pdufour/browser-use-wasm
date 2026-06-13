@@ -35,11 +35,15 @@ interface PromptApiSession {
   destroy?: () => void;
 }
 
+type PromptApiContentPart =
+  | { type: 'text'; value: string }
+  | { type: 'image'; value: Blob };
+
 type PromptApiTurn =
-  | { role: 'user' | 'assistant' | 'system'; content: string; prefix?: boolean }
   | {
-      role: 'user';
-      content: Array<{ type: 'image'; value: Blob }>;
+      role: 'user' | 'assistant' | 'system';
+      content: string | PromptApiContentPart[];
+      prefix?: boolean;
     };
 
 export interface PromptApiProbeResult {
@@ -166,8 +170,14 @@ function imageBufferToBlob(data: ArrayBuffer): Blob {
   return new Blob([data], { type: mime });
 }
 
+/**
+ * Map ShowUI wllama messages → Prompt API turns.
+ * Keep one multimodal user turn (system + task + image together) — same layout
+ * wllama sends in a single `user` message; splitting breaks vision grounding.
+ */
 function toPromptApiTurns(messages: ChatCompletionMessage[]): PromptApiTurn[] {
   const out: PromptApiTurn[] = [];
+
   for (const msg of messages) {
     if (msg.role === 'assistant' && typeof msg.content === 'string') {
       out.push({
@@ -177,20 +187,28 @@ function toPromptApiTurns(messages: ChatCompletionMessage[]): PromptApiTurn[] {
       });
       continue;
     }
+
     if (!Array.isArray(msg.content)) continue;
+
+    const parts: PromptApiContentPart[] = [];
     for (const part of msg.content) {
       if (part.type === 'text' && typeof part.text === 'string') {
-        out.push({ role: 'user', content: part.text });
+        parts.push({ type: 'text', value: part.text });
       } else if (part.type === 'image' && part.data instanceof ArrayBuffer && part.data.byteLength) {
-        out.push({
-          role: 'user',
-          content: [{ type: 'image', value: imageBufferToBlob(part.data) }],
-        });
+        parts.push({ type: 'image', value: imageBufferToBlob(part.data) });
       }
     }
+
+    if (parts.length) {
+      out.push({ role: 'user', content: parts });
+    }
   }
+
   return out;
 }
+
+/** Exported for E2E regression — ShowUI messages must become one multimodal user turn. */
+export const mapShowUIMessagesToPromptApiTurns = toPromptApiTurns;
 
 /**
  * Completion client — Chrome built-in Prompt API (Gemini / Gemma Nano).

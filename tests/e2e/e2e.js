@@ -2057,3 +2057,83 @@ export function appendE2eResult(modelId, row) {
   ].filter(Boolean);
   fs.appendFileSync(E2E_RESULTS_FILE, `${lines.join('\n')}\n\n`);
 }
+
+/** Gemma-nano demo — Prompt API page (not the operator /home gate). */
+export const GEMMA_NANO_E2E_PATH = '/gemma-nano/';
+
+/**
+ * Open gemma-nano with `?e2e=1` (exposes `__e2ePromptApiTurnShape`).
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ */
+export async function openGemmaNanoE2ePage(page, baseURL) {
+  installE2eConsole(page);
+  const url = new URL(GEMMA_NANO_E2E_PATH, baseURL || 'http://127.0.0.1:5173');
+  url.searchParams.set('e2e', '1');
+  await page.goto(url.href, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => typeof globalThis.__e2ePromptApiTurnShape === 'function', {
+    timeout: 15_000,
+  });
+}
+
+/**
+ * Regression: ShowUI navigation messages → one multimodal Prompt API user turn
+ * (system + task + image together). Guards against split-turn grounding bugs.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ */
+export async function runE2EGemmaNanoPromptApiTurnShape(page, baseURL) {
+  await openGemmaNanoE2ePage(page, baseURL);
+  const shape = await page.evaluate(() => globalThis.__e2ePromptApiTurnShape());
+  expect(shape.turnCount).toBe(2);
+  expect(shape.userTurnCount).toBe(1);
+  expect(shape.userPartCount).toBe(3);
+  expect(shape.textPartCount).toBe(2);
+  expect(shape.hasImagePart).toBe(true);
+  expect(shape.assistantPrefix).toBe(true);
+  appendE2eResult('gemma-nano', { status: 'SUCCESS (Prompt API turn shape)' });
+}
+
+/**
+ * Regression: pixel `position: [200, 165]` → vision-norm using JPEG dims, not ÷1000.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ */
+export async function runE2EGemmaNanoPixelPositionNorm(page, baseURL) {
+  await openGemmaNanoE2ePage(page, baseURL);
+  await page.waitForFunction(() => typeof globalThis.__e2eNavPositionNorm === 'function', {
+    timeout: 15_000,
+  });
+  const out = await page.evaluate(() => globalThis.__e2eNavPositionNorm());
+  expect(out.pixel).toEqual({ x: 0.238, y: 0.453 });
+  expect(out.norm).toEqual({ x: 0.2, y: 0.165 });
+  expect(out.submit).toEqual({ x: 0.976, y: 0.824 });
+  appendE2eResult('gemma-nano', { status: 'SUCCESS (pixel position norm)' });
+}
+
+/**
+ * Gemma-nano boot smoke — module loads and autoload exits "Starting…"
+ * (ready or Prompt API unavailable message; no hung import/boot).
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [baseURL]
+ */
+export async function runE2EGemmaNanoBootSmoke(page, baseURL) {
+  await openGemmaNanoE2ePage(page, baseURL);
+  await page.waitForSelector('#browse-frame', { timeout: 15_000 });
+  await page.waitForFunction(
+    () => {
+      const hero = document.getElementById('hero-status');
+      const run = document.getElementById('btn-run');
+      if (!hero) return false;
+      const label = (hero.textContent || '').trim();
+      if (label === 'Starting…') return false;
+      if (run && !run.disabled) return true;
+      const tech = hero.dataset?.technicalStatus || label;
+      return /Prompt API|Built-in AI|Error|ready to run|timed out|failed|Navigation failed/i.test(
+        tech
+      );
+    },
+    { timeout: LOAD_TIMEOUT_MS + 5_000 }
+  );
+  appendE2eResult('gemma-nano', { status: 'SUCCESS (boot smoke)' });
+}

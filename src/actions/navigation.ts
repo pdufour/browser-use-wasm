@@ -188,26 +188,46 @@ function clamp01(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
 
-function normalizeCoordPair(pair: unknown): GroundingPoint | null {
+/** Vision JPEG width/height the model saw (for pixel-style `position` values). */
+export interface NavigationVisionSize {
+  width: number;
+  height: number;
+}
+
+function normalizeCoordPair(
+  pair: unknown,
+  visionSize?: NavigationVisionSize
+): GroundingPoint | null {
   if (!Array.isArray(pair) || pair.length < 2) return null;
   let x = Number(pair[0]);
   let y = Number(pair[1]);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-  // Trained range is 0–1; tolerate 0–100 / 0–1000 style output.
-  if (x > 1 && y > 1) {
-    const div = x <= 100 && y <= 100 ? 100 : x <= 1000 && y <= 1000 ? 1000 : 0;
-    if (!div) return null;
-    x /= div;
-    y /= div;
+
+  if (x <= 1 && y <= 1) {
+    return { x: clamp01(x), y: clamp01(y) };
   }
-  return { x: clamp01(x), y: clamp01(y) };
+  if (x <= 100 && y <= 100) {
+    return { x: clamp01(x / 100), y: clamp01(y / 100) };
+  }
+  const vw = visionSize?.width ?? 0;
+  const vh = visionSize?.height ?? 0;
+  if (vw > 0 && vh > 0 && x <= vw && y <= vh) {
+    return { x: clamp01(x / vw), y: clamp01(y / vh) };
+  }
+  if (x <= 1000 && y <= 1000) {
+    return { x: clamp01(x / 1000), y: clamp01(y / 1000) };
+  }
+  return null;
 }
 
 /**
  * Normalize card position field: [x,y], [[x1,y1],[x2,y2]], or null.
  * Two corner pairs → bbox center (models often emit a box for CLICK, not a point).
  */
-export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
+export function navigationPositionToPoint(
+  pos: unknown,
+  visionSize?: NavigationVisionSize
+): GroundingPoint | null {
   if (!Array.isArray(pos) || pos.length === 0) return null;
 
   if (
@@ -216,8 +236,8 @@ export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
     pos[0].length >= 2 &&
     pos[1].length >= 2
   ) {
-    const p0 = normalizeCoordPair(pos[0]);
-    const p1 = normalizeCoordPair(pos[1]);
+    const p0 = normalizeCoordPair(pos[0], visionSize);
+    const p1 = normalizeCoordPair(pos[1], visionSize);
     if (!p0 || !p1) return null;
     return {
       x: clamp01((p0.x + p1.x) / 2),
@@ -225,13 +245,16 @@ export function navigationPositionToPoint(pos: unknown): GroundingPoint | null {
     };
   }
 
-  return normalizeCoordPair(Array.isArray(pos[0]) ? pos[0] : pos);
+  return normalizeCoordPair(Array.isArray(pos[0]) ? pos[0] : pos, visionSize);
 }
 
 /**
  * Parse one Python-literal action dict into a structured action.
  */
-function parseOneNavigationDict(dictText: string): NavigationAction | null {
+function parseOneNavigationDict(
+  dictText: string,
+  visionSize?: NavigationVisionSize
+): NavigationAction | null {
   const jsonish = dictText
     .replace(/'/g, '"')
     .replace(/\bNone\b/g, 'null')
@@ -248,7 +271,7 @@ function parseOneNavigationDict(dictText: string): NavigationAction | null {
   if (!NAV_ACTION_NAMES.includes(action)) return null;
 
   const value = parsed.value == null ? null : String(parsed.value);
-  const point = navigationPositionToPoint(parsed.position);
+  const point = navigationPositionToPoint(parsed.position, visionSize);
   return { action, value, point };
 }
 
@@ -256,14 +279,17 @@ function parseOneNavigationDict(dictText: string): NavigationAction | null {
  * Parse a ShowUI navigation generation. The card output is a comma-separated
  * sequence of dicts (e.g. CLICK → INPUT → ENTER) in one decode pass.
  */
-export function parseNavigationActions(raw: string | null | undefined): ParsedNavigation {
+export function parseNavigationActions(
+  raw: string | null | undefined,
+  visionSize?: NavigationVisionSize
+): ParsedNavigation {
   const text = sealNavigationText(raw);
   if (!text) return { text: '', actions: [] };
 
   const actions: NavigationAction[] = [];
   // Dicts are flat except nested position arrays — match balanced one-level braces.
   for (const match of text.matchAll(/\{[^{}]*\}/g)) {
-    const parsed = parseOneNavigationDict(match[0]);
+    const parsed = parseOneNavigationDict(match[0], visionSize);
     if (parsed) actions.push(parsed);
   }
   return { text, actions };
@@ -285,12 +311,13 @@ export async function runNavigation(
   client: CompletionClient,
   imageBuffer: ArrayBuffer,
   task: string,
-  history: readonly string[] = []
+  history: readonly string[] = [],
+  visionSize?: NavigationVisionSize
 ): Promise<NavigationResult> {
   const messages = buildShowUINavigationMessages(imageBuffer, task, history);
   const { text: raw, inferMs } = await client.completion(messages, NAV_SAMPLING);
   console.info(`[nav:raw] "${raw}"`);
-  const { text, actions } = parseNavigationActions(raw);
+  const { text, actions } = parseNavigationActions(raw, visionSize);
   return {
     text,
     actions,
