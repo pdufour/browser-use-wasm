@@ -3,9 +3,11 @@
  */
 import { mountSiteHeader } from '../shared/site-header.js';
 import { initTaskRunner } from '../shared/task-runner.js';
-import { withBase } from '../shared/app-base.js';
 import { demoLog, demoLogEnv, logGoalBarState, wireDemoErrorLogging } from '../shared/demo-log.js';
 import { BUILTIN_BROWSE_PATH } from '../shared/browse-defaults.js';
+import { wireBlogSnippets } from './blog-snippets.js';
+
+wireBlogSnippets();
 
 wireDemoErrorLogging('gemma-nano');
 demoLogEnv('gemma-nano');
@@ -30,7 +32,7 @@ logGoalBarState('gemma-nano:html');
 mountSiteHeader(document.getElementById('site-header'), { active: 'gallery' });
 logGoalBarState('gemma-nano:after-header');
 
-initTaskRunner({
+const runner = initTaskRunner({
   initialUrl,
   initialGoal,
   frameTitle: 'Gemma 4 Nano Demo',

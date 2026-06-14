@@ -263,9 +263,28 @@ export function initTaskRunner(options = {}) {
     return cap;
   }
 
+  async function whenIdle() {
+    while (busy) {
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+  }
+
+  async function whenReady() {
+    while (booting) {
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+    if (!modelLoaded || !frameReady) {
+      const boot = await startBoot('wait-ready');
+      if (!boot?.ok && (!modelLoaded || !frameReady)) {
+        throw new Error('Model or page not ready — check Chrome Prompt API setup');
+      }
+    }
+  }
+
   async function navigateTo(input) {
+    await whenIdle();
     const raw = String(input ?? addressEl?.value ?? '').trim();
-    if (!raw || busy) return;
+    if (!raw) return;
     busy = true;
     syncRun();
     setTechnical('Loading page…');
@@ -295,24 +314,19 @@ export function initTaskRunner(options = {}) {
       setTechnical('Enter a goal first.');
       return;
     }
+    try {
+      await whenReady();
+      await whenIdle();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setTechnical(`Error — ${msg}`);
+      return;
+    }
     if (busy || booting) {
       setTechnical('Still starting — wait a moment');
       return;
     }
     if (promptEl) promptEl.value = goal;
-    if (!modelLoaded || !frameReady) {
-      demoLog('task-runner', 'runTask booting first', { modelLoaded, frameReady });
-      const boot = await startBoot('run-click');
-      if (!boot?.ok && (!modelLoaded || !frameReady)) {
-        demoWarn('task-runner', 'runTask aborted — boot incomplete', {
-          bootOk: boot?.ok ?? false,
-          bootReason: boot?.reason ?? null,
-          modelLoaded,
-          frameReady,
-        });
-        return;
-      }
-    }
     if (!captureReady) {
       try {
         await capturePage({ showSnapshot: false });
@@ -449,5 +463,5 @@ export function initTaskRunner(options = {}) {
 
   void startBoot('page-load');
 
-  return { operator, runTask, navigateTo, capturePage, startBoot };
+  return { operator, runTask, navigateTo, capturePage, startBoot, whenReady, whenIdle };
 }
