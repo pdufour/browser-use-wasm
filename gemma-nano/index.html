@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- pages-build:f61be08-mqd3zcd6 -->
+    <!-- pages-build:3e4455a-mqd9km3n -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
-      window.__PAGES_BUILD__ = "f61be08-mqd3zcd6";
+      window.__PAGES_BUILD__ = "3e4455a-mqd9km3n";
       (function () {
         var KEY = 'pages-build-id';
         var next = window.__PAGES_BUILD__;
@@ -26,16 +26,16 @@
         quiet: false,
       };
     </script>
-    <script src="/browser-use-wasm/coi-serviceworker.js?v=f61be08-mqd3zcd6"></script>
+    <script src="/browser-use-wasm/coi-serviceworker.js?v=3e4455a-mqd9km3n"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemma 4 Nano (Native AI) - Architecture & Demo</title>
-    <script type="module" crossorigin src="/browser-use-wasm/assets/gemma-nano-NgTNaHg_.js"></script>
+    <title>Gemini Nano (Native AI) - Architecture & Demo</title>
+    <script type="module" crossorigin src="/browser-use-wasm/assets/gemma-nano-DwC8FTDc.js"></script>
     <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/site-header-DCQQ4ZcQ.js">
-    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/clear-browser-cache-BPxtH0E3.js">
-    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/task-runner-BTTOXVd6.js">
+    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/clear-browser-cache-COt5IQZq.js">
+    <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/task-runner-DbUj0fHc.js">
     <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/site-header-CwZbNdxL.css">
-    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/gemma-nano-B_owKP_w.css">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/gemma-nano-zvYm513T.css">
     <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/dev-details-nlAcpyn7.css">
   </head>
   <body class="browse-app user-facing-demo" data-viewport="live">
@@ -44,7 +44,7 @@
     <div class="browse-status-row browse-status-row--floating">
       <div class="native-ai-badge">
         <span class="native-ai-badge__icon">✨</span>
-        <span class="native-ai-badge__text">Gemma 4 Nano</span>
+        <span class="native-ai-badge__text">Gemini Nano</span>
       </div>
       <p id="hero-status" class="hero-status" aria-live="polite">Starting…</p>
     </div>
@@ -52,7 +52,7 @@
     <main class="browse-main">
       <article class="blog-content">
         <header class="blog-header">
-          <h1>Gemma 4 Nano: The Future of Private Browser Automation</h1>
+          <h1>Gemini Nano: The Future of Private Browser Automation</h1>
           <p class="blog-meta">
             June 13, 2026 • By
             <a class="blog-meta__author" href="https://www.linkedin.com/in/pauldufour/" rel="noopener noreferrer" target="_blank">Paul Dufour</a>
@@ -68,7 +68,7 @@
 
         <section class="blog-section blog-intro">
           <p>
-            Browser automation has traditionally relied on heavy server-side infrastructure. With <strong>Gemma 4 Nano</strong> and the <strong>Chrome Prompt API</strong>, we enable 100% on-device, private browser control with <strong>zero network egress</strong>-which is a fancy way of saying your screenshots and private data never leave your computer.
+            Browser automation has traditionally relied on heavy server-side infrastructure. With <strong>Gemini Nano</strong> and the <strong>Chrome Prompt API</strong>, we enable 100% on-device, private browser control. Your screenshots and private data never leave your computer.
           </p>
         </section>
 
@@ -77,7 +77,7 @@
             <p class="blog-part__kicker">Live demo</p>
             <h2 id="full-example-heading" class="blog-part__title">Try it</h2>
             <p class="blog-part__lede">
-              You type a goal. Chrome screenshots the page in the iframe, Gemma reads the image locally, picks an action (click, type, etc.), and the browser executes it on the real page. No server. Try the default: <em>type Joe in the email field</em> → <strong>Run</strong>.
+              You type a goal. Chrome screenshots the page in the iframe, Gemini reads the image locally, picks an action (click, type, etc.), and the browser executes it on the real page. No server. Try the default: <em>type Joe in the email field</em> → <strong>Run</strong>.
             </p>
           </header>
 
@@ -87,6 +87,7 @@
               <li><strong>Browser:</strong> Chrome 131+ (Dev/Canary for latest multimodal).</li>
               <li><strong>Perf Bypass:</strong> <a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <em>Enabled BypassPerfRequirement</em>.</li>
               <li><strong>Prompt API:</strong> <a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> (+ multimodal flag if listed).</li>
+              <li><strong>HTML-in-Canvas:</strong> <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <em>Enabled</em> (Step 2 <code>drawElementImage</code> capture).</li>
               <li><strong>Update:</strong> <a class="flag-link" href="chrome://components"><code>chrome://components</code></a> &rarr; <em>Optimization Guide On Device Model</em>.</li>
             </ol>
             <button type="button" id="btn-show-requirements" class="text-link">Full setup details</button>
@@ -97,7 +98,7 @@
               <input
                 id="prompt"
                 type="text"
-                placeholder="Tell Gemma what to do in the preview below…"
+                placeholder="Tell Gemini what to do in the preview below…"
                 spellcheck="false"
                 aria-label="Goal"
               />
@@ -127,36 +128,46 @@
             The Chrome Prompt API is the modern entry point for on-device AI. We resolve the API across various namespaces to find the <code>LanguageModel</code> surface:
           </p>
           <div class="interactive-snippet">
-            <pre class="code-block"><code>// 1. Resolve the entry point
-const ai = window.LanguageModel || window.ai?.languageModel;
+            <pre class="code-block"><code>const ai = window.LanguageModel || window.ai?.languageModel;
+if (!ai) throw new Error('LanguageModel not found');
 
-// 2. Create the session
 const session = await ai.create({
   expectedInputs: [{ type: 'text' }, { type: 'image' }],
-  temperature: 0
-});</code></pre>
+  temperature: 0,
+});
+session.destroy?.();
+return 'Multimodal session created';</code></pre>
             <button type="button" id="btn-run-prompt-api" class="chip-btn chip-btn--secondary">Run</button>
             <p id="prompt-api-result" class="snippet-feedback" hidden></p>
           </div>
 
-          <h3 class="steps-subhead">Step 2 - Capture the page with SnapDOM</h3>
+          <h3 class="steps-subhead">Step 2 - Capture the page with drawElementImage</h3>
           <p>
-            To give Gemma vision, we use <code>snapdom</code> to freeze a DOM region into a JPEG-sized bitmap. This mini checkout strip is the kind of surface the model would screenshot:
+            Under the hood, Chrome rasterizes DOM through the experimental <strong>HTML-in-Canvas</strong> API:
+            <code>canvas.getContext('2d').drawElementImage(element, x, y)</code> paints a live subtree into a bitmap using the browser layout engine (no screenshot server, no <code>html2canvas</code>-style SVG hack).
+            <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> must be on.
+          </p>
+          <p>
+            <code>SnapDOM</code> is just a wrapper around that call: clone the target, inline computed styles and fonts, size the canvas, then invoke <code>drawElementImage</code> and hand you the <code>HTMLCanvasElement</code>.
+            The checkout strip below is what gets rasterized; your code only needs SnapDOM:
           </p>
 
-          <div class="snippet-stage" id="snippet-stage" aria-label="Snippet capture target">
+          <div id="snippet-stage" class="snippet-stage" aria-label="Snippet capture target">
             <p class="snippet-stage__title">Complete your order</p>
             <p class="snippet-stage__hint">Review details and continue.</p>
             <button type="button" class="snippet-stage__submit" id="snippet-submit">Submit</button>
           </div>
 
           <div class="interactive-snippet">
-            <pre class="code-block"><code>const target = document.querySelector('#snippet-stage');
-const canvas = await window.snapdom.toCanvas(target, {
+            <pre class="code-block"><code>// SnapDOM → clone + inline styles/fonts → drawElementImage → canvas
+const target = document.getElementById('snippet-stage');
+const canvas = await snapdom.toCanvas(target, {
   width: target.offsetWidth,
   height: target.offsetHeight,
+  dpr: Math.min(2, devicePixelRatio || 1),
+  embedFonts: true,
 });
-console.log('Captured canvas:', canvas);</code></pre>
+return canvas;</code></pre>
             <button type="button" id="btn-try-snapdom" class="chip-btn chip-btn--secondary">Run</button>
             <div id="snapdom-result" class="snippet-feedback" hidden>
               <p class="snippet-feedback__text"></p>
@@ -166,10 +177,115 @@ console.log('Captured canvas:', canvas);</code></pre>
 
           <h3 class="steps-subhead">Step 3 - Ground coordinates and click</h3>
           <p>
-            SnapDOM captures the checkout page in the live demo iframe, <code>LanguageModel</code> reads that JPEG, and returns an action dict with <code>[x, y]</code>. The code below is the full tutorial - copy it into the console or click <strong>Run</strong> to execute it exactly.
+            Step 3 wires it together: <code>SnapDOM</code> (same <code>drawElementImage</code> path) screenshots the live iframe (<code>#capture-target</code>), then the <strong>Chrome Prompt API</strong> (<code>LanguageModel</code>, <code>session.prompt</code>) reads that JPEG and returns <code>[x, y]</code>. We click at that point in the iframe.
           </p>
           <div class="interactive-snippet">
-            <pre class="code-block"><code id="step3-tutorial-code"></code></pre>
+            <pre class="code-block"><code>const frame = document.getElementById('browse-frame');
+const doc = frame.contentDocument;
+const stage = doc.getElementById('capture-target');
+if (!doc || !stage) {
+  throw new Error('Demo page not loaded yet - wait for the checkout preview above');
+}
+
+// Chrome Prompt API (on-device Gemini Nano)
+const ai = window.LanguageModel || window.ai?.languageModel;
+if (!ai) throw new Error('LanguageModel not found');
+
+const session = await ai.create({
+  expectedInputs: [{ type: 'text' }, { type: 'image' }],
+  expectedOutputs: [{ type: 'text' }],
+  temperature: 0,
+  topK: 1,
+});
+
+// Drop live-demo pointer overlay so SnapDOM does not photograph it
+doc.getElementById('agent-grounding-layer')?.remove();
+
+// Screenshot → JPEG (vision input for Prompt API)
+const canvas = await snapdom.toCanvas(stage, {
+  width: stage.offsetWidth,
+  height: stage.offsetHeight,
+  dpr: Math.min(2, devicePixelRatio || 1),
+  embedFonts: true,
+});
+
+const jpeg = await new Promise((resolve, reject) => {
+  canvas.toBlob(
+    (blob) => (blob ? resolve(blob) : reject(new Error('JPEG encode failed'))),
+    'image/jpeg',
+    0.92
+  );
+});
+
+const navSystem = `You are an assistant trained to navigate the web screen.
+Given a task instruction, a screen observation, and an action history sequence,
+output the next action and wait for the next observation.
+Format the action as: {'action': 'CLICK', 'value': None, 'position': [x,y]}
+Position is 0-1 on the screenshot.`;
+
+const t0 = performance.now();
+const raw = await session.prompt([
+  {
+    role: 'user',
+    content: [
+      { type: 'text', value: navSystem },
+      { type: 'text', value: 'Task: click Submit' },
+      { type: 'image', value: jpeg },
+    ],
+  },
+  { role: 'assistant', content: "{'action':", prefix: true },
+]);
+session.destroy?.();
+
+let text = String(raw ?? '').trim();
+if (text &amp;&amp; !text.startsWith("{'action':") &amp;&amp; !text.startsWith('{"action":')) {
+  text = `{'action': ${text}`;
+}
+
+const vision = { width: canvas.width, height: canvas.height };
+let point = null;
+for (const match of text.matchAll(/\{[^{}]*\}/g)) {
+  const jsonish = match[0].replace(/'/g, '"').replace(/\bNone\b/g, 'null');
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonish);
+  } catch {
+    continue;
+  }
+  const pos = parsed.position;
+  if (!Array.isArray(pos) || pos.length &lt; 2) continue;
+  const x = Number(pos[0]);
+  const y = Number(pos[1]);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+  const clamp = (v) =&gt; Math.min(1, Math.max(0, v));
+  if (x &lt;= 1 &amp;&amp; y &lt;= 1) point = { x: clamp(x), y: clamp(y) };
+  else if (x &lt;= 100 &amp;&amp; y &lt;= 100) point = { x: clamp(x / 100), y: clamp(y / 100) };
+  else if (x &lt;= vision.width &amp;&amp; y &lt;= vision.height) {
+    point = { x: clamp(x / vision.width), y: clamp(y / vision.height) };
+  }
+  if (point) break;
+}
+if (!point) throw new Error('No [x,y] in model output: ' + (text || '(empty)'));
+
+const rect = stage.getBoundingClientRect();
+const el = doc.elementFromPoint(
+  rect.left + point.x * rect.width,
+  rect.top + point.y * rect.height
+);
+if (!el) throw new Error('elementFromPoint returned null');
+el.click();
+
+const submit = doc.getElementById('btn-submit');
+const hitSubmit = el === submit || (submit &amp;&amp; submit.contains(el));
+
+return {
+  canvas,
+  point,
+  text,
+  inferMs: Math.round(performance.now() - t0),
+  hitSubmit,
+  clickedLabel: el.textContent?.trim() || 'element',
+};</code></pre>
             <button type="button" id="btn-run-grounding" class="chip-btn chip-btn--secondary">Run</button>
             <div id="grounding-result" class="snippet-feedback" hidden>
               <p class="snippet-feedback__text"></p>
@@ -179,7 +295,7 @@ console.log('Captured canvas:', canvas);</code></pre>
 
           <h3 class="steps-subhead">Hardware constraints</h3>
           <p>
-            Gemma 4 Nano uses your computer's hardware (like your graphics card) to "think" locally. Key constraints include:
+            Gemini Nano uses your computer's hardware (like your graphics card) to "think" locally. Key constraints include:
           </p>
           <ul>
             <li><strong>Video Memory (VRAM):</strong> Requires ~2GB of dedicated memory. On older computers, the browser might be slow or unable to start the AI.</li>
@@ -194,7 +310,7 @@ console.log('Captured canvas:', canvas);</code></pre>
     <div id="native-ai-modal" class="modal-overlay" hidden>
       <div class="modal-content">
         <header class="modal-header">
-          <h3>Gemma 4 Nano Setup</h3>
+          <h3>Gemini Nano Setup</h3>
           <button id="btn-close-modal" class="close-btn">&times;</button>
         </header>
         <div class="modal-body">
@@ -203,6 +319,7 @@ console.log('Captured canvas:', canvas);</code></pre>
             <ul class="native-ai-requirements__list">
               <li><a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <strong>Enabled BypassPerfRequirement</strong></li>
               <li><a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> &rarr; <strong>Enabled</strong></li>
+              <li><a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <strong>Enabled</strong> (<code>drawElementImage</code> / SnapDOM capture)</li>
               <li>Restart Chrome and check <a class="flag-link" href="chrome://components"><code>chrome://components</code></a></li>
             </ul>
             <div class="modal-footer">
@@ -227,7 +344,7 @@ console.log('Captured canvas:', canvas);</code></pre>
           <section class="dev-panel">
             <header class="dev-panel__head">
               <h3 class="dev-panel__title">Spatial Map</h3>
-              <p class="dev-panel__hint">How Gemma "sees" the page coordinate space.</p>
+              <p class="dev-panel__hint">How Gemini "sees" the page coordinate space.</p>
             </header>
             <div id="screenshot-stage" class="screenshot-stage dev-capture-mount empty"></div>
           </section>
