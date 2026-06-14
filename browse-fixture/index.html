@@ -47,10 +47,6 @@
               <option>United Kingdom</option>
             </select>
           </label>
-          <p class="checkout-scroll-filler">
-            Extra form notes (scroll the page): billing matches shipping address.
-            Use voice “scroll down” then capture again to see lower controls.
-          </p>
         </form>
       </main>
 
@@ -109,6 +105,11 @@
       });
       document.getElementById('btn-modal-close')?.addEventListener('click', () => {
         document.getElementById('checkout-modal')?.setAttribute('hidden', '');
+      });
+      document.getElementById('btn-submit')?.addEventListener('click', () => {
+        const h2 = document.querySelector('h2');
+        if (h2) h2.textContent = 'Order Submitted!';
+        document.body.style.backgroundColor = '#ecfdf5'; // Light green
       });
     </script>
   </body>

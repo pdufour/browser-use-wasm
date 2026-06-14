@@ -1,4 +1,4 @@
-import{m as n}from"./site-header-DCQQ4ZcQ.js";import{S as c,o as i,a as d,g as t,b as o}from"./gallery-tasks-pCmejECo.js";n(document.getElementById("site-header"),{active:"gallery"});const s=document.getElementById("gallery-grid");function l(a){return`
+import{m as c,w as o}from"./site-header-DCQQ4ZcQ.js";import{b as d,o as i,S as l,g as t,G as p,c as m}from"./gallery-tasks-DDh8zhdl.js";c(document.getElementById("site-header"),{active:"gallery"});const r=document.getElementById("gallery-grid");function n(a){return`
     <div class="task-card__visual demo-preview brainwave-frame brainwave-frame--compact is-idle has-preview"
          style="--demo-accent: ${a.hue??"#6366f1"}"
          aria-hidden="true">
@@ -8,13 +8,20 @@ import{m as n}from"./site-header-DCQQ4ZcQ.js";import{S as c,o as i,a as d,g as t
         <img class="task-card__preview-img" src="${t(a)}" alt="" decoding="async" />
       </div>
     </div>
-  `}function p(a){const e=o(a),r=document.createElement("a");return r.className="task-card",r.href=e,r.style.setProperty("--task-hue",a.hue??"#6366f1"),r.innerHTML=`
-    ${l(a)}
+  `}function _(a){const e=m(a),s=document.createElement("a");return s.className="task-card",s.href=e,s.style.setProperty("--task-hue",a.hue??"#6366f1"),s.innerHTML=`
+    ${n(a)}
     <span class="task-card__tag">${a.tag}</span>
     <h2 class="task-card__name">${a.name}</h2>
     <p class="task-card__goal">“${a.goal}”</p>
     <span class="task-card__cta">Open & run →</span>
-  `,r}function m(){const a=d,e=document.createElement("a");return e.className="task-card task-card--operator",e.href=i(a.goal),e.style.setProperty("--task-hue",a.hue??"#6366f1"),e.innerHTML=`
+  `,s}function g(){const a=p,e=document.createElement("a");return e.className="task-card task-card--accent",e.href=o("gemma-nano/"),e.style.setProperty("--task-hue",a.hue??"#10b981"),e.innerHTML=`
+    ${n(a)}
+    <span class="task-card__tag">${a.tag}</span>
+    <h2 class="task-card__name">${a.name}</h2>
+    <p class="task-card__goal">“${a.goal}”</p>
+    <p class="task-card__note">Chrome Prompt API — Gemma 4 Nano</p>
+    <span class="task-card__cta">Open native demo →</span>
+  `,e}function u(){const a=l,e=document.createElement("a");return e.className="task-card task-card--operator",e.href=i(a.goal),e.style.setProperty("--task-hue",a.hue??"#6366f1"),e.innerHTML=`
     <div class="task-card__visual demo-preview demo-preview--operator brainwave-frame brainwave-frame--compact is-idle has-preview"
          aria-hidden="true">
       <span class="brainwave-frame__floor"></span>
@@ -29,4 +36,4 @@ import{m as n}from"./site-header-DCQQ4ZcQ.js";import{S as c,o as i,a as d,g as t
     <p class="task-card__goal">“${a.goal}”</p>
     <p class="task-card__note">browser-use-wasm — E2E gate</p>
     <span class="task-card__cta">Open operator →</span>
-  `,e}function _(){if(!s)return;s.replaceChildren();const a=m(),e=c.map(p);s.append(a,...e)}_();
+  `,e}function v(){if(!r)return;r.replaceChildren();const a=u(),e=g(),s=d.map(_);r.append(a,e,...s)}v();
