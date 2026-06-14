@@ -29,12 +29,23 @@ export function mountCaptureCanvas(a, b) {
   const { stage, cap, opts } = resolveMountArgs(a, b);
   if (!stage || !cap) return { caption: () => '' };
 
-  clearMarker();
-  stage.innerHTML = '';
+  const keep = opts.keepGroundingOverlay ?? false;
+  if (!keep) {
+    clearMarker();
+    stage.innerHTML = '';
+  }
   stage.classList.remove('empty');
 
-  const inner = document.createElement('div');
-  inner.className = 'screenshot-inner';
+  let inner = stage.querySelector('.screenshot-inner');
+  if (!inner) {
+    inner = document.createElement('div');
+    inner.className = 'screenshot-inner';
+    stage.appendChild(inner);
+  }
+
+  // Remove existing image, but keep other elements (cursor, markers)
+  inner.querySelector('#screenshot-img')?.remove();
+
   cap.canvas.id = 'screenshot-img';
   cap.canvas.className = 'screenshot-img';
   cap.canvas.dataset.testid = 'screenshot-img';
@@ -46,7 +57,6 @@ export function mountCaptureCanvas(a, b) {
     cap.canvas.style.aspectRatio = `${cap.cssWidth} / ${cap.cssHeight}`;
   }
   inner.appendChild(cap.canvas);
-  stage.appendChild(inner);
 
   const showSnapshot = opts.showSnapshot ?? false;
   if (showSnapshot) {
@@ -72,8 +82,12 @@ export function placeMarkerOnCapture(x, y) {
 }
 
 /** Refresh screenshot panel from an existing operator capture (agent re-capture). */
-export function syncCaptureUi(cap, { operator }) {
-  const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot: false });
+export function syncCaptureUi(cap, { operator, keepGroundingOverlay = false } = {}) {
+  const { caption } = mountCaptureCanvas(cap, {
+    operator,
+    showSnapshot: false,
+    keepGroundingOverlay,
+  });
   const statusEl = $('model-status');
   if (statusEl) statusEl.dataset.captureReady = '1';
   return { status: caption('ready to run a task.') };

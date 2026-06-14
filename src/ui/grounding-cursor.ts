@@ -62,7 +62,6 @@ export function createGroundingCursor({
 
   async function animateTo(point: GroundingPoint, action: string): Promise<void> {
     if (!useIframe) showSnapshotViewport();
-    cursor.resetPosition();
     cursor.setState('thinking');
     const actionKey = String(action ?? '').toLowerCase();
     await cursor.moveTo(point.x, point.y, { action: actionKey });

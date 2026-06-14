@@ -200,7 +200,11 @@ export function App() {
       set({ captureReady: false });
       const cap = await operator.capture();
       if (!keepGroundingOverlay) getGroundingCursor()?.onCaptureClear();
-      const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot });
+      const { caption } = mountCaptureCanvas(cap, {
+        operator,
+        showSnapshot,
+        keepGroundingOverlay,
+      });
       set({ status: caption('encoding…') });
       logCaptureWallPerf(t0);
 
@@ -240,7 +244,13 @@ export function App() {
         },
         onBeforeStep: (step) => getGroundingCursor()?.beforeStep(step),
         onStatus: (text) => set({ status: text }),
-        onRecapture: (cap) => refreshSyncedCapture(cap),
+        onRecapture: (cap) => {
+          const { status } = syncCaptureUi(cap, {
+            operator,
+            keepGroundingOverlay: true,
+          });
+          set({ captureReady: true, status });
+        },
       });
       logTaskPerf(result);
       if (result.degenerate || !result.steps.length) {

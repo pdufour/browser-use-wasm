@@ -158,7 +158,7 @@ export function initTaskRunner(options = {}) {
   function applyCaptureUi(cap, { keepGroundingOverlay = false } = {}) {
     const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
     if (!keepGroundingOverlay) getGroundingCursor()?.onCaptureClear();
-    mountCaptureCanvas(stage, cap);
+    mountCaptureCanvas(cap, { stage, keepGroundingOverlay });
     if (cap.canvas) {
       cap.canvas.dataset.captureCssW = String(cap.cssWidth);
       cap.canvas.dataset.captureCssH = String(cap.cssHeight);
@@ -338,7 +338,7 @@ export function initTaskRunner(options = {}) {
         onBeforeStep: (step) => getGroundingCursor()?.beforeStep(step),
         onStatus: setTechnical,
         onRecapture: (cap) => {
-          applyCaptureUi(cap);
+          applyCaptureUi(cap, { keepGroundingOverlay: true });
           captureReady = true;
         },
       });
