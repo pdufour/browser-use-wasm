@@ -3,12 +3,12 @@ import { SHOWUI_IMAGE_MIN_TOKENS, SHOWUI_IMAGE_MAX_TOKENS } from './ShowUI-2B.ts
 import { VL_PATCH_SIZE } from '../vl.ts';
 
 /**
- * Gemma 4 Nano (via Chrome Prompt API).
+ * Gemini Nano (via Chrome Prompt API).
  * Virtual card — vision sizing matches ShowUI nav so capture prep is identical.
  */
 export const CONFIG: ModelCard = {
   id: 'gemini-nano',
-  label: 'Gemma 4 Nano (Built-in)',
+  label: 'Gemini Nano (Built-in)',
   hfUrl: 'native',
   source: {
     url: 'native',

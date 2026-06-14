@@ -1,5 +1,5 @@
 /**
- * Runnable code blocks in the Gemma Nano architecture post.
+ * Runnable code blocks in the Gemini Nano architecture post.
  * Steps 1 & 3 use Chrome's built-in Prompt API only (no browser-use-wasm).
  */
 import { snapdom } from '@zumer/snapdom';
@@ -201,7 +201,7 @@ function wireSnapdomSnippet() {
       mountCanvasPreview(
         preview,
         canvas,
-        `${canvas.width}×${canvas.height}px - bitmap Gemma would receive (Step 3 marks the click on this)`
+        `${canvas.width}×${canvas.height}px - bitmap Gemini would receive (Step 3 marks the click on this)`
       );
       setSnippetMessage(result, `✓ Captured ${canvas.width}×${canvas.height}px - preview below`, 'ok');
     } catch (err) {
@@ -245,7 +245,7 @@ function wireGroundingSnippet() {
       const thumb = mountCanvasPreview(
         preview,
         outcome.canvas,
-        `Gemma @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] - red ring is where the model pointed`,
+        `Gemini @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] - red ring is where the model pointed`,
         outcome.text
       );
       drawClickMarker(thumb, outcome.point.x, outcome.point.y);
@@ -257,8 +257,8 @@ function wireGroundingSnippet() {
       setSnippetMessage(
         result,
         outcome.hitSubmit
-          ? `✓ Gemma hit Submit @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] in ${outcome.inferMs}ms`
-          : `⚠ Gemma pointed @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] but clicked "${outcome.clickedLabel}" (${outcome.inferMs}ms)`,
+          ? `✓ Gemini hit Submit @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] in ${outcome.inferMs}ms`
+          : `⚠ Gemini pointed @ [${outcome.point.x.toFixed(2)}, ${outcome.point.y.toFixed(2)}] but clicked "${outcome.clickedLabel}" (${outcome.inferMs}ms)`,
         outcome.hitSubmit ? 'ok' : 'error'
       );
     } catch (err) {

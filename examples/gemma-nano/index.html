@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemma 4 Nano (Native AI) - Architecture & Demo</title>
+    <title>Gemini Nano (Native AI) - Architecture & Demo</title>
     <link rel="stylesheet" href="../shared/user-facing.css" />
     <link rel="stylesheet" href="../shared/site-header.css" />
     <link rel="stylesheet" href="../shared/dev-details.css" />
@@ -15,7 +15,7 @@
     <div class="browse-status-row browse-status-row--floating">
       <div class="native-ai-badge">
         <span class="native-ai-badge__icon">✨</span>
-        <span class="native-ai-badge__text">Gemma 4 Nano</span>
+        <span class="native-ai-badge__text">Gemini Nano</span>
       </div>
       <p id="hero-status" class="hero-status" aria-live="polite">Starting…</p>
     </div>
@@ -23,7 +23,7 @@
     <main class="browse-main">
       <article class="blog-content">
         <header class="blog-header">
-          <h1>Gemma 4 Nano: The Future of Private Browser Automation</h1>
+          <h1>Gemini Nano: The Future of Private Browser Automation</h1>
           <p class="blog-meta">
             June 13, 2026 • By
             <a class="blog-meta__author" href="https://www.linkedin.com/in/pauldufour/" rel="noopener noreferrer" target="_blank">Paul Dufour</a>
@@ -39,7 +39,7 @@
 
         <section class="blog-section blog-intro">
           <p>
-            Browser automation has traditionally relied on heavy server-side infrastructure. With <strong>Gemma 4 Nano</strong> and the <strong>Chrome Prompt API</strong>, we enable 100% on-device, private browser control with <strong>zero network egress</strong>-which is a fancy way of saying your screenshots and private data never leave your computer.
+            Browser automation has traditionally relied on heavy server-side infrastructure. With <strong>Gemini Nano</strong> and the <strong>Chrome Prompt API</strong>, we enable 100% on-device, private browser control. Your screenshots and private data never leave your computer.
           </p>
         </section>
 
@@ -48,7 +48,7 @@
             <p class="blog-part__kicker">Live demo</p>
             <h2 id="full-example-heading" class="blog-part__title">Try it</h2>
             <p class="blog-part__lede">
-              You type a goal. Chrome screenshots the page in the iframe, Gemma reads the image locally, picks an action (click, type, etc.), and the browser executes it on the real page. No server. Try the default: <em>type Joe in the email field</em> → <strong>Run</strong>.
+              You type a goal. Chrome screenshots the page in the iframe, Gemini reads the image locally, picks an action (click, type, etc.), and the browser executes it on the real page. No server. Try the default: <em>type Joe in the email field</em> → <strong>Run</strong>.
             </p>
           </header>
 
@@ -68,7 +68,7 @@
               <input
                 id="prompt"
                 type="text"
-                placeholder="Tell Gemma what to do in the preview below…"
+                placeholder="Tell Gemini what to do in the preview below…"
                 spellcheck="false"
                 aria-label="Goal"
               />
@@ -112,7 +112,7 @@ const session = await ai.create({
 
           <h3 class="steps-subhead">Step 2 - Capture the page with SnapDOM</h3>
           <p>
-            To give Gemma vision, we use <code>snapdom</code> to freeze a DOM region into a JPEG-sized bitmap. This mini checkout strip is the kind of surface the model would screenshot:
+            To give Gemini vision, we use <code>snapdom</code> to freeze a DOM region into a JPEG-sized bitmap. This mini checkout strip is the kind of surface the model would screenshot:
           </p>
 
           <div class="snippet-stage" id="snippet-stage" aria-label="Snippet capture target">
@@ -150,7 +150,7 @@ console.log('Captured canvas:', canvas);</code></pre>
 
           <h3 class="steps-subhead">Hardware constraints</h3>
           <p>
-            Gemma 4 Nano uses your computer's hardware (like your graphics card) to "think" locally. Key constraints include:
+            Gemini Nano uses your computer's hardware (like your graphics card) to "think" locally. Key constraints include:
           </p>
           <ul>
             <li><strong>Video Memory (VRAM):</strong> Requires ~2GB of dedicated memory. On older computers, the browser might be slow or unable to start the AI.</li>
@@ -165,7 +165,7 @@ console.log('Captured canvas:', canvas);</code></pre>
     <div id="native-ai-modal" class="modal-overlay" hidden>
       <div class="modal-content">
         <header class="modal-header">
-          <h3>Gemma 4 Nano Setup</h3>
+          <h3>Gemini Nano Setup</h3>
           <button id="btn-close-modal" class="close-btn">&times;</button>
         </header>
         <div class="modal-body">
@@ -198,7 +198,7 @@ console.log('Captured canvas:', canvas);</code></pre>
           <section class="dev-panel">
             <header class="dev-panel__head">
               <h3 class="dev-panel__title">Spatial Map</h3>
-              <p class="dev-panel__hint">How Gemma "sees" the page coordinate space.</p>
+              <p class="dev-panel__hint">How Gemini "sees" the page coordinate space.</p>
             </header>
             <div id="screenshot-stage" class="screenshot-stage dev-capture-mount empty"></div>
           </section>

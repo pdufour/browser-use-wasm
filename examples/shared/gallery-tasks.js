@@ -121,10 +121,10 @@ export const SHOP_DEMO_TASK = {
   hue: '#6366f1',
 };
 
-/** Gemma 4 Nano (Native AI) demo. */
+/** Gemini Nano (Native AI) demo. */
 export const GEMMA_NANO_TASK = {
   id: 'gemma-nano',
-  name: 'Gemma 4 Nano',
+  name: 'Gemini Nano',
   goal: 'type Joe in the email field',
   url: '/gemma-nano/index.html',
   tag: 'Native AI',

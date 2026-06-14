@@ -60,7 +60,7 @@ function renderGemmaCard() {
     <span class="task-card__tag">${task.tag}</span>
     <h2 class="task-card__name">${task.name}</h2>
     <p class="task-card__goal">“${task.goal}”</p>
-    <p class="task-card__note">Chrome Prompt API — Gemma 4 Nano</p>
+    <p class="task-card__note">Chrome Prompt API — Gemini Nano</p>
     <span class="task-card__cta">Open native demo →</span>
   `;
   return card;

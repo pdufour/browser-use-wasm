@@ -1,5 +1,5 @@
 /**
- * Gemma 4 Nano (Chrome Prompt API) runner.
+ * Gemini Nano (Chrome Prompt API) runner.
  */
 import { mountSiteHeader } from '../shared/site-header.js';
 import { initTaskRunner } from '../shared/task-runner.js';
@@ -35,7 +35,7 @@ logGoalBarState('gemma-nano:after-header');
 const runner = initTaskRunner({
   initialUrl,
   initialGoal,
-  frameTitle: 'Gemma 4 Nano Demo',
+  frameTitle: 'Gemini Nano Demo',
   wireSiteHeader: true,
   useNativeAi: true,
   hideDevDetails: false,
