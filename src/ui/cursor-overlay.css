@@ -4,10 +4,10 @@
   position: absolute;
   width: 28px;
   height: 28px;
-  transform: translate(-7px, -4px);
+  transform: translate(-4px, -4px);
   pointer-events: none;
   z-index: 55;
-  transform-origin: 7px 4px;
+  transform-origin: 4px 4px;
 }
 
 .fake-cursor .fake-cursor-icon {
@@ -15,12 +15,12 @@
   width: 28px;
   height: 28px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-  transform-origin: 7px 4px;
+  transform-origin: 4px 4px;
 }
 
 .fake-cursor .fake-cursor-dot {
   position: absolute;
-  left: 4px;
+  left: 1px;
   top: 1px;
   width: 6px;
   height: 6px;
@@ -29,6 +29,27 @@
   box-shadow: 0 0 0 1.5px #ffffff;
   z-index: 56;
   transition: background-color 0.2s ease;
+}
+
+.fake-cursor .fake-cursor-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid #ef4444;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.fake-cursor.fake-cursor--click .fake-cursor-dot::after,
+.fake-cursor.fake-cursor--dblclick .fake-cursor-dot::after {
+  animation: agent-cursor-dot-ripple 0.4s ease-out;
+}
+
+@keyframes agent-cursor-dot-ripple {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(5); opacity: 0; }
 }
 
 .fake-cursor[data-state='listening'] .fake-cursor-dot {
@@ -100,12 +121,12 @@
 
 @keyframes agent-cursor-click-pop {
   0% {
-    transform: translate(-7px, -4px) scale(1);
+    transform: translate(-4px, -4px) scale(1);
   }
   40% {
-    transform: translate(-7px, -4px) scale(1.2);
+    transform: translate(-4px, -4px) scale(1.4);
   }
   100% {
-    transform: translate(-7px, -4px) scale(1);
+    transform: translate(-4px, -4px) scale(1);
   }
 }

@@ -40,7 +40,7 @@ export function createFakeCursor(surface: CursorLayoutSurface) {
       el.setAttribute('aria-hidden', 'true');
       el.innerHTML = `
         <svg class="fake-cursor-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 4V24.58L12.44 19.14L16.31 26.53L20.07 24.57L16.2 17.18H23.5L7 4Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M4 4V24.58L9.44 19.14L13.31 26.53L17.07 24.57L13.2 17.18H20.5L4 4Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
         </svg>
         <div class="fake-cursor-dot"></div>
       `;

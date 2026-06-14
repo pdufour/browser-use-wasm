@@ -3,7 +3,7 @@
  * Classic CSS arrow pointer + small red grounding dot — SnapDOM paints pseudo-elements.
  */
 
-export const CURSOR_HOTSPOT_X = 7;
+export const CURSOR_HOTSPOT_X = 4;
 export const CURSOR_HOTSPOT_Y = 4;
 
 export const CURSOR_OVERLAY_CSS = `
@@ -36,6 +36,27 @@ export const CURSOR_OVERLAY_CSS = `
   box-shadow: 0 0 0 1.5px #ffffff;
   z-index: 56;
   transition: background-color 0.2s ease;
+}
+
+.fake-cursor .fake-cursor-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid #ef4444;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.fake-cursor.fake-cursor--click .fake-cursor-dot::after,
+.fake-cursor.fake-cursor--dblclick .fake-cursor-dot::after {
+  animation: agent-cursor-dot-ripple 0.4s ease-out;
+}
+
+@keyframes agent-cursor-dot-ripple {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(5); opacity: 0; }
 }
 
 .fake-cursor[data-state='listening'] .fake-cursor-dot {
@@ -102,7 +123,7 @@ export const CURSOR_OVERLAY_CSS = `
 
 @keyframes agent-cursor-click-pop {
   0% { transform: translate(-${CURSOR_HOTSPOT_X}px, -${CURSOR_HOTSPOT_Y}px) scale(1); }
-  40% { transform: translate(-${CURSOR_HOTSPOT_X}px, -${CURSOR_HOTSPOT_Y}px) scale(1.2); }
+  40% { transform: translate(-${CURSOR_HOTSPOT_X}px, -${CURSOR_HOTSPOT_Y}px) scale(1.4); }
   100% { transform: translate(-${CURSOR_HOTSPOT_X}px, -${CURSOR_HOTSPOT_Y}px) scale(1); }
 }
 `;
