@@ -10,21 +10,15 @@
   transform-origin: 7px 4px;
 }
 
-.fake-cursor::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
+.fake-cursor .fake-cursor-icon {
+  display: block;
   width: 28px;
   height: 28px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M7 4V24.58L12.44 19.14L16.31 26.53L20.07 24.57L16.2 17.18H23.5L7 4Z' fill='white' stroke='black' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-size: contain;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
   transform-origin: 7px 4px;
 }
 
-.fake-cursor::after {
-  content: '';
+.fake-cursor .fake-cursor-dot {
   position: absolute;
   left: 4px;
   top: 1px;
@@ -37,19 +31,19 @@
   transition: background-color 0.2s ease;
 }
 
-.fake-cursor[data-state='listening']::after {
+.fake-cursor[data-state='listening'] .fake-cursor-dot {
   background: #6366f1;
 }
 
-.fake-cursor[data-moving='1']::after {
+.fake-cursor[data-moving='1'] .fake-cursor-dot {
   background: #ef4444;
 }
 
-.fake-cursor[data-state='thinking']::after {
+.fake-cursor[data-state='thinking'] .fake-cursor-dot {
   background: #f59e0b;
 }
 
-.fake-cursor[data-state='thinking']::before {
+.fake-cursor[data-state='thinking'] .fake-cursor-icon {
   animation: agent-cursor-wiggle 0.5s ease-in-out infinite;
 }
 
