@@ -51,10 +51,6 @@ export const TOOL_SPECS: Record<string, ToolSpec> = {
       return { ok: true, detail: 'captured' };
     },
   },
-  play_cursor_tour: {
-    description: 'Run the multi-stop fake cursor tour on the screenshot',
-    run: () => ({ ok: true, detail: 'tour' }),
-  },
   // —— Page / scroll ——
   press_key: {
     description:
@@ -134,7 +130,7 @@ export const TOOL_SPECS: Record<string, ToolSpec> = {
     POINTER_TOOL_NAMES.map((action): [string, ToolSpec] => [
       action,
       {
-        description: `Ground a UI label on the screenshot with ShowUI and ${action} it with the fake cursor`,
+        description: `Ground a UI label on the screenshot with ShowUI and ${action} it on the live page`,
         args: { target: {} },
         required: ['target'],
         async run(call, ctx) {

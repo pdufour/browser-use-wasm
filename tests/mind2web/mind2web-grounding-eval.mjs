@@ -22,7 +22,6 @@ import {
   navigateBrowseTo,
   runCaptureUntilReady,
   runTaskAndWaitParsed,
-  sampleMarkerPixels,
   showLiveBrowseViewport,
   browseFrame,
   waitForE2eVoiceApi,
@@ -199,7 +198,7 @@ async function clearMind2WebBboxOverlay(page) {
 }
 
 /**
- * Red dashed box = Mind2Web expected bbox on the screenshot panel (#click-marker = model).
+ * Red dashed box = Mind2Web expected bbox on the screenshot panel (parsed model point).
  * @param {import('@playwright/test').Page} page
  * @param {{ x: number; y: number; w: number; h: number }} bbox shot pixels
  */
@@ -666,21 +665,18 @@ async function loadSnapshotInBrowse(page, imgPath, uid) {
 }
 
 /**
- * Marker uses full-precision norms; #raw-output rounds — score the marker.
+ * Scoring uses parsed norms from #raw-output (full precision in marker path removed).
  * @param {import('@playwright/test').Page} page
  * @param {{ normX: number; normY: number }} parsed from waitForParsedTask
  */
 async function groundingNormForScore(page, parsed) {
-  const marker = await sampleMarkerPixels(page);
-  if (!marker.ok) return { normX: parsed.normX, normY: parsed.normY, source: 'parsed' };
-  const dNorm = Math.hypot(marker.nx - parsed.normX, marker.ny - parsed.normY);
   return {
-    normX: marker.nx,
-    normY: marker.ny,
-    source: 'marker',
+    normX: parsed.normX,
+    normY: parsed.normY,
+    source: 'parsed',
     parsedNormX: parsed.normX,
     parsedNormY: parsed.normY,
-    parseRoundDelta: dNorm,
+    parseRoundDelta: 0,
   };
 }
 
@@ -703,7 +699,6 @@ async function screenshotDims(page) {
 async function blackboxTaskClick(page, label) {
   await page.waitForFunction(() => !document.body.classList.contains('loading'));
   const parsed = await runTaskAndWaitParsed(page, `click ${label}`, MIND2WEB_INFERENCE_TIMEOUT_MS);
-  await expect(page.locator('#click-marker')).toBeVisible();
   const scored = await groundingNormForScore(page, parsed);
   const query = (await page.locator('#prompt').inputValue()).trim();
   return {
@@ -731,23 +726,18 @@ async function blackboxVoiceGround(page, sample, phrase) {
   const timeoutMs = Math.max(MIND2WEB_INFERENCE_TIMEOUT_MS, VOICE_GROUNDING_WAIT_MS);
   await page.waitForFunction(
     () => {
-      const marker = document.getElementById('click-marker');
       const t = document.querySelector('[data-testid="voice-transcript"]')?.textContent ?? '';
-      // Marker = grounding produced a point (scored from the model only).
-      // Frozen dataset snapshots cannot apply live DOM type/select, so an
-      // "Error: could not apply…" transcript with a visible marker still
-      // counts as a completed grounding; no marker (locate failure) keeps
-      // waiting and times out to FAIL.
-      return marker && marker.style.display !== 'none' && /✓|Error:/.test(t);
+      return /✓|Error:/.test(t);
     },
     undefined,
     { timeout: timeoutMs }
   );
-  const marker = await sampleMarkerPixels(page);
-  if (!marker.ok) throw new Error('voice grounding marker missing');
+  const transcript = (await page.locator('[data-testid="voice-transcript"]').textContent()) ?? '';
+  const match = transcript.match(/@\s*\(([\d.]+),\s*([\d.]+)\)/);
+  if (!match) throw new Error('voice grounding coords missing from transcript');
   return {
-    normX: marker.nx,
-    normY: marker.ny,
+    normX: parseFloat(match[1]),
+    normY: parseFloat(match[2]),
     query: phrase,
     parseRoundDelta: null,
   };

@@ -141,7 +141,3 @@ body.browse-app {
 .browse-app .live-frame-wrap {
   position: relative;
 }
-
-.browse-app .live-frame-wrap .live-cursor {
-  z-index: 30;
-}

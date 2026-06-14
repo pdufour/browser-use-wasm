@@ -1,6 +1,6 @@
 /**
  * App state + workflows (load / capture / run task / browse), ported 1:1 from
- * the vanilla entry. The SnapDOM canvas, click marker, voice DOM, and the
+ * the vanilla entry. The SnapDOM canvas, voice DOM, and the
  * `#model-status` datasets are managed imperatively because the E2E suite
  * reads and mutates them outside React.
  */
@@ -23,7 +23,6 @@ import {
   bootOperatorModel,
 } from '../../shared/operator-session.js';
 import {
-  placeMarkerOnCapture,
   mountCaptureCanvas,
   syncCaptureUi,
   resetCaptureUi,
@@ -235,7 +234,7 @@ export function App() {
       }
       const grounded = [...result.steps].reverse().find((s) => s.point);
       if (grounded?.point) {
-        placeMarkerOnCapture(grounded.point.x, grounded.point.y);
+        void capturePage({ showSnapshot: true });
       }
       const summary = result.summary;
       const lines = result.steps.map(
@@ -329,7 +328,6 @@ export function App() {
         locateTarget: (label) => operator.locate(label),
         runTask: (task) => runTask(task),
         requestCapture: () => capturePage({ showSnapshot: false }),
-        drawMarker: placeMarkerOnCapture,
       });
       globalThis.__e2eVoiceTool = (call) => voice.simulateToolCallForE2e(call);
     }

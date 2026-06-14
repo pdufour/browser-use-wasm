@@ -336,7 +336,6 @@ const SUBMIT_NX_MIN = 0.6;
 const SUBMIT_NX_MAX = 0.95;
 const SUBMIT_NY_MIN = 0.58;
 const SUBMIT_NY_MAX = 0.95;
-const MARKER_PARSED_MAX_DELTA = 0.04;
 const CANCEL_SUBMIT_MIN_DISTANCE = 0.08;
 
 /**
@@ -430,35 +429,14 @@ export async function sampleNormPixels(page, nx, ny, opts = {}) {
   );
 }
 
-/** Marker center on displayed #screenshot-img (must match parsed action point).
-    Marker is positioned in % of the screenshot-inner box (image fills it 1:1). */
-export async function sampleMarkerPixels(page) {
-  return page.evaluate(() => {
-    const marker = document.getElementById('click-marker');
-    const img = document.getElementById('screenshot-img');
-    if (!marker || !img) return { ok: false };
-    if (!marker.style.left.endsWith('%') || !marker.style.top.endsWith('%')) {
-      return { ok: false };
-    }
-    const nx = parseFloat(marker.style.left) / 100;
-    const ny = parseFloat(marker.style.top) / 100;
-    return { ok: true, nx, ny };
-  });
-}
-
 /**
  * @param {number} parsedX
  * @param {number} parsedY
- * @param {{ nx: number; ny: number; r: number; g: number; b: number }} markerRgb
  * @param {{ nx: number; ny: number; r: number; g: number; b: number }} parsedRgb
  */
-export function assertSubmitGrounding(parsedX, parsedY, markerRgb, parsedRgb) {
+export function assertSubmitGrounding(parsedX, parsedY, parsedRgb) {
   expect(isInSubmitNormBand(parsedX, parsedY)).toBe(true);
-  expect(isInSubmitNormBand(markerRgb.nx, markerRgb.ny)).toBe(true);
-  expect(Math.abs(markerRgb.nx - parsedX)).toBeLessThan(MARKER_PARSED_MAX_DELTA);
-  expect(Math.abs(markerRgb.ny - parsedY)).toBeLessThan(MARKER_PARSED_MAX_DELTA);
   expect(isSubmitGreen(parsedRgb)).toBe(true);
-  expect(isSubmitGreen(markerRgb)).toBe(true);
 }
 
 /**
@@ -822,7 +800,6 @@ export async function runE2EProductionJourney(page, baseURL, modelId = 'ShowUI-2
     runTaskAndWaitParsed(page, 'click Submit')
   );
 
-  await expect(page.locator('#click-marker')).toBeVisible();
   await expect(page.getByTestId('raw-output')).toContainText(/Parsed actions/);
   expect(normX).toBeGreaterThanOrEqual(0);
   expect(normY).toBeLessThanOrEqual(1);
@@ -939,7 +916,6 @@ export async function runE2EModelExpensiveSmoke(page, baseURL, modelId) {
     runTaskAndWaitParsed(page, 'click Submit')
   );
 
-  await expect(page.locator('#click-marker')).toBeVisible();
   await expect(page.getByTestId('raw-output')).toContainText(/Parsed actions/);
   expect(normX).toBeGreaterThanOrEqual(0);
   expect(normX).toBeLessThanOrEqual(1);
@@ -984,7 +960,6 @@ export async function runE2EGreenRound(page, opts = {}) {
   const { normX: submitX, normY: submitY } = await e2ePhaseRun(page, 'task:submit', () =>
     runTaskAndWaitParsed(page, 'click Submit')
   );
-  await expect(page.locator('#click-marker')).toBeVisible();
 
   const capturePerf = lastPerfEvent(perfEvents, 'capture');
   const taskPerf = lastPerfEvent(perfEvents, 'task');
@@ -1003,23 +978,15 @@ export async function runE2EGreenRound(page, opts = {}) {
     `taskInfer=${taskInferMs ?? '?'}ms taskWall=${taskWallMs ?? '?'}ms captureWall=${captureWallMs ?? '?'}ms`
   );
 
-  const markerPos = await sampleMarkerPixels(page);
-  expect(markerPos.ok).toBe(true);
-  const markerRgb = await sampleNormPixels(page, markerPos.nx, markerPos.ny, {
-    useScreenshotImg: true,
-  });
   const parsedRgb = await sampleNormPixels(page, submitX, submitY, { useScreenshotImg: true });
-  expect(markerRgb.ok).toBe(true);
   expect(parsedRgb.ok).toBe(true);
   if (strictGreen) {
-    assertSubmitGrounding(submitX, submitY, markerRgb, parsedRgb);
+    assertSubmitGrounding(submitX, submitY, parsedRgb);
   } else {
     expect(submitX).toBeGreaterThanOrEqual(0);
     expect(submitX).toBeLessThanOrEqual(1);
     expect(submitY).toBeGreaterThanOrEqual(0);
     expect(submitY).toBeLessThanOrEqual(1);
-    expect(Math.abs(markerRgb.nx - submitX)).toBeLessThan(MARKER_PARSED_MAX_DELTA);
-    expect(Math.abs(markerRgb.ny - submitY)).toBeLessThan(MARKER_PARSED_MAX_DELTA);
     expect(isInSubmitNormBand(submitX, submitY)).toBe(true);
   }
 
@@ -1144,22 +1111,17 @@ export async function runE2eVoiceTool(page, call) {
 }
 
 /**
- * Wait for voice nav to finish grounding and show cursor + marker (blackbox DOM only).
+ * Wait for voice nav to finish grounding (blackbox transcript only).
  * @param {import('@playwright/test').Page} page
  * @param {string} label
  * @param {number} [timeoutMs]
  */
-async function waitForVoiceCursorGrounded(page, label, timeoutMs = VOICE_GROUNDING_WAIT_MS) {
+async function waitForVoiceGrounded(page, label, timeoutMs = VOICE_GROUNDING_WAIT_MS) {
   await page.waitForFunction(
     (lbl) => {
       const transcript = document.querySelector('[data-testid="voice-transcript"]');
       const text = transcript?.textContent ?? '';
-      const cursor = document.querySelector('[data-testid="fake-cursor"]');
-      const marker = document.getElementById('click-marker');
-      if (!/✓/.test(text) || !text.includes(lbl)) return false;
-      if (!cursor || cursor.hidden) return false;
-      if (!marker || marker.style.display === 'none') return false;
-      return true;
+      return /✓/.test(text) && text.includes(lbl);
     },
     label,
     { timeout: timeoutMs }
@@ -1167,77 +1129,7 @@ async function waitForVoiceCursorGrounded(page, label, timeoutMs = VOICE_GROUNDI
 }
 
 /**
- * Load model, capture, voice phrase → fake cursor (blackbox: transcript, marker, screenshot).
- * @param {import('@playwright/test').Page} page
- * @param {string} [baseURL]
- * @param {string} [modelId]
- */
-export async function runE2EFakeCursor(page, baseURL, modelId = 'ShowUI-2B', opts = {}) {
-  const { skipSession = false } = opts;
-  installE2eConsole(page);
-  lastE2ePhase = 'init';
-
-  if (!skipSession) {
-    await openE2eSession(page, baseURL, modelId);
-  } else {
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(
-      () => document.getElementById('model-status')?.dataset.modelLoaded === '1',
-      { timeout: 120_000 }
-    );
-    await waitForBrowseFixtureReady(page);
-    await expect(page.getByTestId('btn-capture')).toBeEnabled({ timeout: INFERENCE_TIMEOUT_MS });
-  }
-
-  await e2ePhaseRun(page, 'capture', () => runCaptureUntilReady(page));
-  await waitForE2eVoiceApi(page);
-
-  await e2ePhaseRun(page, 'cursor:submit', async () => {
-    await runE2eVoiceTool(page, {
-      name: 'hover',
-      arguments: { target: 'Submit' },
-    });
-    await waitForVoiceCursorGrounded(page, 'Submit');
-  });
-  await expect(page.getByTestId('fake-cursor')).toBeVisible();
-  await expect(page.getByTestId('voice-transcript')).toContainText('Submit');
-  const submitMarker = await sampleMarkerPixels(page);
-  expect(submitMarker.ok).toBe(true);
-  expect(isInSubmitNormBand(submitMarker.nx, submitMarker.ny)).toBe(true);
-  const submitRgb = await sampleNormPixels(page, submitMarker.nx, submitMarker.ny, {
-    useScreenshotImg: true,
-  });
-  expect(submitRgb.ok).toBe(true);
-  expect(isSubmitGreen(submitRgb)).toBe(true);
-
-  await e2ePhaseRun(page, 'cursor:cancel', async () => {
-    await runE2eVoiceTool(page, {
-      name: 'move',
-      arguments: { target: 'Cancel' },
-    });
-    await waitForVoiceCursorGrounded(page, 'Cancel');
-  });
-  await expect(page.getByTestId('fake-cursor')).toBeVisible();
-  await expect(page.getByTestId('voice-transcript')).toContainText('Cancel');
-  const cancelMarker = await sampleMarkerPixels(page);
-  expect(cancelMarker.ok).toBe(true);
-  const dist = Math.hypot(cancelMarker.nx - submitMarker.nx, cancelMarker.ny - submitMarker.ny);
-  expect(dist).toBeGreaterThan(CANCEL_SUBMIT_MIN_DISTANCE);
-  const cancelRgb = await sampleNormPixels(page, cancelMarker.nx, cancelMarker.ny, {
-    useScreenshotImg: true,
-  });
-  expect(cancelRgb.ok).toBe(true);
-  expect(isSubmitGreen(cancelRgb)).toBe(false);
-
-  console.log(
-    `[e2e:cursor] submit=(${submitMarker.nx},${submitMarker.ny}) cancel=(${cancelMarker.nx},${cancelMarker.ny}) dist=${dist.toFixed(3)}`
-  );
-  appendE2eResult(modelId, { status: 'SUCCESS (fake cursor)' });
-  setE2ePhase('done');
-}
-
-/**
- * Voice → press Tab on live page (blackbox: transcript + capture refresh).
+ * Voice → capture page refreshes screenshot panel.
  * @param {import('@playwright/test').Page} page
  * @param {string} [modelId]
  */
@@ -1511,7 +1403,6 @@ export async function runE2ERecaptureAfterTask(page, modelId = E2E_MODEL_ID) {
   await e2ePhaseRun(page, 'workflow:recapture', async () => {
     await runCaptureUntilReady(page);
     await runTaskAndWaitParsed(page, 'click Submit');
-    await expect(page.locator('#click-marker')).toBeVisible();
 
     await runCaptureUntilReady(page);
 
@@ -1520,7 +1411,6 @@ export async function runE2ERecaptureAfterTask(page, modelId = E2E_MODEL_ID) {
     expect(normX).toBeLessThanOrEqual(1);
     expect(normY).toBeGreaterThanOrEqual(0);
     expect(normY).toBeLessThanOrEqual(1);
-    await expect(page.locator('#click-marker')).toBeVisible();
   });
   appendE2eResult(modelId, { status: 'SUCCESS (recapture after task)' });
   setE2ePhase('done');
@@ -1581,10 +1471,7 @@ export async function runE2ESwitchRoundTrip(
     const { normX, normY } = await e2ePhaseRun(page, 'switch:task-submit', () =>
       runTaskAndWaitParsed(page, 'click Submit')
     );
-    const marker = await sampleMarkerPixels(page);
-    expect(marker.ok).toBe(true);
     expect(isInSubmitNormBand(normX, normY)).toBe(true);
-    expect(isInSubmitNormBand(marker.nx, marker.ny)).toBe(true);
   }
 
   appendE2eResult(primaryId, {
@@ -1627,7 +1514,6 @@ export async function runE2ETaskSignInNotSubmitBand(page, modelId = E2E_MODEL_ID
 
   expect(isInSubmitNormBand(normX, normY)).toBe(false);
   expect(normY).toBeLessThan(0.45);
-  await expect(page.locator('#click-marker')).toBeVisible();
   const rgb = await sampleNormPixels(page, normX, normY, { useScreenshotImg: true });
   expect(rgb.ok).toBe(true);
   expect(isSubmitGreen(rgb)).toBe(false);
@@ -1637,7 +1523,7 @@ export async function runE2ETaskSignInNotSubmitBand(page, modelId = E2E_MODEL_ID
 }
 
 /**
- * Voice → click Submit on screenshot (marker green, submit band).
+ * Voice → click Submit on screenshot (parsed coords in submit band).
  * @param {import('@playwright/test').Page} page
  * @param {string} [modelId]
  */
@@ -1650,13 +1536,16 @@ export async function runE2EVoiceClickSubmit(page, modelId = E2E_MODEL_ID) {
       name: 'click',
       arguments: { target: 'Submit' },
     });
-    await waitForVoiceCursorGrounded(page, 'Submit');
+    await waitForVoiceGrounded(page, 'Submit');
   });
 
-  const marker = await sampleMarkerPixels(page);
-  expect(marker.ok).toBe(true);
-  expect(isInSubmitNormBand(marker.nx, marker.ny)).toBe(true);
-  const rgb = await sampleNormPixels(page, marker.nx, marker.ny, { useScreenshotImg: true });
+  const transcript = (await page.getByTestId('voice-transcript').textContent()) ?? '';
+  const match = transcript.match(/@\s*\(([\d.]+),\s*([\d.]+)\)/);
+  expect(match).not.toBeNull();
+  const nx = parseFloat(match[1]);
+  const ny = parseFloat(match[2]);
+  expect(isInSubmitNormBand(nx, ny)).toBe(true);
+  const rgb = await sampleNormPixels(page, nx, ny, { useScreenshotImg: true });
   expect(rgb.ok).toBe(true);
   expect(isSubmitGreen(rgb)).toBe(true);
 
@@ -1690,23 +1579,6 @@ export async function runE2EVoiceCapturePage(page, modelId = E2E_MODEL_ID) {
   await waitForScreenshotImage(page);
 
   appendE2eResult(modelId, { status: 'SUCCESS (voice capture page)' });
-  setE2ePhase('done');
-}
-
-/**
- * Blackbox: capture clears marker until a task runs.
- * @param {import('@playwright/test').Page} page
- * @param {string} [modelId]
- */
-export async function runE2ENoMarkerUntilTask(page, modelId = E2E_MODEL_ID) {
-  resetE2ePerfRound();
-  await e2ePhaseRun(page, 'capture:no-marker', () => runCaptureUntilReady(page));
-  await expect(page.locator('#click-marker')).toHaveCount(0);
-
-  await e2ePhaseRun(page, 'task:submit-marker', () => runTaskAndWaitParsed(page, 'click Submit'));
-  await expect(page.locator('#click-marker')).toBeVisible();
-
-  appendE2eResult(modelId, { status: 'SUCCESS (marker after task)' });
   setE2ePhase('done');
 }
 
@@ -1763,10 +1635,6 @@ export async function runE2ESecondTaskSubmit(page, modelId = E2E_MODEL_ID) {
   const wallMs = Date.now() - t0;
   expect(wallMs).toBeLessThanOrEqual(INFERENCE_TIMEOUT_MS);
   await expect(page.getByTestId('raw-output')).toContainText(/Parsed actions/);
-  // The marker must repaint on every task run, not only the first.
-  await expect(page.locator('#click-marker')).toBeVisible();
-  const markerPos = await sampleMarkerPixels(page);
-  expect(markerPos.ok).toBe(true);
 
   appendE2eResult(modelId, { status: 'SUCCESS (second task same capture)', taskWallMs: wallMs });
   setE2ePhase('done');
@@ -1819,7 +1687,6 @@ export async function runE2EPromptEnterSubmitsTask(page, modelId = E2E_MODEL_ID)
   });
 
   expect(isInSubmitNormBand(normX, normY)).toBe(true);
-  await expect(page.locator('#click-marker')).toBeVisible();
   const rgb = await sampleNormPixels(page, normX, normY, { useScreenshotImg: true });
   expect(rgb.ok).toBe(true);
   if (modelId === 'ShowUI-2B') expect(isSubmitGreen(rgb)).toBe(true);
@@ -1873,7 +1740,6 @@ export async function runE2EAddressBarNavigationTask(page, modelId = E2E_MODEL_I
   );
 
   expect(isInSubmitNormBand(normX, normY)).toBe(true);
-  await expect(page.locator('#click-marker')).toBeVisible();
   const rgb = await sampleNormPixels(page, normX, normY, { useScreenshotImg: true });
   expect(rgb.ok).toBe(true);
   if (modelId === 'ShowUI-2B') expect(isSubmitGreen(rgb)).toBe(true);
@@ -1914,7 +1780,7 @@ export async function runE2EVoiceBareSubmit(page, modelId = E2E_MODEL_ID) {
       name: 'click',
       arguments: { target: 'Submit' },
     });
-    await waitForVoiceCursorGrounded(page, 'Submit');
+    await waitForVoiceGrounded(page, 'Submit');
   });
 
   appendE2eResult(modelId, { status: 'SUCCESS (voice bare Submit)' });
@@ -1936,7 +1802,7 @@ export async function runE2EVoiceHoverCancel(page, modelId = E2E_MODEL_ID) {
       name: 'hover',
       arguments: { target: 'Cancel' },
     });
-    await waitForVoiceCursorGrounded(page, 'Cancel');
+    await waitForVoiceGrounded(page, 'Cancel');
   });
 
   appendE2eResult(modelId, { status: 'SUCCESS (voice hover Cancel)' });
@@ -2061,205 +1927,15 @@ export function appendE2eResult(modelId, row) {
 /** Gemma-nano demo — Prompt API page (not the operator /home gate). */
 export const GEMMA_NANO_E2E_PATH = '/gemma-nano/';
 
-/** Default mock CLICK norm for gemma-nano alignment / smoke tests. */
-export const GEMMA_NANO_MOCK_CLICK_NX = 0.8;
-export const GEMMA_NANO_MOCK_CLICK_NY = 0.8;
-
-/** Max L2 distance between screenshot marker and live pointer (capture-norm). */
-export const GEMMA_NANO_MARKER_POINTER_ALIGN_MAX = 0.02;
-
 /**
- * Open the `#dev-details` disclosure (screenshot buffer + model output).
- * @param {import('@playwright/test').Page} page
- */
-export async function openDeveloperDetails(page) {
-  await page.evaluate(() => {
-    const details = document.getElementById('dev-details');
-    if (details instanceof HTMLDetailsElement) details.open = true;
-  });
-  await expect(page.locator('#dev-details')).toHaveAttribute('open', '');
-  await expect(page.locator('#screenshot-stage')).toBeVisible();
-}
-
-/**
- * Mock Chrome Prompt API (globalThis.LanguageModel + legacy window.ai) before navigation.
- * No real on-device model — returns a fixed ShowUI-style CLICK dict.
- * @param {import('@playwright/test').Page} page
- * @param {{ nx?: number; ny?: number }} [opts]
- */
-export async function installGemmaNanoMockPromptApi(
-  page,
-  { nx = GEMMA_NANO_MOCK_CLICK_NX, ny = GEMMA_NANO_MOCK_CLICK_NY } = {}
-) {
-  await page.addInitScript(({ nx, ny }) => {
-    const response = `{'action': 'CLICK', 'value': None, 'position': [${nx}, ${ny}]}`;
-    const session = {
-      prompt: async () => response,
-      destroy: () => {},
-    };
-    const LanguageModel = {
-      create: async () => session,
-      availability: async () => 'available',
-      capabilities: async () => ({ available: 'readily' }),
-    };
-    globalThis.LanguageModel = LanguageModel;
-    globalThis.ai = { languageModel: LanguageModel };
-  }, { nx, ny });
-}
-
-/**
- * Visual capture-norm marker center on the displayed screenshot bitmap.
- * Uses painted pixels, not dataset.normX/Y (those are intent, not placement).
- * @param {import('@playwright/test').Page} page
- */
-export async function sampleMarkerNormOnScreenshot(page) {
-  return page.evaluate(() => {
-    const marker = document.getElementById('click-marker');
-    const img = document.getElementById('screenshot-img');
-    if (!marker || !img) return null;
-
-    const viewport = img.getBoundingClientRect();
-    const nw = img instanceof HTMLCanvasElement ? img.width : img.naturalWidth;
-    const nh = img instanceof HTMLCanvasElement ? img.height : img.naturalHeight;
-    if (!nw || !nh || !viewport.width || !viewport.height) return null;
-
-    const scale = Math.min(viewport.width / nw, viewport.height / nh);
-    const bitmapW = nw * scale;
-    const bitmapH = nh * scale;
-    const bitmapLeft = viewport.left + (viewport.width - bitmapW) / 2;
-    const bitmapTop = viewport.top + (viewport.height - bitmapH) / 2;
-
-    const mRect = marker.getBoundingClientRect();
-    return {
-      x: (mRect.left + mRect.width / 2 - bitmapLeft) / bitmapW,
-      y: (mRect.top + mRect.height / 2 - bitmapTop) / bitmapH,
-    };
-  });
-}
-
-/**
- * Visual capture-norm live pointer hotspot on `#capture-target`.
- * @param {import('@playwright/test').Page} page
- */
-export async function sampleLiveCursorNormOnCapture(page) {
-  return page.evaluate(() => {
-    const cursor = document.getElementById('live-cursor');
-    const frame = document.getElementById('browse-frame');
-    const root = frame?.contentDocument?.getElementById('capture-target');
-    if (!cursor || !root) return null;
-
-    const rRect = root.getBoundingClientRect();
-    if (!rRect.width || !rRect.height) return null;
-
-    const cRect = cursor.getBoundingClientRect();
-    const cs = getComputedStyle(cursor);
-    const hx = parseFloat(cs.getPropertyValue('--live-cursor-hotspot-x')) || 0;
-    const hy = parseFloat(cs.getPropertyValue('--live-cursor-hotspot-y')) || 0;
-    const tipX = cRect.left + hx;
-    const tipY = cRect.top + hy;
-    return {
-      x: (tipX - rRect.left) / rRect.width,
-      y: (tipY - rRect.top) / rRect.height,
-    };
-  });
-}
-
-/**
- * Wait until gemma-nano autoload exits "Starting…" and Run is enabled.
- * @param {import('@playwright/test').Page} page
- */
-export async function waitForGemmaNanoBootReady(page) {
-  await page.waitForSelector('#browse-frame', { timeout: 15_000 });
-  await expect.poll(
-    async () => {
-      const text = (await page.locator('#hero-status').textContent()) ?? '';
-      if (text.includes('Error')) throw new Error(`Boot error: ${text}`);
-      return text;
-    },
-    { timeout: 30_000 }
-  ).toMatch(/Ready|ready to run/i);
-
-  await expect(page.locator('#btn-run')).toBeEnabled({ timeout: 5_000 });
-  await expect(page.locator('#model-status')).toHaveAttribute('data-model-id', 'gemini-nano');
-  await expect(page.locator('#model-status')).toHaveAttribute('data-model-loaded', '1');
-}
-
-/**
- * Mocked gemma-nano: grounded marker on screenshot aligns with live pointer at the mock point.
+ * Open gemma-nano (real page — no ?e2e=1 hooks).
  * @param {import('@playwright/test').Page} page
  * @param {string} [baseURL]
- * @param {{ nx?: number; ny?: number }} [opts]
  */
-export async function runE2EGemmaNanoMarkerPointerAlignment(
-  page,
-  baseURL,
-  { nx = GEMMA_NANO_MOCK_CLICK_NX, ny = GEMMA_NANO_MOCK_CLICK_NY } = {}
-) {
+export async function openGemmaNanoPage(page, baseURL) {
   installE2eConsole(page);
-  await installGemmaNanoMockPromptApi(page, { nx, ny });
-  await openGemmaNanoE2ePage(page, baseURL);
-  await waitForGemmaNanoBootReady(page);
-  await openDeveloperDetails(page);
-
-  await page.locator('#prompt').fill('click something');
-  await page.locator('#btn-run').click();
-
-  const raw = page.locator('#raw-output');
-  await expect(raw).toContainText('Parsed actions', { timeout: INFERENCE_TIMEOUT_MS + 8_000 });
-  await expect(page.locator('#click-marker')).toBeVisible();
-  await expect(page.locator('#click-marker')).toHaveAttribute('data-norm-x', String(nx));
-  await expect(page.locator('#click-marker')).toHaveAttribute('data-norm-y', String(ny));
-
-  const rawText = (await raw.textContent()) ?? '';
-  expect(rawText).toMatch(/CLICK/i);
-  expect(rawText).toMatch(new RegExp(`@\\s*\\[${nx.toFixed(2)},\\s*${ny.toFixed(2)}\\]`));
-
-  const markerPos = await sampleMarkerNormOnScreenshot(page);
-  expect(markerPos).not.toBeNull();
-  expect(markerPos.x).toBeCloseTo(nx, 1);
-  expect(markerPos.y).toBeCloseTo(ny, 1);
-
-  await page.evaluate(() => {
-    document.body.dataset.viewport = 'live';
-  });
-  await page.waitForFunction(
-    () => {
-      const c = document.getElementById('live-cursor');
-      return c && !c.hidden && !c.classList.contains('is-moving');
-    },
-    { timeout: 5_000 }
-  );
-
-  const pointerPos = await sampleLiveCursorNormOnCapture(page);
-  expect(pointerPos).not.toBeNull();
-  expect(pointerPos.x).toBeCloseTo(nx, 1);
-  expect(pointerPos.y).toBeCloseTo(ny, 1);
-
-  const dist = Math.hypot(markerPos.x - pointerPos.x, markerPos.y - pointerPos.y);
-  expect(dist).toBeLessThan(GEMMA_NANO_MARKER_POINTER_ALIGN_MAX);
-
-  // Opening/closing dev details must not desync marker vs live pointer.
-  await page.evaluate(() => {
-    const details = document.getElementById('dev-details');
-    if (details instanceof HTMLDetailsElement) {
-      details.open = false;
-      details.open = true;
-    }
-    globalThis.dispatchEvent(new CustomEvent('dev-details-layout'));
-  });
-  await page.waitForTimeout(100);
-
-  const markerAfter = await sampleMarkerNormOnScreenshot(page);
-  const pointerAfter = await sampleLiveCursorNormOnCapture(page);
-  expect(markerAfter?.x).toBeCloseTo(nx, 1);
-  expect(pointerAfter?.x).toBeCloseTo(nx, 1);
-  expect(
-    Math.hypot((markerAfter?.x ?? 0) - (pointerAfter?.x ?? 0), (markerAfter?.y ?? 0) - (pointerAfter?.y ?? 0))
-  ).toBeLessThan(GEMMA_NANO_MARKER_POINTER_ALIGN_MAX);
-
-  appendE2eResult('gemma-nano', {
-    status: `SUCCESS (marker/pointer alignment @ [${nx}, ${ny}])`,
-  });
+  const url = new URL(GEMMA_NANO_E2E_PATH, baseURL || 'http://127.0.0.1:5173');
+  await page.goto(url.href, { waitUntil: 'domcontentloaded' });
 }
 
 /**
@@ -2386,9 +2062,6 @@ export async function runE2EGemmaNanoClickSubmit(page, baseURL) {
     },
     { timeout: 30_000 }
   ).not.toBeNull();
-
-  // Verify the marker is visible (indicates successful grounding)
-  await expect(page.locator('#click-marker')).toBeVisible();
 
   // Verify the action was logged correctly
   const text = await raw.textContent();

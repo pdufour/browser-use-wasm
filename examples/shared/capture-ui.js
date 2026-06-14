@@ -1,15 +1,12 @@
 /**
- * Shared capture preview — SnapDOM canvas mount, marker, viewport toggle.
- * Used by operator, voice, forms, models, and embed examples.
+ * Shared capture preview — SnapDOM canvas mount, viewport toggle.
  */
-import { clearMarker, drawMarker } from 'browser-use-wasm';
 import { $ } from './dom.js';
 import { openDevDetails } from './dev-details-sync.js';
 
-/** Clear a screenshot stage and remove any click marker. */
+/** Clear a screenshot stage. */
 export function clearCaptureStage(stageEl) {
   if (!stageEl) return;
-  clearMarker();
   stageEl.innerHTML = '';
   stageEl.classList.add('empty');
 }
@@ -30,7 +27,6 @@ export function mountCaptureCanvas(a, b) {
   const { stage, cap, opts } = resolveMountArgs(a, b);
   if (!stage || !cap) return { caption: () => '' };
 
-  clearMarker();
   stage.innerHTML = '';
   stage.classList.remove('empty');
 
@@ -43,6 +39,9 @@ export function mountCaptureCanvas(a, b) {
   cap.canvas.style.maxWidth = '100%';
   cap.canvas.style.height = 'auto';
   cap.canvas.style.maxHeight = '320px';
+  if (cap.cssWidth > 0 && cap.cssHeight > 0) {
+    cap.canvas.style.aspectRatio = `${cap.cssWidth} / ${cap.cssHeight}`;
+  }
   inner.appendChild(cap.canvas);
   stage.appendChild(inner);
 
@@ -64,11 +63,6 @@ export function mountCaptureCanvas(a, b) {
   return { statusEl, caption, generation: cap.generation };
 }
 
-/** Place marker on the capture canvas — does not switch away from live view. */
-export function placeMarkerOnCapture(x, y) {
-  drawMarker(x, y);
-}
-
 /** Refresh screenshot panel from an existing operator capture (agent re-capture). */
 export function syncCaptureUi(cap, { operator }) {
   const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot: false });
@@ -82,7 +76,6 @@ export function resetCaptureUi(operator) {
   operator.clearCapture();
   const statusEl = $('model-status');
   if (statusEl) delete statusEl.dataset.captureReady;
-  clearMarker();
   document.body.dataset.viewport = 'live';
   const stage = $('screenshot-stage');
   if (stage) clearCaptureStage(stage);

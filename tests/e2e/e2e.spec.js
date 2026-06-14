@@ -11,10 +11,8 @@ import {
   runE2ESwitchUncachedReverts,
   runE2EGreenRound,
   runE2ETaskSignInNotSubmitBand,
-  runE2ENoMarkerUntilTask,
   runE2ETaskCancelNotGreen,
   runE2ESecondTaskSubmit,
-  runE2EFakeCursor,
   runE2EVoiceClickSubmit,
   runE2EVoiceBareSubmit,
   runE2EVoiceCapturePage,
@@ -138,20 +136,12 @@ test.describe(`e2e ${E2E_MODEL_ID}`, () => {
     await runE2ETaskSignInNotSubmitBand(page, E2E_MODEL_ID);
   });
 
-  test(`Model ${E2E_MODEL_ID}: no marker until task after capture`, async () => {
-    await runE2ENoMarkerUntilTask(page, E2E_MODEL_ID);
-  });
-
   test(`Model ${E2E_MODEL_ID}: UI Cancel task is not green`, async () => {
     await runE2ETaskCancelNotGreen(page, E2E_MODEL_ID);
   });
 
   test(`Model ${E2E_MODEL_ID}: second Submit task on same capture`, async () => {
     await runE2ESecondTaskSubmit(page, E2E_MODEL_ID);
-  });
-
-  test(`Model ${E2E_MODEL_ID}: fake cursor moves Submit then Cancel on screenshot`, async () => {
-    await runE2EFakeCursor(page, undefined, E2E_MODEL_ID, { skipSession: true });
   });
 
   test(`Model ${E2E_MODEL_ID}: voice click Submit on screenshot`, async () => {

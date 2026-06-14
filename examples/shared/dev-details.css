@@ -177,6 +177,9 @@
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   padding: 0.5rem;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .user-facing-demo .dev-details[open] #screenshot-stage.empty::before {
@@ -190,7 +193,8 @@
 
 .user-facing-demo .dev-details[open] .screenshot-inner {
   position: relative;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   line-height: 0;
   border-radius: 8px;
   overflow: hidden;

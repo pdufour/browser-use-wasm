@@ -14,7 +14,7 @@ import {
 export default defineConfig({
   globalSetup: './tests/e2e/global-setup.js',
   testDir: 'tests/e2e',
-  testMatch: '**/*.spec.js',
+  testMatch: '**/e2e.spec.js',
   timeout: E2E_TEST_TIMEOUT_MS,
   globalTimeout: E2E_BENCHMARK ? E2E_BENCHMARK_GLOBAL_TIMEOUT_MS : E2E_GLOBAL_TIMEOUT_MS,
   expect: { timeout: 12_000 },

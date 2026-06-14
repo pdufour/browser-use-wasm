@@ -169,12 +169,7 @@ try {
     console.log(`[smoke] screenshot ${shotInfo.kind} ${shotInfo.w}x${shotInfo.h} → /tmp/nav-smoke-shot.png`);
   }
   await page.screenshot({ path: '/tmp/nav-smoke-after.png' });
-
-  const markerVisible = await page.evaluate(() => {
-    const m = document.getElementById('click-marker');
-    return !!m && m.style.display !== 'none';
-  });
-  console.log(`[smoke] marker visible: ${markerVisible}`);
+  console.log('[smoke] task complete — see /tmp/nav-smoke-after.png');
 } finally {
   await browser.close();
   vite?.kill();

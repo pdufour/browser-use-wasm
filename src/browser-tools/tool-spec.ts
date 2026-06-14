@@ -41,7 +41,7 @@ export interface ToolExecutorContext {
     label: string
   ) => Promise<{ ok: boolean; point?: { x: number; y: number } }>;
   setPrompt?: (label: string) => void;
-  /** Locate + fake-cursor move + live pointer action. */
+  /** Locate + live pointer action at the grounded point. */
   groundTarget: (
     target: string,
     action: PointerAction

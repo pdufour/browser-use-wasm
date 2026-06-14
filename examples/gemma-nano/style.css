@@ -156,6 +156,33 @@ body.browse-app {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
+body[data-inline-capture='1'] .browse-main .live-hero {
+  flex: 1 1 auto;
+  min-height: calc(100vh - 220px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Full #capture-target in live iframe — same framing as SnapDOM screenshot. */
+body[data-inline-capture='1'] .browse-main .live-frame-wrap {
+  max-height: none;
+  flex: 1 1 auto;
+  min-height: calc(100vh - 240px);
+  height: auto;
+}
+
+body[data-inline-capture='1'] .browse-main .live-frame-wrap iframe {
+  min-height: calc(100vh - 260px);
+  height: 100%;
+  max-height: none;
+}
+
+/* After capture: inline height from JS must not fight viewport min-height. */
+body[data-inline-capture='1'][data-frame-locked='1'] .browse-main .live-frame-wrap iframe {
+  min-height: 0;
+  max-height: none;
+}
+
 /* Modal Overlay */
 .modal-overlay {
   position: fixed;

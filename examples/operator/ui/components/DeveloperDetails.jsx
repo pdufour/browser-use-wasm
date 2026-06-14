@@ -38,7 +38,7 @@ export function DeveloperDetails({ status, raw }) {
             <header className="dev-panel__head">
               <h3 className="dev-panel__title">Screenshot buffer</h3>
               <p className="dev-panel__hint">
-                SnapDOM capture the model sees — red dot is the grounded click
+                SnapDOM capture the model sees
               </p>
             </header>
             <ScreenshotStage />

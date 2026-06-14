@@ -35,7 +35,9 @@ initTaskRunner({
   initialGoal,
   frameTitle: 'Gemma 4 Nano Demo',
   wireSiteHeader: true,
-  useNativeAi: true, 
+  useNativeAi: true,
+  hideDevDetails: false,
+  inlineCapturePanel: true,
 });
 
 if (params.has('e2e')) {

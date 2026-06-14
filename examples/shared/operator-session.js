@@ -5,8 +5,6 @@
 import './examples-policy.js';
 import {
   createWebOperator,
-  drawMarker,
-  clearMarker,
   getWllamaEnvIssues,
   loadCachedModelIds,
   canDownloadModelInBrowser,
@@ -162,9 +160,7 @@ function createEmbedSession(options) {
       }
       const grounded = [...result.steps].reverse().find((s) => s.point);
       if (grounded?.point) {
-        drawMarker(grounded.point.x, grounded.point.y);
-      } else {
-        clearMarker();
+        void capture();
       }
       const lines = result.steps.map(
         (s) =>
@@ -189,7 +185,6 @@ function createEmbedSession(options) {
     operator.clearCapture();
     captureReady = false;
     if (captureStageEl) clearCaptureStage(captureStageEl);
-    clearMarker();
   }
 
   return {

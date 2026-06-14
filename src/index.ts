@@ -109,9 +109,6 @@ export {
 } from './wllama/model-sources.ts';
 export type { ModelSourceOrigin } from './wllama/model-sources.ts';
 
-// Screenshot click-marker overlay
-export { drawMarker, clearMarker, relayoutMarker } from './ui/marker.ts';
-
 // Embedded browser frame (iframe chrome for demos / embeds)
 export {
   setBrowseHomePath,
@@ -125,7 +122,6 @@ export {
 
 // Voice
 export { createVoiceNavController } from './voice/controller.ts';
-export type { CursorTourStep } from './voice/cursor-tour.ts';
 
 // Debug / perf instrumentation
 export { createPerfTracker, logPerfEvent } from './util/perf.ts';

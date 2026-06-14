@@ -31,6 +31,7 @@ npm-debug.log*
 
 # Scratch / debug
 .tmp/
+alignment-visual/
 e2e-results-multi.txt
 e2e-results.txt
 e2e-benchmark-results.txt

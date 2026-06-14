@@ -11,13 +11,10 @@ import {
   getCaptureElement,
   waitForBrowseFrameReady,
   navigateBrowseFrame,
-  drawMarker,
-  clearMarker,
-  relayoutMarker,
+  resetScrollForCapture,
 } from 'browser-use-wasm';
 import { $ } from './dom.js';
 import { mountCaptureCanvas } from './capture-ui.js';
-import { createLiveCursor } from './live-cursor.js';
 import {
   autoloadAndCapture,
   bindHumanStatus,
@@ -26,7 +23,7 @@ import {
   ensureHiddenCaptureMount,
   BOOT_FRAME_TIMEOUT_MS,
 } from './user-facing.js';
-import { syncDevChrome } from './dev-details-sync.js';
+import { syncDevChrome, openDevDetails } from './dev-details-sync.js';
 import { wireClearCacheButton } from './clear-browser-cache.js';
 import { BUILTIN_BROWSE_PATH } from './browse-defaults.js';
 import { resolveAppPath, withBase } from './app-base.js';
@@ -39,6 +36,8 @@ import { demoLog, demoWarn, logGoalBarState } from './demo-log.js';
  *   frameTitle?: string;
  *   hideDevDetails?: boolean;
  *   wireSiteHeader?: boolean;
+ *   useNativeAi?: boolean;
+ *   inlineCapturePanel?: boolean;
  * }} [options]
  */
 export function initTaskRunner(options = {}) {
@@ -49,11 +48,19 @@ export function initTaskRunner(options = {}) {
     hideDevDetails = true,
     wireSiteHeader = false,
     useNativeAi = false,
+    inlineCapturePanel = false,
   } = options;
 
   setBrowseHomePath(initialUrl);
   if (hideDevDetails) hideDevChrome({ detailsId: 'dev-details' });
-  ensureHiddenCaptureMount();
+  if (inlineCapturePanel) {
+    document.body.dataset.inlineCapture = '1';
+    const stage = $('screenshot-stage');
+    if (stage) stage.classList.remove('dev-capture-mount');
+    openDevDetails();
+  } else {
+    ensureHiddenCaptureMount();
+  }
 
   const operator = useNativeAi
     ? createPromptApiOperator({
@@ -71,6 +78,8 @@ export function initTaskRunner(options = {}) {
   let frameReady = false;
   let captureReady = false;
   let bootGeneration = 0;
+  /** @type {{ cssWidth: number; cssHeight: number } | null} */
+  let lastCaptureCss = null;
 
   if (wireSiteHeader) {
     const aside = document.querySelector('[data-site-header-aside]');
@@ -92,20 +101,55 @@ export function initTaskRunner(options = {}) {
   const promptEl = $('prompt');
   const runBtn = $('btn-run');
   const liveWrap = $('live-wrap');
-  const liveCursor = createLiveCursor(liveWrap, getBrowseFrame, getCaptureElement);
   const addressEl = $('address-bar');
 
-  function relayoutOverlays() {
-    liveCursor.relayout();
-    relayoutMarker();
+  /** Live iframe must show the same #capture-target framing as the SnapDOM bitmap. */
+  function lockBrowseFrameToCapture(cap) {
+    const cssW = cap?.cssWidth ?? lastCaptureCss?.cssWidth ?? 0;
+    const cssH = cap?.cssHeight ?? lastCaptureCss?.cssHeight ?? 0;
+    if (cssW > 0 && cssH > 0) lastCaptureCss = { cssWidth: cssW, cssHeight: cssH };
+
+    resetScrollForCapture();
+    const frame = getBrowseFrame();
+    const wrap = liveWrap;
+    if (frame && cssH > 0) {
+      frame.style.width = '100%';
+      frame.style.height = `${cssH}px`;
+      frame.style.minHeight = `${cssH}px`;
+      frame.style.maxHeight = `${cssH}px`;
+      if (cssW > 0) frame.dataset.captureCssW = String(cssW);
+      frame.dataset.captureCssH = String(cssH);
+      document.body.dataset.frameLocked = '1';
+    }
+    if (wrap && cssH > 0) {
+      wrap.style.height = 'auto';
+      wrap.style.minHeight = `${cssH + 16}px`;
+      if (cssW > 0) {
+        wrap.style.width = `${cssW + 16}px`;
+        wrap.style.maxWidth = '100%';
+        wrap.dataset.captureCssW = String(cssW);
+        wrap.dataset.captureCssH = String(cssH);
+      }
+    }
   }
 
-  const devDetails = $('dev-details');
-  devDetails?.addEventListener('toggle', () => {
-    if (devDetails.open) relayoutOverlays();
-    else requestAnimationFrame(relayoutOverlays);
-  });
-  globalThis.addEventListener('dev-details-layout', relayoutOverlays);
+  function syncBrowseFrameToCapture() {
+    lockBrowseFrameToCapture(null);
+  }
+
+  async function waitForCaptureLayout() {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
+
+  function applyCaptureUi(cap) {
+    const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
+    mountCaptureCanvas(stage, cap);
+    if (cap.canvas) {
+      cap.canvas.dataset.captureCssW = String(cap.cssWidth);
+      cap.canvas.dataset.captureCssH = String(cap.cssHeight);
+    }
+    lockBrowseFrameToCapture(cap);
+  }
 
   demoLog('task-runner', 'init', {
     initialUrl,
@@ -135,6 +179,7 @@ export function initTaskRunner(options = {}) {
 
   if (frame) {
     demoLog('task-runner', 'iframe src', { src: frame.src });
+    frame.addEventListener('load', () => syncBrowseFrameToCapture());
   }
 
   function setTechnical(text) {
@@ -188,9 +233,9 @@ export function initTaskRunner(options = {}) {
       throw new Error('Capture target missing in demo iframe — refresh the page');
     }
 
+    await waitForCaptureLayout();
     const cap = await operator.capture();
-    const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
-    mountCaptureCanvas(stage, cap);
+    applyCaptureUi(cap);
     if (showSnapshot) document.body.dataset.viewport = 'snapshot';
     setTechnical(`Captured ${cap.width}×${cap.height}px — encoding…`);
     const buf = await cap.whenEncoded;
@@ -214,9 +259,9 @@ export function initTaskRunner(options = {}) {
       if (addressEl) addressEl.value = nav.external ? nav.addressBar : nav.frameSrc;
       operator.clearCapture();
       captureReady = false;
-      clearMarker();
       await waitForBrowseFrameReady(getBrowseFrame(), BOOT_FRAME_TIMEOUT_MS);
       frameReady = true;
+      syncBrowseFrameToCapture();
       if (modelLoaded) await capturePage({ showSnapshot: false });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -268,34 +313,22 @@ export function initTaskRunner(options = {}) {
 
     busy = true;
     syncRun();
-    document.body.dataset.viewport = 'live';
-    liveCursor.show();
-    liveCursor.setThinking(true);
     setRaw(`Running ${operator.model.label} navigation…`);
     heroStatusEl && (heroStatusEl.textContent = humanStatus('Running…', { goal }));
 
     try {
       const result = await operator.instruct(goal, {
         onStatus: setTechnical,
-        onBeforeExecute: () => {
-          document.body.dataset.viewport = 'live';
-          liveCursor.setThinking(false);
-        },
-        onBeforeStep: async (step) => {
-          await liveCursor.performStep(step);
-        },
         onRecapture: (cap) => {
-          const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
-          mountCaptureCanvas(stage, cap);
+          applyCaptureUi(cap);
           captureReady = true;
         },
       });
 
       const grounded = [...result.steps].reverse().find((s) => s.point);
       if (grounded?.point) {
-        drawMarker(grounded.point.x, grounded.point.y);
-        liveCursor.showAt(grounded.point.x, grounded.point.y);
-      } else clearMarker();
+        void capturePage({ showSnapshot: true });
+      }
 
       const lines = result.steps.map(
         (s) =>
@@ -312,7 +345,6 @@ export function initTaskRunner(options = {}) {
     } finally {
       busy = false;
       syncRun();
-      liveCursor.setThinking(false);
     }
   }
 
@@ -354,6 +386,7 @@ export function initTaskRunner(options = {}) {
         waitForFrame: async () => {
           await waitForBrowseFrameReady(getBrowseFrame(), BOOT_FRAME_TIMEOUT_MS);
           frameReady = true;
+          syncBrowseFrameToCapture();
         },
         load: loadModel,
         capture: capturePage,

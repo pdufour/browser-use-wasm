@@ -1,5 +1,5 @@
 /**
- * Vision buffer mount — canvas and click marker are appended imperatively.
+ * Vision buffer mount — canvas is appended imperatively.
  * Visible inside open Developer details (Cmd/Ctrl+Shift+S toggles snapshot view).
  */
 export function ScreenshotStage() {

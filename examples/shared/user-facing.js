@@ -150,7 +150,7 @@ function humanizeDone(text) {
   return `Done — ${verbs.slice(0, -1).join(', ')} and ${verbs[verbs.length - 1]}`;
 }
 
-/** Off-screen capture stage — keeps #screenshot-img in DOM for markers / E2E. */
+/** Off-screen capture stage — keeps #screenshot-img in DOM for E2E. */
 export function ensureHiddenCaptureMount() {
   let stage = document.getElementById('screenshot-stage');
   if (!stage) {
