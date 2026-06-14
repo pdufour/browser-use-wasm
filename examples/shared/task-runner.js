@@ -155,9 +155,9 @@ export function initTaskRunner(options = {}) {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   }
 
-  function applyCaptureUi(cap) {
+  function applyCaptureUi(cap, { keepGroundingOverlay = false } = {}) {
     const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
-    getGroundingCursor()?.onCaptureClear();
+    if (!keepGroundingOverlay) getGroundingCursor()?.onCaptureClear();
     mountCaptureCanvas(stage, cap);
     if (cap.canvas) {
       cap.canvas.dataset.captureCssW = String(cap.cssWidth);
@@ -239,7 +239,7 @@ export function initTaskRunner(options = {}) {
     }
   }
 
-  async function capturePage({ showSnapshot = false } = {}) {
+  async function capturePage({ showSnapshot = false, keepGroundingOverlay = false } = {}) {
     captureReady = false;
     if (modelStatusEl) delete modelStatusEl.dataset.captureReady;
 
@@ -250,7 +250,7 @@ export function initTaskRunner(options = {}) {
 
     await waitForCaptureLayout();
     const cap = await operator.capture();
-    applyCaptureUi(cap);
+    applyCaptureUi(cap, { keepGroundingOverlay });
     if (showSnapshot) document.body.dataset.viewport = 'snapshot';
     setTechnical(`Captured ${cap.width}×${cap.height}px — encoding…`);
     const buf = await cap.whenEncoded;
@@ -343,10 +343,14 @@ export function initTaskRunner(options = {}) {
         },
       });
 
-      const grounded = [...result.steps].reverse().find((s) => s.point);
-      if (grounded?.point && !getBrowseFrame()) {
-        document.body.dataset.viewport = 'snapshot';
-        void capturePage({ showSnapshot: true });
+      if (!result.degenerate && result.steps.length) {
+        try {
+          // SnapDOM while cursor/marker still live in the iframe; clear overlay after mount.
+          await capturePage({ showSnapshot: false, keepGroundingOverlay: true });
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          setTechnical(`Error — ${msg}`);
+        }
       }
 
       const lines = result.steps.map(

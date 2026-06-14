@@ -188,7 +188,7 @@ export function App() {
    * (`showSnapshot: false`) is silent — datasets/status update, viewport stays
    * live. `busy` spans capture + encode, so concurrent triggers no-op.
    */
-  async function capturePage({ showSnapshot = true } = {}) {
+  async function capturePage({ showSnapshot = true, keepGroundingOverlay = false } = {}) {
     if (ui.busy) return;
     const stage = $('screenshot-stage');
     const statusEl = $('model-status');
@@ -199,7 +199,7 @@ export function App() {
       delete statusEl.dataset.captureReady;
       set({ captureReady: false });
       const cap = await operator.capture();
-      getGroundingCursor()?.onCaptureClear();
+      if (!keepGroundingOverlay) getGroundingCursor()?.onCaptureClear();
       const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot });
       set({ status: caption('encoding…') });
       logCaptureWallPerf(t0);
@@ -250,9 +250,8 @@ export function App() {
         });
         return { ok: false, summary: 'no parsable action' };
       }
-      const grounded = [...result.steps].reverse().find((s) => s.point);
-      if (grounded?.point) {
-        void capturePage({ showSnapshot: true });
+      if (!result.degenerate && result.steps.length) {
+        await capturePage({ showSnapshot: !getBrowseFrame(), keepGroundingOverlay: true });
       }
       const summary = result.summary;
       const lines = result.steps.map(
