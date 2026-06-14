@@ -58,7 +58,7 @@
               <li><strong>Browser:</strong> Chrome 131+ (Dev/Canary for latest multimodal).</li>
               <li><strong>Perf Bypass:</strong> <a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <em>Enabled BypassPerfRequirement</em>.</li>
               <li><strong>Prompt API:</strong> <a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> (+ multimodal flag if listed).</li>
-              <li><strong>HTML-in-Canvas:</strong> <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <em>Enabled</em> (Step 2 capture).</li>
+              <li><strong>HTML-in-Canvas:</strong> <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <em>Enabled</em> (Step 2 <code>drawElementImage</code> capture).</li>
               <li><strong>Update:</strong> <a class="flag-link" href="chrome://components"><code>chrome://components</code></a> &rarr; <em>Optimization Guide On Device Model</em>.</li>
             </ol>
             <button type="button" id="btn-show-requirements" class="text-link">Full setup details</button>
@@ -114,49 +114,31 @@ return 'Multimodal session created';</code></pre>
 
           <h3 class="steps-subhead">Step 2 - Capture the page with drawElementImage</h3>
           <p>
-            To give Gemini vision, we rasterize a DOM region with the experimental HTML-in-Canvas API (<code>drawElementImage</code>) — native layout, no third-party screenshot library. This mini checkout strip is the kind of surface the model would capture:
+            Under the hood, Chrome rasterizes DOM through the experimental <strong>HTML-in-Canvas</strong> API:
+            <code>canvas.getContext('2d').drawElementImage(element, x, y)</code> paints a live subtree into a bitmap using the browser layout engine (no screenshot server, no <code>html2canvas</code>-style SVG hack).
+            <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> must be on.
+          </p>
+          <p>
+            <code>SnapDOM</code> is just a wrapper around that call: clone the target, inline computed styles and fonts, size the canvas, then invoke <code>drawElementImage</code> and hand you the <code>HTMLCanvasElement</code>.
+            The checkout strip below is what gets rasterized; your code only needs SnapDOM:
           </p>
 
-          <canvas id="snippet-canvas" class="snippet-stage" layoutsubtree aria-label="Snippet capture target">
-            <div id="snippet-stage">
-              <p class="snippet-stage__title">Complete your order</p>
-              <p class="snippet-stage__hint">Review details and continue.</p>
-              <button type="button" class="snippet-stage__submit" id="snippet-submit">Submit</button>
-            </div>
-          </canvas>
+          <div id="snippet-stage" class="snippet-stage" aria-label="Snippet capture target">
+            <p class="snippet-stage__title">Complete your order</p>
+            <p class="snippet-stage__hint">Review details and continue.</p>
+            <button type="button" class="snippet-stage__submit" id="snippet-submit">Submit</button>
+          </div>
 
           <div class="interactive-snippet">
-            <pre class="code-block"><code>const canvas = document.getElementById('snippet-canvas');
-const content = canvas.firstElementChild;
-const ctx = canvas.getContext('2d');
-const dpr = Math.min(2, devicePixelRatio || 1);
-
-canvas.layoutSubtree = true;
-canvas.width = Math.max(1, Math.round(content.offsetWidth * dpr));
-canvas.height = Math.max(1, Math.round(content.offsetHeight * dpr));
-
-await new Promise((resolve, reject) => {
-  const timer = setTimeout(() => reject(new Error('paint timed out')), 8000);
-  canvas.onpaint = () => {
-    try {
-      ctx.reset();
-      const t = ctx.drawElementImage(content, 0, 0);
-      content.style.transform = t.toString();
-      clearTimeout(timer);
-      resolve();
-    } catch (err) {
-      clearTimeout(timer);
-      reject(err);
-    }
-  };
-  canvas.requestPaint();
+            <pre class="code-block"><code>// SnapDOM → clone + inline styles/fonts → drawElementImage → canvas
+const target = document.getElementById('snippet-stage');
+const canvas = await snapdom.toCanvas(target, {
+  width: target.offsetWidth,
+  height: target.offsetHeight,
+  dpr: Math.min(2, devicePixelRatio || 1),
+  embedFonts: true,
 });
-
-const bitmap = document.createElement('canvas');
-bitmap.width = canvas.width;
-bitmap.height = canvas.height;
-bitmap.getContext('2d').drawImage(canvas, 0, 0);
-return bitmap;</code></pre>
+return canvas;</code></pre>
             <button type="button" id="btn-try-snapdom" class="chip-btn chip-btn--secondary">Run</button>
             <div id="snapdom-result" class="snippet-feedback" hidden>
               <p class="snippet-feedback__text"></p>
@@ -166,16 +148,17 @@ return bitmap;</code></pre>
 
           <h3 class="steps-subhead">Step 3 - Ground coordinates and click</h3>
           <p>
-            <code>drawElementImage</code> captures the Step 2 checkout strip; the live iframe demo uses SnapDOM for <code>#capture-target</code>. <code>LanguageModel</code> reads the JPEG and returns an action dict with <code>[x, y]</code>. Copy the code below into the console or click <strong>Run</strong>.
+            Step 3 wires it together: <code>SnapDOM</code> (same <code>drawElementImage</code> path) screenshots the live iframe (<code>#capture-target</code>), then the <strong>Chrome Prompt API</strong> (<code>LanguageModel</code>, <code>session.prompt</code>) reads that JPEG and returns <code>[x, y]</code>. We click at that point in the iframe.
           </p>
           <div class="interactive-snippet">
             <pre class="code-block"><code>const frame = document.getElementById('browse-frame');
 const doc = frame.contentDocument;
 const stage = doc.getElementById('capture-target');
 if (!doc || !stage) {
-  throw new Error('Demo page not loaded yet — wait for the checkout preview above');
+  throw new Error('Demo page not loaded yet - wait for the checkout preview above');
 }
 
+// Chrome Prompt API (on-device Gemini Nano)
 const ai = window.LanguageModel || window.ai?.languageModel;
 if (!ai) throw new Error('LanguageModel not found');
 
@@ -186,6 +169,10 @@ const session = await ai.create({
   topK: 1,
 });
 
+// Drop live-demo pointer overlay so SnapDOM does not photograph it
+doc.getElementById('agent-grounding-layer')?.remove();
+
+// Screenshot → JPEG (vision input for Prompt API)
 const canvas = await snapdom.toCanvas(stage, {
   width: stage.offsetWidth,
   height: stage.offsetHeight,
@@ -303,7 +290,7 @@ return {
             <ul class="native-ai-requirements__list">
               <li><a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <strong>Enabled BypassPerfRequirement</strong></li>
               <li><a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> &rarr; <strong>Enabled</strong></li>
-              <li><a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <strong>Enabled</strong> (blog capture demos)</li>
+              <li><a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <strong>Enabled</strong> (<code>drawElementImage</code> / SnapDOM capture)</li>
               <li>Restart Chrome and check <a class="flag-link" href="chrome://components"><code>chrome://components</code></a></li>
             </ul>
             <div class="modal-footer">

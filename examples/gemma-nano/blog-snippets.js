@@ -73,7 +73,7 @@ async function runCodeBlock(btn) {
 
     if (value instanceof HTMLCanvasElement && previewEl) {
       showPreview(previewEl, value, `${value.width}×${value.height}px`);
-      setFeedback(resultEl, `✓ Captured ${value.width}×${value.height}px — preview below`, 'ok');
+      setFeedback(resultEl, `✓ Captured ${value.width}×${value.height}px - preview below`, 'ok');
       return;
     }
 
