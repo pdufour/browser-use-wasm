@@ -7,6 +7,7 @@ import './styles/dashboard.css';
 import './styles/command-bar.css';
 import './styles/browser-frame.css';
 import './styles/orbit-pulse.css';
+import './styles/marker.css';
 import './styles/e2e-shelf.css';
 import '../../shared/user-facing.css';
 import '../../shared/site-header.css';

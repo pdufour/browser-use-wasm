@@ -4,6 +4,7 @@
 import {
   createWebOperator,
   createPromptApiOperator,
+  createGroundingCursor,
   resolveWasmUrl,
   setBrowseHomePath,
   getBrowseFrame,
@@ -80,6 +81,19 @@ export function initTaskRunner(options = {}) {
   let bootGeneration = 0;
   /** @type {{ cssWidth: number; cssHeight: number } | null} */
   let lastCaptureCss = null;
+  let groundingCursor = null;
+
+  function getGroundingCursor() {
+    const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
+    if (!stage) return null;
+    if (!groundingCursor) {
+      groundingCursor = createGroundingCursor({
+        screenshotStage: stage,
+        liveInIframe: !!getBrowseFrame(),
+      });
+    }
+    return groundingCursor;
+  }
 
   if (wireSiteHeader) {
     const aside = document.querySelector('[data-site-header-aside]');
@@ -143,6 +157,7 @@ export function initTaskRunner(options = {}) {
 
   function applyCaptureUi(cap) {
     const stage = $('screenshot-stage') ?? ensureHiddenCaptureMount();
+    getGroundingCursor()?.onCaptureClear();
     mountCaptureCanvas(stage, cap);
     if (cap.canvas) {
       cap.canvas.dataset.captureCssW = String(cap.cssWidth);
@@ -259,6 +274,7 @@ export function initTaskRunner(options = {}) {
       if (addressEl) addressEl.value = nav.external ? nav.addressBar : nav.frameSrc;
       operator.clearCapture();
       captureReady = false;
+      getGroundingCursor()?.onCaptureClear();
       await waitForBrowseFrameReady(getBrowseFrame(), BOOT_FRAME_TIMEOUT_MS);
       frameReady = true;
       syncBrowseFrameToCapture();
@@ -318,6 +334,8 @@ export function initTaskRunner(options = {}) {
 
     try {
       const result = await operator.instruct(goal, {
+        onBeforeExecute: () => getGroundingCursor()?.onCaptureClear(),
+        onBeforeStep: (step) => getGroundingCursor()?.beforeStep(step),
         onStatus: setTechnical,
         onRecapture: (cap) => {
           applyCaptureUi(cap);
@@ -326,7 +344,8 @@ export function initTaskRunner(options = {}) {
       });
 
       const grounded = [...result.steps].reverse().find((s) => s.point);
-      if (grounded?.point) {
+      if (grounded?.point && !getBrowseFrame()) {
+        document.body.dataset.viewport = 'snapshot';
         void capturePage({ showSnapshot: true });
       }
 
@@ -352,6 +371,8 @@ export function initTaskRunner(options = {}) {
     e.preventDefault();
     void runTask();
   });
+
+  window.addEventListener('resize', () => getGroundingCursor()?.relayout());
 
   $('nav-form')?.addEventListener('submit', (e) => {
     e.preventDefault();

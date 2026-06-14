@@ -16,6 +16,7 @@ import type {
 } from '../browser-tools/tool-spec.ts';
 import { triggerActionAtNorm } from '../browser-tools/dom-actions.ts';
 import { createSpeechSession, isSpeechRecognitionAvailable } from './speech-session.ts';
+import { createGroundingCursor, type GroundingCursor } from '../ui/grounding-cursor.ts';
 
 export interface VoiceNavDeps {
   screenshotStage: HTMLElement;
@@ -32,12 +33,17 @@ export interface VoiceNavDeps {
   runTask: (task: string) => Promise<{ ok: boolean; summary: string }>;
   requestCapture: () => void | Promise<void>;
   onStatus?: (message: string) => void;
+  /** Shared screenshot cursor — one instance per app (avoids duplicate pointers). */
+  groundingCursor?: GroundingCursor;
 }
 
 /**
- * Voice → ShowUI navigation → live-page actions (structured orchestrator).
+ * Voice → ShowUI navigation → fake cursor on screenshot (structured orchestrator).
  */
 export function createVoiceNavController(deps: VoiceNavDeps) {
+  const groundingCursor =
+    deps.groundingCursor ??
+    createGroundingCursor({ screenshotStage: deps.screenshotStage });
   let speech: ReturnType<typeof createSpeechSession> = null;
   let enabled = false;
   let lastHandledPhrase = '';
@@ -73,9 +79,11 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
       `[voice-nav] locate result target="${target}" ok=${result.ok} point=${JSON.stringify(result.point)}`
     );
     if (!result.ok || !result.point) {
+      groundingCursor.setListening(true);
       throw new Error(`Could not locate "${target}"`);
     }
 
+    await groundingCursor.animateTo(result.point, action);
     if (action === 'doubleclick') {
       triggerActionAtNorm(result.point.x, result.point.y, 'doubleclick');
     } else if (action === 'click') {
@@ -147,6 +155,7 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
         );
         setVoiceStatus('Voice: listening');
       } catch (err) {
+        groundingCursor.setListening(true);
         setTranscript(`Error: ${err instanceof Error ? err.message : String(err)}`, 'error');
         setVoiceStatus('Voice: listening');
       }
@@ -241,6 +250,7 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
     deps.toggleBtn.textContent = 'Stop voice navigation';
     deps.toggleBtn.setAttribute('aria-pressed', 'true');
     setVoiceStatus('Voice: listening…');
+    groundingCursor.setListening(true);
     setTranscript(
       'Try: "click Submit" · "type paul in the email field" · "scroll down"',
       'hint'
@@ -254,6 +264,7 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
     deps.toggleBtn.textContent = 'Start voice navigation';
     deps.toggleBtn.setAttribute('aria-pressed', 'false');
     setVoiceStatus('Voice: off');
+    groundingCursor.hide();
     setTranscript('Voice navigation stopped.', 'system');
   }
 
@@ -278,13 +289,14 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
     stop,
     toggle,
     isEnabled: () => enabled,
-    relayout() {},
+    relayout: () => groundingCursor.relayout(),
     async simulateToolCallForE2e(call: BrowserToolCall) {
       if (!enabled) {
         enabled = true;
         deps.toggleBtn.textContent = 'Stop voice navigation';
         deps.toggleBtn.setAttribute('aria-pressed', 'true');
         setVoiceStatus('Voice: listening (e2e)');
+        groundingCursor.setListening(true);
       }
       let valid: BrowserToolCall;
       try {
@@ -304,6 +316,7 @@ export function createVoiceNavController(deps: VoiceNavDeps) {
     destroy() {
       stop();
       speech?.abort();
+      if (!deps.groundingCursor) groundingCursor.destroy();
     },
   };
 }

@@ -1,12 +1,14 @@
 /**
- * Shared capture preview — SnapDOM canvas mount, viewport toggle.
+ * Shared capture preview — SnapDOM canvas mount, marker, viewport toggle.
  */
+import { clearMarker, drawMarker } from 'browser-use-wasm';
 import { $ } from './dom.js';
 import { openDevDetails } from './dev-details-sync.js';
 
-/** Clear a screenshot stage. */
+/** Clear a screenshot stage and remove any click marker. */
 export function clearCaptureStage(stageEl) {
   if (!stageEl) return;
+  clearMarker();
   stageEl.innerHTML = '';
   stageEl.classList.add('empty');
 }
@@ -27,6 +29,7 @@ export function mountCaptureCanvas(a, b) {
   const { stage, cap, opts } = resolveMountArgs(a, b);
   if (!stage || !cap) return { caption: () => '' };
 
+  clearMarker();
   stage.innerHTML = '';
   stage.classList.remove('empty');
 
@@ -63,6 +66,11 @@ export function mountCaptureCanvas(a, b) {
   return { statusEl, caption, generation: cap.generation };
 }
 
+/** Place marker on the capture canvas — does not switch away from live view. */
+export function placeMarkerOnCapture(x, y) {
+  drawMarker(x, y);
+}
+
 /** Refresh screenshot panel from an existing operator capture (agent re-capture). */
 export function syncCaptureUi(cap, { operator }) {
   const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot: false });
@@ -76,6 +84,7 @@ export function resetCaptureUi(operator) {
   operator.clearCapture();
   const statusEl = $('model-status');
   if (statusEl) delete statusEl.dataset.captureReady;
+  clearMarker();
   document.body.dataset.viewport = 'live';
   const stage = $('screenshot-stage');
   if (stage) clearCaptureStage(stage);

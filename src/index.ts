@@ -120,8 +120,14 @@ export {
   waitForBrowseFrameReady,
 } from './ui/browse-frame.ts';
 
+// Screenshot overlay (marker + fake cursor)
+export { clearMarker, drawMarker, relayoutMarker } from './ui/marker.ts';
+export { createGroundingCursor } from './ui/grounding-cursor.ts';
+export type { GroundingCursor, GroundingStep } from './ui/grounding-cursor.ts';
+
 // Voice
 export { createVoiceNavController } from './voice/controller.ts';
+export { createFakeCursor } from './voice/fake-cursor.ts';
 
 // Debug / perf instrumentation
 export { createPerfTracker, logPerfEvent } from './util/perf.ts';

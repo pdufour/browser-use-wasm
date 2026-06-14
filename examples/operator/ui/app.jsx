@@ -7,6 +7,7 @@
 import { useEffect, useReducer, useRef } from 'react';
 import {
   createVoiceNavController,
+  createGroundingCursor,
   MODELS,
   canDownloadModelInBrowser,
   setBrowseHomePath,
@@ -44,6 +45,21 @@ const isE2e = params.has('e2e');
 const initialGoal = params.get('goal') ?? '';
 
 const operator = createOperatorSession();
+
+/** One fake pointer per screenshot stage (Run task + voice share it). */
+let groundingCursor = null;
+
+function getGroundingCursor() {
+  const stage = $('screenshot-stage');
+  if (!stage) return null;
+  if (!groundingCursor) {
+    groundingCursor = createGroundingCursor({
+      screenshotStage: stage,
+      liveInIframe: !!getBrowseFrame(),
+    });
+  }
+  return groundingCursor;
+}
 
 /** Stable keydown handler — iframe wiring must remove the same function reference. */
 const shortcutActions = { refreshBrowse: () => {} };
@@ -183,6 +199,7 @@ export function App() {
       delete statusEl.dataset.captureReady;
       set({ captureReady: false });
       const cap = await operator.capture();
+      getGroundingCursor()?.onCaptureClear();
       const { caption } = mountCaptureCanvas(cap, { operator, showSnapshot });
       set({ status: caption('encoding…') });
       logCaptureWallPerf(t0);
@@ -219,8 +236,9 @@ export function App() {
       // One ShowUI inference → execute the parsed action sequence (card style).
       const result = await operator.instruct(goal, {
         onBeforeExecute: () => {
-          document.body.dataset.viewport = 'live';
+          getGroundingCursor()?.onCaptureClear();
         },
+        onBeforeStep: (step) => getGroundingCursor()?.beforeStep(step),
         onStatus: (text) => set({ status: text }),
         onRecapture: (cap) => refreshSyncedCapture(cap),
       });
@@ -270,6 +288,7 @@ export function App() {
       set({ address: nav.addressBar, frameReady: true });
       wireFrameShortcuts();
       resetCaptureUi(operator);
+      getGroundingCursor()?.onCaptureClear();
       navigated = true;
     } catch (err) {
       set({ status: `Navigation failed: ${err instanceof Error ? err.message : err}` });
@@ -328,16 +347,22 @@ export function App() {
         locateTarget: (label) => operator.locate(label),
         runTask: (task) => runTask(task),
         requestCapture: () => capturePage({ showSnapshot: false }),
+        groundingCursor: getGroundingCursor() ?? undefined,
       });
       globalThis.__e2eVoiceTool = (call) => voice.simulateToolCallForE2e(call);
     }
     document.addEventListener('keydown', onAppKeydown, { capture: true });
+    const onRelayout = () => getGroundingCursor()?.relayout();
+    window.addEventListener('resize', onRelayout);
     void boot();
     return () => {
       getBrowseFrame()?.removeEventListener('load', wireFrameShortcuts);
       document.removeEventListener('keydown', onAppKeydown, { capture: true });
+      window.removeEventListener('resize', onRelayout);
       wiredFrameWin?.removeEventListener('keydown', onAppKeydown, true);
       wiredFrameWin = null;
+      groundingCursor?.destroy();
+      groundingCursor = null;
     };
   }, []);
 
