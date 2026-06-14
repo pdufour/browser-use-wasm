@@ -22,6 +22,7 @@ const PAGE_ROUTES = [
   { src: 'examples/gallery/index.html', dest: 'gallery/index.html' },
   { src: 'examples/browse/index.html', dest: 'browse/index.html' },
   { src: 'examples/video/index.html', dest: 'video/index.html' },
+  { src: 'examples/gemma-nano/index.html', dest: 'gemma-nano/index.html' },
 ];
 
 /** Static trees served by Vite middleware in dev. */

@@ -19,6 +19,7 @@ const mpaInput = {
   gallery: path.join(examplesDir, 'gallery/index.html'),
   browse: path.join(examplesDir, 'browse/index.html'),
   video: path.join(examplesDir, 'video/index.html'),
+  'gemma-nano': path.join(examplesDir, 'gemma-nano/index.html'),
 };
 
 /** GitHub Pages project site: https://pdufour.github.io/browser-use-wasm/ */
