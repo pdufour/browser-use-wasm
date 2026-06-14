@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- pages-build:3e4455a-mqd9km3n -->
+    <!-- pages-build:6ffa420-mqd9ovpz -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>
-      window.__PAGES_BUILD__ = "3e4455a-mqd9km3n";
+      window.__PAGES_BUILD__ = "6ffa420-mqd9ovpz";
       (function () {
         var KEY = 'pages-build-id';
         var next = window.__PAGES_BUILD__;
@@ -26,16 +26,16 @@
         quiet: false,
       };
     </script>
-    <script src="/browser-use-wasm/coi-serviceworker.js?v=3e4455a-mqd9km3n"></script>
+    <script src="/browser-use-wasm/coi-serviceworker.js?v=6ffa420-mqd9ovpz"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gemini Nano (Native AI) - Architecture & Demo</title>
-    <script type="module" crossorigin src="/browser-use-wasm/assets/gemma-nano-DwC8FTDc.js"></script>
+    <script type="module" crossorigin src="/browser-use-wasm/assets/gemma-nano-DWWXkL9h.js"></script>
     <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/site-header-DCQQ4ZcQ.js">
     <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/clear-browser-cache-COt5IQZq.js">
     <link rel="modulepreload" crossorigin href="/browser-use-wasm/assets/task-runner-DbUj0fHc.js">
     <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/site-header-CwZbNdxL.css">
-    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/gemma-nano-zvYm513T.css">
+    <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/gemma-nano-BrfZPXD6.css">
     <link rel="stylesheet" crossorigin href="/browser-use-wasm/assets/dev-details-nlAcpyn7.css">
   </head>
   <body class="browse-app user-facing-demo" data-viewport="live">
@@ -90,7 +90,6 @@
               <li><strong>HTML-in-Canvas:</strong> <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <em>Enabled</em> (Step 2 <code>drawElementImage</code> capture).</li>
               <li><strong>Update:</strong> <a class="flag-link" href="chrome://components"><code>chrome://components</code></a> &rarr; <em>Optimization Guide On Device Model</em>.</li>
             </ol>
-            <button type="button" id="btn-show-requirements" class="text-link">Full setup details</button>
           </div>
 
           <div class="interactive-demo interactive-demo--full">
@@ -305,30 +304,6 @@ return {
         </section>
       </article>
     </main>
-
-    <!-- Requirements Modal -->
-    <div id="native-ai-modal" class="modal-overlay" hidden>
-      <div class="modal-content">
-        <header class="modal-header">
-          <h3>Gemini Nano Setup</h3>
-          <button id="btn-close-modal" class="close-btn">&times;</button>
-        </header>
-        <div class="modal-body">
-          <div class="native-ai-requirements">
-            <p>Ensure these Chrome flags are enabled:</p>
-            <ul class="native-ai-requirements__list">
-              <li><a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <strong>Enabled BypassPerfRequirement</strong></li>
-              <li><a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> &rarr; <strong>Enabled</strong></li>
-              <li><a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <strong>Enabled</strong> (<code>drawElementImage</code> / SnapDOM capture)</li>
-              <li>Restart Chrome and check <a class="flag-link" href="chrome://components"><code>chrome://components</code></a></li>
-            </ul>
-            <div class="modal-footer">
-              <button id="btn-verify-ai" class="chip-btn verify-btn">🔍 Verify AI Status</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div class="dev-details-shell">
       <details id="dev-details" class="dev-details">
