@@ -58,6 +58,7 @@
               <li><strong>Browser:</strong> Chrome 131+ (Dev/Canary for latest multimodal).</li>
               <li><strong>Perf Bypass:</strong> <a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <em>Enabled BypassPerfRequirement</em>.</li>
               <li><strong>Prompt API:</strong> <a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> (+ multimodal flag if listed).</li>
+              <li><strong>HTML-in-Canvas:</strong> <a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <em>Enabled</em> (Step 2 capture).</li>
               <li><strong>Update:</strong> <a class="flag-link" href="chrome://components"><code>chrome://components</code></a> &rarr; <em>Optimization Guide On Device Model</em>.</li>
             </ol>
             <button type="button" id="btn-show-requirements" class="text-link">Full setup details</button>
@@ -98,36 +99,64 @@
             The Chrome Prompt API is the modern entry point for on-device AI. We resolve the API across various namespaces to find the <code>LanguageModel</code> surface:
           </p>
           <div class="interactive-snippet">
-            <pre class="code-block"><code>// 1. Resolve the entry point
-const ai = window.LanguageModel || window.ai?.languageModel;
+            <pre class="code-block"><code>const ai = window.LanguageModel || window.ai?.languageModel;
+if (!ai) throw new Error('LanguageModel not found');
 
-// 2. Create the session
 const session = await ai.create({
   expectedInputs: [{ type: 'text' }, { type: 'image' }],
-  temperature: 0
-});</code></pre>
+  temperature: 0,
+});
+session.destroy?.();
+return 'Multimodal session created';</code></pre>
             <button type="button" id="btn-run-prompt-api" class="chip-btn chip-btn--secondary">Run</button>
             <p id="prompt-api-result" class="snippet-feedback" hidden></p>
           </div>
 
-          <h3 class="steps-subhead">Step 2 - Capture the page with SnapDOM</h3>
+          <h3 class="steps-subhead">Step 2 - Capture the page with drawElementImage</h3>
           <p>
-            To give Gemini vision, we use <code>snapdom</code> to freeze a DOM region into a JPEG-sized bitmap. This mini checkout strip is the kind of surface the model would screenshot:
+            To give Gemini vision, we rasterize a DOM region with the experimental HTML-in-Canvas API (<code>drawElementImage</code>) — native layout, no third-party screenshot library. This mini checkout strip is the kind of surface the model would capture:
           </p>
 
-          <div class="snippet-stage" id="snippet-stage" aria-label="Snippet capture target">
-            <p class="snippet-stage__title">Complete your order</p>
-            <p class="snippet-stage__hint">Review details and continue.</p>
-            <button type="button" class="snippet-stage__submit" id="snippet-submit">Submit</button>
-          </div>
+          <canvas id="snippet-canvas" class="snippet-stage" layoutsubtree aria-label="Snippet capture target">
+            <div id="snippet-stage">
+              <p class="snippet-stage__title">Complete your order</p>
+              <p class="snippet-stage__hint">Review details and continue.</p>
+              <button type="button" class="snippet-stage__submit" id="snippet-submit">Submit</button>
+            </div>
+          </canvas>
 
           <div class="interactive-snippet">
-            <pre class="code-block"><code>const target = document.querySelector('#snippet-stage');
-const canvas = await window.snapdom.toCanvas(target, {
-  width: target.offsetWidth,
-  height: target.offsetHeight,
+            <pre class="code-block"><code>const canvas = document.getElementById('snippet-canvas');
+const content = canvas.firstElementChild;
+const ctx = canvas.getContext('2d');
+const dpr = Math.min(2, devicePixelRatio || 1);
+
+canvas.layoutSubtree = true;
+canvas.width = Math.max(1, Math.round(content.offsetWidth * dpr));
+canvas.height = Math.max(1, Math.round(content.offsetHeight * dpr));
+
+await new Promise((resolve, reject) => {
+  const timer = setTimeout(() => reject(new Error('paint timed out')), 8000);
+  canvas.onpaint = () => {
+    try {
+      ctx.reset();
+      const t = ctx.drawElementImage(content, 0, 0);
+      content.style.transform = t.toString();
+      clearTimeout(timer);
+      resolve();
+    } catch (err) {
+      clearTimeout(timer);
+      reject(err);
+    }
+  };
+  canvas.requestPaint();
 });
-console.log('Captured canvas:', canvas);</code></pre>
+
+const bitmap = document.createElement('canvas');
+bitmap.width = canvas.width;
+bitmap.height = canvas.height;
+bitmap.getContext('2d').drawImage(canvas, 0, 0);
+return bitmap;</code></pre>
             <button type="button" id="btn-try-snapdom" class="chip-btn chip-btn--secondary">Run</button>
             <div id="snapdom-result" class="snippet-feedback" hidden>
               <p class="snippet-feedback__text"></p>
@@ -137,10 +166,110 @@ console.log('Captured canvas:', canvas);</code></pre>
 
           <h3 class="steps-subhead">Step 3 - Ground coordinates and click</h3>
           <p>
-            SnapDOM captures the checkout page in the live demo iframe, <code>LanguageModel</code> reads that JPEG, and returns an action dict with <code>[x, y]</code>. The code below is the full tutorial - copy it into the console or click <strong>Run</strong> to execute it exactly.
+            <code>drawElementImage</code> captures the Step 2 checkout strip; the live iframe demo uses SnapDOM for <code>#capture-target</code>. <code>LanguageModel</code> reads the JPEG and returns an action dict with <code>[x, y]</code>. Copy the code below into the console or click <strong>Run</strong>.
           </p>
           <div class="interactive-snippet">
-            <pre class="code-block"><code id="step3-tutorial-code"></code></pre>
+            <pre class="code-block"><code>const frame = document.getElementById('browse-frame');
+const doc = frame.contentDocument;
+const stage = doc.getElementById('capture-target');
+if (!doc || !stage) {
+  throw new Error('Demo page not loaded yet — wait for the checkout preview above');
+}
+
+const ai = window.LanguageModel || window.ai?.languageModel;
+if (!ai) throw new Error('LanguageModel not found');
+
+const session = await ai.create({
+  expectedInputs: [{ type: 'text' }, { type: 'image' }],
+  expectedOutputs: [{ type: 'text' }],
+  temperature: 0,
+  topK: 1,
+});
+
+const canvas = await snapdom.toCanvas(stage, {
+  width: stage.offsetWidth,
+  height: stage.offsetHeight,
+  dpr: Math.min(2, devicePixelRatio || 1),
+  embedFonts: true,
+});
+
+const jpeg = await new Promise((resolve, reject) => {
+  canvas.toBlob(
+    (blob) => (blob ? resolve(blob) : reject(new Error('JPEG encode failed'))),
+    'image/jpeg',
+    0.92
+  );
+});
+
+const navSystem = `You are an assistant trained to navigate the web screen.
+Given a task instruction, a screen observation, and an action history sequence,
+output the next action and wait for the next observation.
+Format the action as: {'action': 'CLICK', 'value': None, 'position': [x,y]}
+Position is 0-1 on the screenshot.`;
+
+const t0 = performance.now();
+const raw = await session.prompt([
+  {
+    role: 'user',
+    content: [
+      { type: 'text', value: navSystem },
+      { type: 'text', value: 'Task: click Submit' },
+      { type: 'image', value: jpeg },
+    ],
+  },
+  { role: 'assistant', content: "{'action':", prefix: true },
+]);
+session.destroy?.();
+
+let text = String(raw ?? '').trim();
+if (text &amp;&amp; !text.startsWith("{'action':") &amp;&amp; !text.startsWith('{"action":')) {
+  text = `{'action': ${text}`;
+}
+
+const vision = { width: canvas.width, height: canvas.height };
+let point = null;
+for (const match of text.matchAll(/\{[^{}]*\}/g)) {
+  const jsonish = match[0].replace(/'/g, '"').replace(/\bNone\b/g, 'null');
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonish);
+  } catch {
+    continue;
+  }
+  const pos = parsed.position;
+  if (!Array.isArray(pos) || pos.length &lt; 2) continue;
+  const x = Number(pos[0]);
+  const y = Number(pos[1]);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+  const clamp = (v) =&gt; Math.min(1, Math.max(0, v));
+  if (x &lt;= 1 &amp;&amp; y &lt;= 1) point = { x: clamp(x), y: clamp(y) };
+  else if (x &lt;= 100 &amp;&amp; y &lt;= 100) point = { x: clamp(x / 100), y: clamp(y / 100) };
+  else if (x &lt;= vision.width &amp;&amp; y &lt;= vision.height) {
+    point = { x: clamp(x / vision.width), y: clamp(y / vision.height) };
+  }
+  if (point) break;
+}
+if (!point) throw new Error('No [x,y] in model output: ' + (text || '(empty)'));
+
+const rect = stage.getBoundingClientRect();
+const el = doc.elementFromPoint(
+  rect.left + point.x * rect.width,
+  rect.top + point.y * rect.height
+);
+if (!el) throw new Error('elementFromPoint returned null');
+el.click();
+
+const submit = doc.getElementById('btn-submit');
+const hitSubmit = el === submit || (submit &amp;&amp; submit.contains(el));
+
+return {
+  canvas,
+  point,
+  text,
+  inferMs: Math.round(performance.now() - t0),
+  hitSubmit,
+  clickedLabel: el.textContent?.trim() || 'element',
+};</code></pre>
             <button type="button" id="btn-run-grounding" class="chip-btn chip-btn--secondary">Run</button>
             <div id="grounding-result" class="snippet-feedback" hidden>
               <p class="snippet-feedback__text"></p>
@@ -174,6 +303,7 @@ console.log('Captured canvas:', canvas);</code></pre>
             <ul class="native-ai-requirements__list">
               <li><a class="flag-link" href="chrome://flags/#optimization-guide-on-device-model"><code>chrome://flags/#optimization-guide-on-device-model</code></a> &rarr; <strong>Enabled BypassPerfRequirement</strong></li>
               <li><a class="flag-link" href="chrome://flags/#prompt-api-for-gemini-nano"><code>chrome://flags/#prompt-api-for-gemini-nano</code></a> &rarr; <strong>Enabled</strong></li>
+              <li><a class="flag-link" href="chrome://flags/#canvas-draw-element"><code>chrome://flags/#canvas-draw-element</code></a> &rarr; <strong>Enabled</strong> (blog capture demos)</li>
               <li>Restart Chrome and check <a class="flag-link" href="chrome://components"><code>chrome://components</code></a></li>
             </ul>
             <div class="modal-footer">

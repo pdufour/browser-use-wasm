@@ -285,7 +285,14 @@ body.browse-app {
 }
 
 .snippet-stage {
-  margin: 0;
+  display: block;
+  margin: 1.25rem 0 1.5rem;
+  padding: 0;
+  border: none;
+  max-width: 22rem;
+}
+
+.snippet-stage > #snippet-stage {
   padding: 1.35rem 1.5rem;
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -461,8 +468,12 @@ body.browse-app {
   animation: snippet-toast-burst 0.55s ease-out 0.05s forwards;
 }
 
-#snippet-stage {
+#snippet-canvas {
   margin: 1.25rem 0 1.5rem;
+}
+
+#snippet-stage {
+  margin: 0;
 }
 
 .snippet-code-note {

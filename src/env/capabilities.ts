@@ -1,8 +1,10 @@
 /**
  * Browser environment checks — what can load and run here.
- * wllama needs cross-origin isolation (COOP/COEP) for SharedArrayBuffer and
- * WebGPU (Chrome/Edge) for usable inference speed.
+ * wllama needs cross-origin isolation (COOP/COEP) for SharedArrayBuffer,
+ * WebGPU, and native JSPI (`WebAssembly.Suspending`).
  */
+
+import { hasNativeJspi, jspiDiagnostics } from '../wllama/jspi-shim.ts';
 
 function navigatorGpu(): unknown {
   return (navigator as Navigator & { gpu?: unknown }).gpu;
@@ -29,15 +31,21 @@ export function getWllamaEnvIssues(): string[] {
   if (!navigatorGpu()) {
     issues.push('WebGPU not supported in this browser');
   }
+  if (!hasNativeJspi()) {
+    const { mode } = jspiDiagnostics();
+    issues.push(
+      `JSPI not available (mode=${mode}) — use Chrome 137+ or Firefox with javascript.options.wasm_js_promise_integration in about:config`
+    );
+  }
   return issues;
 }
 
-/** Main-thread WebGPU + JSPI signal (the worker probe is authoritative). */
+/** Main-thread WebGPU signal (worker probe is authoritative). */
 export function hasMainThreadWebGpu(): boolean {
-  return !!(
-    navigatorGpu() && (WebAssembly as unknown as { Suspending?: unknown }).Suspending
-  );
+  return !!navigatorGpu();
 }
+
+export { hasNativeJspi, jspiDiagnostics } from '../wllama/jspi-shim.ts';
 
 /** Approximate device RAM in GB (Chrome only; undefined elsewhere). */
 export function deviceMemoryGb(): number | undefined {

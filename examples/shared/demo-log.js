@@ -1,4 +1,5 @@
 /** Lightweight console diagnostics for browse/video demos (filter: demo:). */
+import { jspiDiagnostics } from 'browser-use-wasm';
 
 const params = new URLSearchParams(location.search);
 const verbose = params.has('debug') || params.get('log') === '1';
@@ -27,6 +28,7 @@ export function demoWarn(scope, message, data) {
 
 /** @param {string} scope */
 export function demoLogEnv(scope) {
+  const jspi = jspiDiagnostics();
   demoLog(scope, 'environment', {
     href: location.href,
     base: import.meta.env.BASE_URL,
@@ -34,9 +36,16 @@ export function demoLogEnv(scope) {
     search: location.search,
     crossOriginIsolated: globalThis.crossOriginIsolated,
     sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
+    jspiEnabled: jspi.enabled,
+    jspiMode: jspi.mode,
+    jspiSuspending: jspi.suspending,
+    jspiPromising: jspi.promising,
     pagesBuild: globalThis.__PAGES_BUILD__ ?? null,
     verbose,
   });
+  console.info(
+    `[demo:${scope}] JSPI ${jspi.enabled ? 'enabled' : 'disabled'} (mode=${jspi.mode}, Suspending=${jspi.suspending}, promising=${jspi.promising})`
+  );
 }
 
 /** @param {string} phase */

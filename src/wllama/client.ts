@@ -3,6 +3,7 @@ import type { VlLoadParamOverrides } from '../config/vl.ts';
 import type { KvCacheType } from '../config/models/types.ts';
 import type { PerfSnapshot } from '../util/perf.ts';
 import type { EncodeWorkerSuccess } from '../snapdom/encode-worker.ts';
+import type { JspiDiagnostics } from './jspi-shim.ts';
 import type { ChatCompletionMessage } from '@wllama/wllama';
 
 /**
@@ -87,6 +88,7 @@ export interface WorkerFailure extends WorkerReplyBase {
 export interface ProbeResult extends WorkerReplyBase {
   ok: true;
   webgpu: boolean;
+  jspi?: JspiDiagnostics;
 }
 
 export interface LoadResult extends WorkerReplyBase {

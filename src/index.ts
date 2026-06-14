@@ -65,6 +65,13 @@ export { BROWSER_TOOL_DEFINITIONS } from './browser-tools/catalog.ts';
 
 // Environment gating — what can load and run in this browser
 export {
+  hasNativeJspi,
+  jspiDiagnostics,
+  jspiMode,
+  logJspiSupport,
+} from './wllama/jspi-shim.ts';
+export type { JspiDiagnostics, JspiMode } from './wllama/jspi-shim.ts';
+export {
   getWllamaEnvIssues,
   hasMainThreadWebGpu,
   deviceMemoryGb,

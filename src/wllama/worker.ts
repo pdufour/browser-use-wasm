@@ -1,4 +1,5 @@
 import './browser-shim.ts';
+import { jspiDiagnostics, logJspiSupport } from './jspi-shim.ts';
 import { buildVlWllamaLoadParams, DEFAULT_MODEL_ID } from '../config/vl.ts';
 import { getCurrentModel } from '../config/models/registry.ts';
 import { resolveRegistryModelSourceDetailed } from './model-sources.ts';
@@ -36,12 +37,11 @@ function reply(id: string, payload: Record<string, unknown>, transfer: Transfera
   self.postMessage({ id, ...payload }, transfer);
 }
 
-function probeWebGpu(): boolean {
-  return !!(
-    (navigator as Navigator & { gpu?: unknown }).gpu &&
-    (WebAssembly as { Suspending?: unknown }).Suspending
-  );
+function hasWebGpu(): boolean {
+  return !!(navigator as Navigator & { gpu?: unknown }).gpu;
 }
+
+logJspiSupport('wllama-worker:init');
 
 // llama.cpp's chat-template self-test prints rendered template dumps to stdout on every load
 // (`parser generation prompt:`, `--- Reasoning & Content Structure ---`, `--- Tool Call Structure ---`,
@@ -151,7 +151,8 @@ self.onmessage = async (event: MessageEvent) => {
     ensureDomPolyfill(baseURI);
 
     if (type === 'probe') {
-      reply(id, { ok: true, webgpu: probeWebGpu() });
+      logJspiSupport('wllama-worker:probe');
+      reply(id, { ok: true, webgpu: hasWebGpu(), jspi: jspiDiagnostics() });
       return;
     }
 
@@ -248,6 +249,7 @@ self.onmessage = async (event: MessageEvent) => {
       await instance.loadModelFromUrl(source, loadOptions);
       perf.mark('loadModelFromUrl done');
       loadedModelId = modelId;
+      logJspiSupport('wllama-worker:load');
 
       reply(id, {
         ok: true,
