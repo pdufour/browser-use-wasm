@@ -124,6 +124,7 @@ export {
 export { clearMarker, drawMarker, relayoutMarker } from './ui/marker.ts';
 export { createGroundingCursor } from './ui/grounding-cursor.ts';
 export type { GroundingCursor, GroundingStep } from './ui/grounding-cursor.ts';
+export { injectCursorOverlayStyles } from './ui/cursor-overlay-styles.ts';
 
 // Voice
 export { createVoiceNavController } from './voice/controller.ts';
