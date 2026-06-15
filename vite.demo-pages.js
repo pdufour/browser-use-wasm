@@ -14,6 +14,7 @@ export const DEMO_PAGES = [
   { id: 'browse', route: '/browse', dir: 'examples/browse' },
   { id: 'video', route: '/video', dir: 'examples/video' },
   { id: 'gemma-nano', route: '/gemma-nano', dir: 'examples/gemma-nano' },
+  { id: 'substack', route: '/substack', dir: 'docs/substack' },
 ];
 
 /** Old per-fixture demo routes → gallery or browse presets. */

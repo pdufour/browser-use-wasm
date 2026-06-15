@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser-use pipeline — Substack diagram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #e8eaed;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --accent: #16a34a;
+        --blue: #2563eb;
+        --blue-soft: #eff6ff;
+        --amber: #d97706;
+        --amber-soft: #fffbeb;
+        --green: #059669;
+        --green-soft: #ecfdf5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background-color: var(--bg);
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+        background-size: 24px 24px;
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        padding: 2rem 1.25rem 3rem;
+      }
+
+      .page {
+        max-width: 58rem;
+        margin: 0 auto;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .toolbar h1 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .toolbar .hint-substack {
+        margin: 0.5rem 0 0;
+        font-size: 0.78rem;
+        color: #64748b;
+        flex: 1 1 100%;
+      }
+
+      .toolbar__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      button {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 0.84rem;
+        font-weight: 600;
+        padding: 0.48rem 0.9rem;
+        cursor: pointer;
+      }
+
+      button:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+      }
+
+      button.primary {
+        background: var(--accent);
+        border-color: #15803d;
+        color: #fff;
+      }
+
+      button.primary:hover {
+        filter: brightness(1.05);
+      }
+
+      #export-root {
+        width: 1040px;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 2.25rem 2.5rem 2.5rem;
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid #e8ecf1;
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04),
+          0 16px 48px rgba(15, 23, 42, 0.08);
+        transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        overflow: visible;
+      }
+
+      #export-root.dark {
+        background: #0f172a;
+        border-color: #334155;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.2),
+          0 16px 48px rgba(0, 0, 0, 0.35);
+      }
+
+      .export-head {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .export-head__eyebrow {
+        display: inline-block;
+        margin: 0 0 0.65rem;
+        padding: 0.28rem 0.7rem;
+        border-radius: 999px;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .export-head__title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #0f172a;
+      }
+
+      #export-root.dark .export-head__title {
+        color: #f1f5f9;
+      }
+
+      .export-head__sub {
+        margin: 0.5rem 0 0;
+        font-size: 0.92rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      #export-root.dark .export-head__sub {
+        color: #94a3b8;
+      }
+
+      #export-root.dark .export-head__eyebrow {
+        background: #064e3b;
+        border-color: #059669;
+        color: #6ee7b7;
+      }
+
+      /* ── Pipeline diagram ── */
+      .pipeline {
+        position: relative;
+        width: 100%;
+        padding: 1.75rem 1.25rem 1.5rem;
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.07), transparent 55%),
+          linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e8edf4;
+        overflow-x: auto;
+      }
+
+      #export-root.dark .pipeline {
+        background:
+          radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12), transparent 55%),
+          linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        border-color: #334155;
+      }
+
+      .pipeline__grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: stretch;
+        gap: 0;
+        min-width: 880px;
+      }
+
+      @media (max-width: 920px) {
+        .pipeline {
+          overflow-x: visible;
+          padding: 1.25rem 1rem 1.25rem;
+        }
+
+        .pipeline__grid {
+          min-width: 0;
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+        }
+
+        .connector {
+          padding: 0.35rem 0;
+          min-width: 0;
+          transform: rotate(90deg);
+        }
+
+        .connector__label {
+          transform: rotate(-90deg);
+        }
+
+        .stage__panel {
+          min-height: 0;
+        }
+      }
+
+      /* PNG/SVG export always uses the wide horizontal layout */
+      #export-root.exporting .pipeline {
+        overflow-x: visible;
+      }
+
+      #export-root.exporting .pipeline__grid {
+        min-width: 880px;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        gap: 0;
+      }
+
+      #export-root.exporting .connector {
+        padding: 2.5rem 0.35rem 0;
+        min-width: 4.5rem;
+        transform: none;
+      }
+
+      #export-root.exporting .connector__label {
+        transform: none;
+      }
+
+      .stage {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        min-width: 0;
+      }
+
+      .stage__head {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 0.15rem;
+      }
+
+      .stage__num {
+        width: 1.65rem;
+        height: 1.65rem;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .stage--capture .stage__num {
+        background: var(--blue-soft);
+        color: var(--blue);
+        border: 1.5px solid #93c5fd;
+      }
+
+      .stage--ground .stage__num {
+        background: var(--amber-soft);
+        color: var(--amber);
+        border: 1.5px solid #fcd34d;
+      }
+
+      .stage--act .stage__num {
+        background: var(--green-soft);
+        color: var(--green);
+        border: 1.5px solid #6ee7b7;
+      }
+
+      #export-root.dark .stage--capture .stage__num {
+        background: #1e3a5f;
+        color: #93c5fd;
+        border-color: #3b82f6;
+      }
+
+      #export-root.dark .stage--ground .stage__num {
+        background: #422006;
+        color: #fcd34d;
+        border-color: #f59e0b;
+      }
+
+      #export-root.dark .stage--act .stage__num {
+        background: #064e3b;
+        color: #6ee7b7;
+        border-color: #10b981;
+      }
+
+      .stage__title {
+        margin: 0;
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+
+      #export-root.dark .stage__title {
+        color: #94a3b8;
+      }
+
+      .stage__panel {
+        flex: 1;
+        padding: 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      #export-root.dark .stage__panel {
+        background: #1e293b;
+        border-color: #475569;
+      }
+
+      .stage--capture .stage__panel {
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+      }
+
+      .stage--ground .stage__panel {
+        box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.08);
+      }
+
+      .stage--act .stage__panel {
+        box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.08);
+      }
+
+      .node {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 1rem 1.05rem;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid #e8edf4;
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04),
+          0 6px 20px rgba(15, 23, 42, 0.06);
+      }
+
+      #export-root.dark .node {
+        background: #1e293b;
+        border-color: #475569;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.2),
+          0 6px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      .node--hero {
+        padding: 1.35rem 1.15rem;
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .node__icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      .node--hero .node__icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 16px;
+      }
+
+      .node__icon svg {
+        width: 1.45rem;
+        height: 1.45rem;
+      }
+
+      .node--hero .node__icon svg {
+        width: 1.85rem;
+        height: 1.85rem;
+      }
+
+      .node--capture .node__icon {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .node--ground .node__icon {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+
+      .node--act .node__icon {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      #export-root.dark .node--capture .node__icon {
+        background: #1e3a5f;
+        color: #60a5fa;
+      }
+
+      #export-root.dark .node--ground .node__icon {
+        background: #422006;
+        color: #fbbf24;
+      }
+
+      #export-root.dark .node--act .node__icon {
+        background: #064e3b;
+        color: #34d399;
+      }
+
+      .node__body {
+        min-width: 0;
+      }
+
+      .node__title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+      }
+
+      #export-root.dark .node__title {
+        color: #f1f5f9;
+      }
+
+      .node__sub {
+        margin: 0.2rem 0 0;
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.4;
+      }
+
+      #export-root.dark .node__sub {
+        color: #94a3b8;
+      }
+
+      .node__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: center;
+        margin-top: 0.55rem;
+      }
+
+      .chip {
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+
+      #export-root.dark .chip {
+        background: #334155;
+        color: #cbd5e1;
+        border-color: #475569;
+      }
+
+      .connector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 0.35rem 0;
+        min-width: 4.5rem;
+      }
+
+      .connector__arrow {
+        width: 3.25rem;
+        height: 1.5rem;
+        color: var(--blue);
+        opacity: 0.85;
+      }
+
+      #export-root.dark .connector__arrow {
+        color: #60a5fa;
+      }
+
+      .connector__label {
+        margin: 0.45rem 0 0;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      #export-root.dark .connector__label {
+        color: #64748b;
+      }
+
+      .intra-arrow {
+        display: flex;
+        justify-content: center;
+        padding: 0.15rem 0;
+        color: #94a3b8;
+      }
+
+      .intra-arrow svg {
+        width: 1.1rem;
+        height: 1.1rem;
+      }
+
+      #export-root.dark .intra-arrow {
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="toolbar">
+        <div>
+          <h1>Substack diagram</h1>
+          <p><code>http://127.0.0.1:5173/substack/</code></p>
+          <p class="hint-substack">
+            Substack image blocks need <strong>PNG</strong> (upload the file). SVG paste / data URIs often fail.
+          </p>
+        </div>
+        <div class="toolbar__actions">
+          <button type="button" id="btn-theme">Dark frame</button>
+          <button type="button" id="btn-svg">Download SVG</button>
+          <button type="button" id="btn-png" class="primary">PNG for Substack (2×)</button>
+        </div>
+      </div>
+
+      <div id="export-root">
+        <header class="export-head">
+          <p class="export-head__eyebrow">100% client-side</p>
+          <h2 class="export-head__title">How browser-use works</h2>
+          <p class="export-head__sub">
+            Screenshot → vision model → click on the live page. No server.
+          </p>
+        </header>
+
+        <div id="diagram-host" class="pipeline" aria-label="Pipeline diagram">
+          <div class="pipeline__grid">
+            <!-- 1 Capture -->
+            <section class="stage stage--capture">
+              <div class="stage__head">
+                <span class="stage__num">1</span>
+                <h3 class="stage__title">Capture</h3>
+              </div>
+              <div class="stage__panel">
+                <article class="node node--capture">
+                  <div class="node__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="14" rx="2"/>
+                      <path d="M7 20h10"/>
+                      <path d="M9 16v4"/>
+                      <path d="M15 16v4"/>
+                    </svg>
+                  </div>
+                  <div class="node__body">
+                    <p class="node__title">Live page</p>
+                    <p class="node__sub">iframe or DOM under your app</p>
+                  </div>
+                </article>
+                <div class="intra-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M12 5v14"/><path d="m7 14 5 5 5-5"/>
+                  </svg>
+                </div>
+                <article class="node node--capture">
+                  <div class="node__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <path d="m21 15-5-5L5 21"/>
+                    </svg>
+                  </div>
+                  <div class="node__body">
+                    <p class="node__title">Screenshot buffer</p>
+                    <p class="node__sub">SnapDOM or drawElementImage</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <div class="connector" aria-hidden="true">
+              <svg class="connector__arrow" viewBox="0 0 52 24" fill="none">
+                <path d="M2 12h38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="m36 5 8 7-8 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="connector__label">pixels</p>
+            </div>
+
+            <!-- 2 Ground -->
+            <section class="stage stage--ground">
+              <div class="stage__head">
+                <span class="stage__num">2</span>
+                <h3 class="stage__title">Ground</h3>
+              </div>
+              <div class="stage__panel">
+                <article class="node node--ground node--hero">
+                  <div class="node__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3a7 7 0 0 1 7 7c0 3-2 5.5-4 7l-3 4-3-4c-2-1.5-4-4-4-7a7 7 0 0 1 7-7z"/>
+                      <circle cx="12" cy="10" r="2.5"/>
+                    </svg>
+                  </div>
+                  <div class="node__body">
+                    <p class="node__title">Vision model</p>
+                    <p class="node__sub">Task + screenshot → normalized x, y</p>
+                    <div class="node__chips">
+                      <span class="chip">ShowUI</span>
+                      <span class="chip">Gemini Nano</span>
+                      <span class="chip">any VLM</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <div class="connector" aria-hidden="true">
+              <svg class="connector__arrow" viewBox="0 0 52 24" fill="none">
+                <path d="M2 12h38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="m36 5 8 7-8 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="connector__label">coords</p>
+            </div>
+
+            <!-- 3 Act -->
+            <section class="stage stage--act">
+              <div class="stage__head">
+                <span class="stage__num">3</span>
+                <h3 class="stage__title">Act</h3>
+              </div>
+              <div class="stage__panel">
+                <article class="node node--act node--hero">
+                  <div class="node__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 4l7 16 2.5-6.5L20 11z"/>
+                    </svg>
+                  </div>
+                  <div class="node__body">
+                    <p class="node__title">DOM action</p>
+                    <p class="node__sub">elementFromPoint at grounded point</p>
+                    <div class="node__chips">
+                      <span class="chip">click</span>
+                      <span class="chip">type</span>
+                      <span class="chip">select</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./diagram.js"></script>
+  </body>
+</html>
