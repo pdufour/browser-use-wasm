@@ -45,7 +45,7 @@
       }
 
       .page {
-        max-width: 58rem;
+        max-width: 75rem;
         margin: 0 auto;
       }
 
@@ -105,8 +105,7 @@
       }
 
       #export-root {
-        width: 1040px;
-        max-width: 100%;
+        width: 100%;
         margin: 0 auto;
         padding: 2.25rem 2.5rem 2.5rem;
         background: #fff;
@@ -127,54 +126,6 @@
           0 16px 48px rgba(0, 0, 0, 0.35);
       }
 
-      .export-head {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      .export-head__eyebrow {
-        display: inline-block;
-        margin: 0 0 0.65rem;
-        padding: 0.28rem 0.7rem;
-        border-radius: 999px;
-        background: #ecfdf5;
-        border: 1px solid #bbf7d0;
-        color: #15803d;
-        font-size: 0.68rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .export-head__title {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        color: #0f172a;
-      }
-
-      #export-root.dark .export-head__title {
-        color: #f1f5f9;
-      }
-
-      .export-head__sub {
-        margin: 0.5rem 0 0;
-        font-size: 0.92rem;
-        color: #64748b;
-        font-weight: 500;
-      }
-
-      #export-root.dark .export-head__sub {
-        color: #94a3b8;
-      }
-
-      #export-root.dark .export-head__eyebrow {
-        background: #064e3b;
-        border-color: #059669;
-        color: #6ee7b7;
-      }
-
       /* ── Pipeline diagram ── */
       .pipeline {
         position: relative;
@@ -185,7 +136,7 @@
           radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.07), transparent 55%),
           linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
         border: 1px solid #e8edf4;
-        overflow-x: auto;
+        overflow: visible;
       }
 
       #export-root.dark .pipeline {
@@ -197,58 +148,78 @@
 
       .pipeline__grid {
         display: grid;
-        grid-template-columns: 1fr auto 1fr auto 1fr;
+        grid-template-columns: 1fr 5rem 2fr;
         align-items: stretch;
         gap: 0;
-        min-width: 880px;
+        width: 100%;
       }
 
-      @media (max-width: 920px) {
-        .pipeline {
-          overflow-x: visible;
-          padding: 1.25rem 1rem 1.25rem;
-        }
-
-        .pipeline__grid {
-          min-width: 0;
-          grid-template-columns: 1fr;
-          gap: 0.5rem;
-        }
-
-        .connector {
-          padding: 0.35rem 0;
-          min-width: 0;
-          transform: rotate(90deg);
-        }
-
-        .connector__label {
-          transform: rotate(-90deg);
-        }
-
-        .stage__panel {
-          min-height: 0;
-        }
-      }
-
-      /* PNG/SVG export always uses the wide horizontal layout */
-      #export-root.exporting .pipeline {
-        overflow-x: visible;
+      #export-root.exporting {
+        width: 1200px;
+        max-width: none;
       }
 
       #export-root.exporting .pipeline__grid {
-        min-width: 880px;
-        grid-template-columns: 1fr auto 1fr auto 1fr;
+        grid-template-columns: 1fr 5rem 2fr;
+      }
+
+      .stage--loop .stage__num {
+        background: linear-gradient(135deg, var(--amber-soft) 50%, var(--green-soft) 50%);
+        color: #92400e;
+        border: 1.5px solid #fcd34d;
+      }
+
+      #export-root.dark .stage--loop .stage__num {
+        background: linear-gradient(135deg, #422006 50%, #064e3b 50%);
+        color: #fde68a;
+        border-color: #f59e0b;
+      }
+
+      .stage__panel--loop {
+        gap: 0.85rem;
+      }
+
+      .loop__row {
+        display: grid;
+        grid-template-columns: 1fr 4rem 1fr;
+        align-items: stretch;
         gap: 0;
       }
 
-      #export-root.exporting .connector {
-        padding: 2.5rem 0.35rem 0;
-        min-width: 4.5rem;
-        transform: none;
+      .connector--inline {
+        padding: 2rem 0 0;
       }
 
-      #export-root.exporting .connector__label {
-        transform: none;
+      .loop-return {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 10px;
+        border: 1px dashed #cbd5e1;
+        background: rgba(255, 255, 255, 0.6);
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      #export-root.dark .loop-return {
+        border-color: #475569;
+        background: rgba(15, 23, 42, 0.5);
+        color: #94a3b8;
+      }
+
+      .loop-return__arrow {
+        width: 2rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+        color: var(--blue);
+        opacity: 0.85;
+      }
+
+      #export-root.dark .loop-return__arrow {
+        color: #60a5fa;
       }
 
       .stage {
@@ -471,6 +442,11 @@
         margin-top: 0.55rem;
       }
 
+      .node:not(.node--hero) .node__chips {
+        justify-content: flex-start;
+        margin-top: 0.45rem;
+      }
+
       .chip {
         font-size: 0.68rem;
         font-weight: 600;
@@ -492,8 +468,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 2.5rem 0.35rem 0;
-        min-width: 4.5rem;
+        padding: 2.5rem 0.5rem 0;
       }
 
       .connector__arrow {
@@ -537,6 +512,1061 @@
       #export-root.dark .intra-arrow {
         color: #64748b;
       }
+
+      /* ── Capture comparison (Option 1 vs 2) ── */
+      .section-gap {
+        height: 1.75rem;
+      }
+
+      #capture-export-root {
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 2.25rem 2.25rem;
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid #e8ecf1;
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04),
+          0 16px 48px rgba(15, 23, 42, 0.08);
+      }
+
+      #capture-export-root.dark {
+        background: #0f172a;
+        border-color: #334155;
+      }
+
+      .capture-intro {
+        margin: 0 0 1.25rem;
+        font-size: 0.92rem;
+        color: #475569;
+        max-width: 52rem;
+      }
+
+      #capture-export-root.dark .capture-intro {
+        color: #94a3b8;
+      }
+
+      .capture-compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .capture-option {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #capture-export-root.dark .capture-option {
+        border-color: #475569;
+      }
+
+      .capture-option--bad {
+        opacity: 0.92;
+      }
+
+      .capture-option--good {
+        border-color: #86efac;
+        box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.15);
+      }
+
+      #capture-export-root.dark .capture-option--good {
+        border-color: #059669;
+      }
+
+      .capture-option--future {
+        border-color: #93c5fd;
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+      }
+
+      #capture-export-root.dark .capture-option--future {
+        border-color: #3b82f6;
+      }
+
+      .capture-option__head {
+        padding: 0.75rem 1rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .capture-option--bad .capture-option__head {
+        background: #fef2f2;
+        color: #b91c1c;
+      }
+
+      .capture-option--good .capture-option__head {
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .capture-option--future .capture-option__head {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+
+      #capture-export-root.dark .capture-option--bad .capture-option__head {
+        background: #450a0a;
+        color: #fca5a5;
+      }
+
+      #capture-export-root.dark .capture-option--good .capture-option__head {
+        background: #064e3b;
+        color: #6ee7b7;
+      }
+
+      #capture-export-root.dark .capture-option--future .capture-option__head {
+        background: #1e3a5f;
+        color: #93c5fd;
+      }
+
+      .capture-option__body {
+        padding: 1rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .capture-mock {
+        margin: 0;
+        padding: 0.85rem 0.9rem;
+        border-radius: 10px;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.62rem;
+        line-height: 1.45;
+        overflow: hidden;
+        max-height: 11rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      #capture-export-root.dark .capture-mock {
+        background: #020617;
+      }
+
+      .capture-mock .dim {
+        color: #64748b;
+      }
+
+      .capture-mock .warn {
+        color: #f87171;
+      }
+
+      .capture-mock .ok {
+        color: #4ade80;
+      }
+
+      .capture-visual {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: linear-gradient(180deg, #f8fafc, #eef2f7);
+        padding: 0.75rem;
+        min-height: 11rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      #capture-export-root.dark .capture-visual {
+        border-color: #475569;
+        background: linear-gradient(180deg, #1e293b, #0f172a);
+      }
+
+      .capture-visual__frame {
+        flex: 1;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 7.5rem;
+      }
+
+      #capture-export-root.dark .capture-visual__frame {
+        background: #334155;
+        border-color: #475569;
+      }
+
+      .capture-screenshot__chrome {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.55rem;
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.58rem;
+        color: #64748b;
+      }
+
+      #capture-export-root.dark .capture-screenshot__chrome {
+        background: #1e293b;
+        border-color: #475569;
+        color: #94a3b8;
+      }
+
+      .capture-screenshot__dots {
+        letter-spacing: 0.12em;
+        font-size: 0.45rem;
+        color: #94a3b8;
+      }
+
+      .capture-screenshot__url {
+        flex: 1;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        font-family: ui-monospace, monospace;
+        font-size: 0.52rem;
+      }
+
+      #capture-export-root.dark .capture-screenshot__url {
+        background: #0f172a;
+        border-color: #475569;
+      }
+
+      .capture-screenshot__bitmap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.85rem 0.5rem;
+        background:
+          linear-gradient(135deg, #f8fafc 25%, #e2e8f0 25%, #e2e8f0 50%, #f8fafc 50%, #f8fafc 75%, #e2e8f0 75%);
+        background-size: 12px 12px;
+        text-align: center;
+      }
+
+      #capture-export-root.dark .capture-screenshot__bitmap {
+        background:
+          linear-gradient(135deg, #334155 25%, #475569 25%, #475569 50%, #334155 50%, #334155 75%, #475569 75%);
+        background-size: 12px 12px;
+      }
+
+      .capture-screenshot__bitmap svg {
+        width: 1.75rem;
+        height: 1.75rem;
+        color: #64748b;
+        opacity: 0.85;
+      }
+
+      #capture-export-root.dark .capture-screenshot__bitmap svg {
+        color: #94a3b8;
+      }
+
+      .capture-screenshot__label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #475569;
+      }
+
+      #capture-export-root.dark .capture-screenshot__label {
+        color: #cbd5e1;
+      }
+
+      .capture-screenshot__dims {
+        font-size: 0.55rem;
+        font-family: ui-monospace, monospace;
+        color: #64748b;
+      }
+
+      #capture-export-root.dark .capture-screenshot__dims {
+        color: #94a3b8;
+      }
+
+      .capture-visual__tag {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #2563eb;
+      }
+
+      .capture-visual__tag--future {
+        color: #1d4ed8;
+      }
+
+      .capture-visual__tokens {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #15803d;
+      }
+
+      .capture-visual__tokens--future {
+        color: #1d4ed8;
+      }
+
+      #capture-export-root.dark .capture-visual__tokens {
+        color: #6ee7b7;
+      }
+
+      #capture-export-root.dark .capture-visual__tokens--future {
+        color: #93c5fd;
+      }
+
+      #capture-export-root.dark .capture-visual__tag {
+        color: #60a5fa;
+      }
+
+      #capture-export-root.dark .capture-visual__tag--future {
+        color: #93c5fd;
+      }
+
+      .capture-api {
+        margin: 0;
+        padding: 0.75rem 0.85rem;
+        border-radius: 10px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.58rem;
+        line-height: 1.5;
+        color: #1e3a8a;
+        white-space: pre-wrap;
+      }
+
+      #capture-export-root.dark .capture-api {
+        background: #0f172a;
+        border-color: #334155;
+        color: #bfdbfe;
+      }
+
+      .capture-api .kw {
+        color: #2563eb;
+      }
+
+      #capture-export-root.dark .capture-api .kw {
+        color: #60a5fa;
+      }
+
+      .capture-status {
+        display: inline-block;
+        margin-top: 0.35rem;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      #capture-export-root.dark .capture-status {
+        background: #1e3a5f;
+        color: #93c5fd;
+      }
+
+      .capture-option__note {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.45;
+      }
+
+      #capture-export-root.dark .capture-option__note {
+        color: #94a3b8;
+      }
+
+      .capture-stats {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+        margin-top: 1.25rem;
+      }
+
+      .capture-stats th,
+      .capture-stats td {
+        padding: 0.55rem 0.65rem;
+        text-align: left;
+        border-bottom: 1px solid #e8edf4;
+        font-weight: 700;
+      }
+
+      .capture-stats th {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #64748b;
+        background: #f8fafc;
+      }
+
+      .capture-stats td:nth-child(2),
+      .capture-stats td:nth-child(3),
+      .capture-stats th:nth-child(2),
+      .capture-stats th:nth-child(3) {
+        color: #b91c1c;
+        font-weight: 800;
+      }
+
+      .capture-stats td:last-child,
+      .capture-stats th:last-child {
+        color: #15803d;
+        font-weight: 800;
+      }
+
+      #capture-export-root.dark .capture-stats th {
+        background: #1e293b;
+        color: #94a3b8;
+        border-color: #334155;
+      }
+
+      #capture-export-root.dark .capture-stats td {
+        border-color: #334155;
+      }
+
+      #capture-export-root.dark .capture-stats td:nth-child(2),
+      #capture-export-root.dark .capture-stats td:nth-child(3),
+      #capture-export-root.dark .capture-stats th:nth-child(2),
+      #capture-export-root.dark .capture-stats th:nth-child(3) {
+        color: #fca5a5;
+      }
+
+      #capture-export-root.dark .capture-stats td:last-child,
+      #capture-export-root.dark .capture-stats th:last-child {
+        color: #6ee7b7;
+      }
+
+      .capture-stats .num {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .capture-footnote {
+        margin: 0.75rem 0 0;
+        font-size: 0.68rem;
+        color: #94a3b8;
+        line-height: 1.45;
+      }
+
+      #capture-export-root.dark .capture-footnote {
+        color: #64748b;
+      }
+
+      #export-root.exporting,
+      #capture-export-root.exporting,
+      #libs-export-root.exporting,
+      #snapdom-export-root.exporting,
+      #drift-export-root.exporting {
+        width: 1200px;
+        max-width: none;
+      }
+
+      /* ── Shared card shell for extra diagrams ── */
+      .export-card {
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 2.25rem 2.25rem;
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid #e8ecf1;
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.04),
+          0 16px 48px rgba(15, 23, 42, 0.08);
+      }
+
+      .export-card.dark {
+        background: #0f172a;
+        border-color: #334155;
+      }
+
+      .export-card__intro {
+        margin: 0 0 1.25rem;
+        font-size: 0.92rem;
+        color: #475569;
+        max-width: 54rem;
+        line-height: 1.55;
+      }
+
+      .export-card.dark .export-card__intro {
+        color: #94a3b8;
+      }
+
+      .export-card__intro strong {
+        color: #0f172a;
+      }
+
+      .export-card.dark .export-card__intro strong {
+        color: #f1f5f9;
+      }
+
+      /* ── JS capture library landscape ── */
+      .lib-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+        align-items: stretch;
+      }
+
+      .lib-col {
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .export-card.dark .lib-col {
+        border-color: #475569;
+      }
+
+      .lib-col--native {
+        border-color: #93c5fd;
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+      }
+
+      .export-card.dark .lib-col--native {
+        border-color: #3b82f6;
+      }
+
+      .lib-col--procedural {
+        border-color: #fcd34d;
+      }
+
+      .lib-col--foreign {
+        border-color: #86efac;
+        box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.15);
+      }
+
+      .export-card.dark .lib-col--foreign {
+        border-color: #059669;
+      }
+
+      .lib-col__head {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+        line-height: 1.35;
+      }
+
+      .lib-col--native .lib-col__head {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+
+      .lib-col--procedural .lib-col__head {
+        background: #fffbeb;
+        color: #92400e;
+      }
+
+      .lib-col--foreign .lib-col__head {
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .export-card.dark .lib-col--native .lib-col__head {
+        background: #1e3a5f;
+        color: #93c5fd;
+      }
+
+      .export-card.dark .lib-col--procedural .lib-col__head {
+        background: #422006;
+        color: #fde68a;
+      }
+
+      .export-card.dark .lib-col--foreign .lib-col__head {
+        background: #064e3b;
+        color: #6ee7b7;
+      }
+
+      .lib-col__body {
+        padding: 0.85rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .lib-entry {
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e8edf4;
+      }
+
+      .export-card.dark .lib-entry {
+        background: #1e293b;
+        border-color: #475569;
+      }
+
+      .lib-entry--pick {
+        background: #ecfdf5;
+        border-color: #86efac;
+        box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.2);
+      }
+
+      .export-card.dark .lib-entry--pick {
+        background: #064e3b;
+        border-color: #059669;
+      }
+
+      .lib-entry__name {
+        margin: 0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .export-card.dark .lib-entry__name {
+        color: #f1f5f9;
+      }
+
+      .lib-entry__meta {
+        margin: 0.15rem 0 0;
+        font-size: 0.68rem;
+        color: #64748b;
+        line-height: 1.4;
+      }
+
+      .export-card.dark .lib-entry__meta {
+        color: #94a3b8;
+      }
+
+      .lib-entry__stars {
+        display: inline-block;
+        font-weight: 700;
+        color: #d97706;
+      }
+
+      .export-card.dark .lib-entry__stars {
+        color: #fbbf24;
+      }
+
+      .lib-flow {
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        border: 1px dashed #cbd5e1;
+        background: rgba(248, 250, 252, 0.8);
+        font-size: 0.78rem;
+        color: #475569;
+        line-height: 1.5;
+      }
+
+      .export-card.dark .lib-flow {
+        border-color: #475569;
+        background: rgba(15, 23, 42, 0.5);
+        color: #94a3b8;
+      }
+
+      .lib-flow strong {
+        color: #15803d;
+      }
+
+      .export-card.dark .lib-flow strong {
+        color: #6ee7b7;
+      }
+
+      /* ── SnapDOM pipeline ── */
+      .snapdom-flow {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        padding: 1.25rem 0.5rem;
+        overflow-x: auto;
+      }
+
+      .snapdom-step {
+        flex: 1;
+        min-width: 7.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+      }
+
+      .snapdom-step__box {
+        width: 100%;
+        padding: 0.85rem 0.65rem;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid #e8edf4;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        min-height: 5.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+      }
+
+      .export-card.dark .snapdom-step__box {
+        background: #1e293b;
+        border-color: #475569;
+      }
+
+      .snapdom-step__box--live {
+        border-color: #93c5fd;
+        background: var(--blue-soft);
+      }
+
+      .export-card.dark .snapdom-step__box--live {
+        background: #1e3a5f;
+        border-color: #3b82f6;
+      }
+
+      .snapdom-step__box--bitmap {
+        border-color: #86efac;
+        background: var(--green-soft);
+      }
+
+      .export-card.dark .snapdom-step__box--bitmap {
+        background: #064e3b;
+        border-color: #059669;
+      }
+
+      .snapdom-step__icon {
+        font-size: 1.35rem;
+        line-height: 1;
+      }
+
+      .snapdom-step__title {
+        margin: 0;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .export-card.dark .snapdom-step__title {
+        color: #f1f5f9;
+      }
+
+      .snapdom-step__sub {
+        margin: 0;
+        font-size: 0.65rem;
+        color: #64748b;
+        line-height: 1.35;
+      }
+
+      .export-card.dark .snapdom-step__sub {
+        color: #94a3b8;
+      }
+
+      .snapdom-arrow {
+        display: flex;
+        align-items: center;
+        padding: 2rem 0.25rem 0;
+        color: var(--blue);
+        flex-shrink: 0;
+      }
+
+      .export-card.dark .snapdom-arrow {
+        color: #60a5fa;
+      }
+
+      .snapdom-arrow svg {
+        width: 2rem;
+        height: 1.25rem;
+      }
+
+      .snapdom-reasons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.65rem;
+        margin-top: 0.75rem;
+      }
+
+      .snapdom-reason {
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #475569;
+        line-height: 1.35;
+        text-align: center;
+      }
+
+      .export-card.dark .snapdom-reason {
+        background: #1e293b;
+        border-color: #475569;
+        color: #cbd5e1;
+      }
+
+      /* ── Vertical drift debug timeline ── */
+      .drift-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        position: relative;
+        padding-left: 1.75rem;
+      }
+
+      .drift-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.55rem;
+        top: 0.5rem;
+        bottom: 0.5rem;
+        width: 2px;
+        background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+        border-radius: 1px;
+      }
+
+      .export-card.dark .drift-timeline::before {
+        background: linear-gradient(180deg, #475569, #334155);
+      }
+
+      .drift-item {
+        position: relative;
+        padding: 0.65rem 0 0.65rem 0.85rem;
+      }
+
+      .drift-item::before {
+        content: '';
+        position: absolute;
+        left: -1.45rem;
+        top: 1rem;
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 2px solid #94a3b8;
+      }
+
+      .drift-item--fail::before {
+        border-color: #f87171;
+        background: #fef2f2;
+      }
+
+      .drift-item--partial::before {
+        border-color: #fbbf24;
+        background: #fffbeb;
+      }
+
+      .drift-item--found::before {
+        border-color: #34d399;
+        background: #ecfdf5;
+      }
+
+      .export-card.dark .drift-item::before {
+        background: #0f172a;
+      }
+
+      .export-card.dark .drift-item--fail::before {
+        background: #450a0a;
+        border-color: #f87171;
+      }
+
+      .export-card.dark .drift-item--partial::before {
+        background: #422006;
+        border-color: #fbbf24;
+      }
+
+      .export-card.dark .drift-item--found::before {
+        background: #064e3b;
+        border-color: #34d399;
+      }
+
+      .drift-item__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.45rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .drift-item__title {
+        margin: 0;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .export-card.dark .drift-item__title {
+        color: #f1f5f9;
+      }
+
+      .drift-item__badge {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.12rem 0.4rem;
+        border-radius: 999px;
+      }
+
+      .drift-item--fail .drift-item__badge {
+        background: #fef2f2;
+        color: #b91c1c;
+      }
+
+      .drift-item--partial .drift-item__badge {
+        background: #fffbeb;
+        color: #92400e;
+      }
+
+      .drift-item--found .drift-item__badge {
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .export-card.dark .drift-item--fail .drift-item__badge {
+        background: #450a0a;
+        color: #fca5a5;
+      }
+
+      .export-card.dark .drift-item--partial .drift-item__badge {
+        background: #422006;
+        color: #fde68a;
+      }
+
+      .export-card.dark .drift-item--found .drift-item__badge {
+        background: #064e3b;
+        color: #6ee7b7;
+      }
+
+      .drift-item__body {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.45;
+        max-width: 52rem;
+      }
+
+      .export-card.dark .drift-item__body {
+        color: #94a3b8;
+      }
+
+      .drift-compare {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .export-card.dark .drift-compare {
+        border-color: #334155;
+      }
+
+      .drift-layer {
+        padding: 0.85rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+      }
+
+      .export-card.dark .drift-layer {
+        border-color: #475569;
+      }
+
+      .drift-layer--ok {
+        border-color: #86efac;
+        background: #ecfdf5;
+      }
+
+      .drift-layer--bad {
+        border-color: #fca5a5;
+        background: #fef2f2;
+      }
+
+      .export-card.dark .drift-layer--ok {
+        background: #064e3b;
+        border-color: #059669;
+      }
+
+      .export-card.dark .drift-layer--bad {
+        background: #450a0a;
+        border-color: #dc2626;
+      }
+
+      .drift-layer__label {
+        margin: 0;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+
+      .export-card.dark .drift-layer__label {
+        color: #94a3b8;
+      }
+
+      .drift-layer__note {
+        margin: 0.35rem 0 0;
+        font-size: 0.72rem;
+        color: #64748b;
+        line-height: 1.4;
+      }
+
+      .export-card.dark .drift-layer__note {
+        color: #cbd5e1;
+      }
+
+      .dpr-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.74rem;
+        margin-top: 0.75rem;
+      }
+
+      .dpr-table th,
+      .dpr-table td {
+        padding: 0.45rem 0.55rem;
+        text-align: left;
+        border: 1px solid #e2e8f0;
+      }
+
+      .export-card.dark .dpr-table th,
+      .export-card.dark .dpr-table td {
+        border-color: #475569;
+      }
+
+      .dpr-table th {
+        background: #f8fafc;
+        font-weight: 800;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+      }
+
+      .export-card.dark .dpr-table th {
+        background: #1e293b;
+        color: #94a3b8;
+      }
+
+      @media (max-width: 900px) {
+        .capture-compare {
+          grid-template-columns: 1fr;
+        }
+
+        .lib-grid,
+        .snapdom-reasons,
+        .drift-compare {
+          grid-template-columns: 1fr;
+        }
+
+        .snapdom-flow {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .snapdom-arrow {
+          padding: 0;
+          justify-content: center;
+          transform: rotate(90deg);
+        }
+      }
     </style>
   </head>
   <body>
@@ -552,19 +1582,15 @@
         <div class="toolbar__actions">
           <button type="button" id="btn-theme">Dark frame</button>
           <button type="button" id="btn-svg">Download SVG</button>
-          <button type="button" id="btn-png" class="primary">PNG for Substack (2×)</button>
+          <button type="button" id="btn-png" class="primary">PNG pipeline (2×)</button>
+          <button type="button" id="btn-png-capture">PNG capture (2×)</button>
+          <button type="button" id="btn-png-libs">PNG libraries (2×)</button>
+          <button type="button" id="btn-png-snapdom">PNG snapdom (2×)</button>
+          <button type="button" id="btn-png-drift">PNG drift (2×)</button>
         </div>
       </div>
 
       <div id="export-root">
-        <header class="export-head">
-          <p class="export-head__eyebrow">100% client-side</p>
-          <h2 class="export-head__title">How browser-use works</h2>
-          <p class="export-head__sub">
-            Screenshot → vision model → click on the live page. No server.
-          </p>
-        </header>
-
         <div id="diagram-host" class="pipeline" aria-label="Pipeline diagram">
           <div class="pipeline__grid">
             <!-- 1 Capture -->
@@ -603,7 +1629,11 @@
                   </div>
                   <div class="node__body">
                     <p class="node__title">Screenshot buffer</p>
-                    <p class="node__sub">SnapDOM or drawElementImage</p>
+                    <p class="node__sub">Bitmap the VLA reads — not the live DOM tree</p>
+                    <div class="node__chips">
+                      <span class="chip">SnapDOM</span>
+                      <span class="chip">drawElementImage</span>
+                    </div>
                   </div>
                 </article>
               </div>
@@ -617,66 +1647,384 @@
               <p class="connector__label">pixels</p>
             </div>
 
-            <!-- 2 Ground -->
-            <section class="stage stage--ground">
+            <!-- 2 Agent loop: VLA → Act, then re-capture -->
+            <section class="stage stage--loop">
               <div class="stage__head">
                 <span class="stage__num">2</span>
-                <h3 class="stage__title">Ground</h3>
+                <h3 class="stage__title">Agent loop</h3>
               </div>
-              <div class="stage__panel">
-                <article class="node node--ground node--hero">
-                  <div class="node__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 3a7 7 0 0 1 7 7c0 3-2 5.5-4 7l-3 4-3-4c-2-1.5-4-4-4-7a7 7 0 0 1 7-7z"/>
-                      <circle cx="12" cy="10" r="2.5"/>
-                    </svg>
-                  </div>
-                  <div class="node__body">
-                    <p class="node__title">Vision model</p>
-                    <p class="node__sub">Task + screenshot → normalized x, y</p>
-                    <div class="node__chips">
-                      <span class="chip">ShowUI</span>
-                      <span class="chip">Gemini Nano</span>
-                      <span class="chip">any VLM</span>
+              <div class="stage__panel stage__panel--loop">
+                <div class="loop__row">
+                  <article class="node node--ground node--hero">
+                    <div class="node__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a7 7 0 0 1 7 7c0 3-2 5.5-4 7l-3 4-3-4c-2-1.5-4-4-4-7a7 7 0 0 1 7-7z"/>
+                        <circle cx="12" cy="10" r="2.5"/>
+                      </svg>
                     </div>
+                    <div class="node__body">
+                      <p class="node__title">VLA grounding</p>
+                      <p class="node__sub">Task + screenshot → action dict(s) with position</p>
+                      <div class="node__chips">
+                        <span class="chip">CLICK</span>
+                        <span class="chip">INPUT</span>
+                        <span class="chip">ENTER</span>
+                      </div>
+                    </div>
+                  </article>
+
+                  <div class="connector connector--inline" aria-hidden="true">
+                    <svg class="connector__arrow" viewBox="0 0 52 24" fill="none">
+                      <path d="M2 12h38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                      <path d="m36 5 8 7-8 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <p class="connector__label">actions</p>
                   </div>
-                </article>
+
+                  <article class="node node--act node--hero">
+                    <div class="node__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4l7 16 2.5-6.5L20 11z"/>
+                      </svg>
+                    </div>
+                    <div class="node__body">
+                      <p class="node__title">Act on live DOM</p>
+                      <p class="node__sub">elementFromPoint at each position</p>
+                      <div class="node__chips">
+                        <span class="chip">click</span>
+                        <span class="chip">type</span>
+                        <span class="chip">select</span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <div class="loop-return" aria-hidden="true">
+                  <svg class="loop-return__arrow" viewBox="0 0 48 20" fill="none">
+                    <path d="M46 10H10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="m16 4-6 6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Page changed → re-capture screenshot → VLA again (until task done)</span>
+                </div>
               </div>
             </section>
+          </div>
+        </div>
+      </div>
 
-            <div class="connector" aria-hidden="true">
-              <svg class="connector__arrow" viewBox="0 0 52 24" fill="none">
-                <path d="M2 12h38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="m36 5 8 7-8 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <p class="connector__label">coords</p>
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="capture-export-root">
+        <p class="capture-intro">
+          <strong>Capture</strong> is the first step in browser-use. Four ways to turn a live page into something a model can act on — only options 3 and 4 scale for vision agents. Token numbers are <strong>estimated LLM context</strong> (options 1–2) or a <strong>fixed VLA vision budget</strong> (options 3–4).
+        </p>
+
+        <div class="capture-compare">
+          <article class="capture-option capture-option--bad">
+            <div class="capture-option__head">Option 1 — DOM + text LLM</div>
+            <div class="capture-option__body">
+              <pre class="capture-mock" aria-label="Example text prompt"><span class="dim">SYSTEM: Output click coords from the DOM below.</span>
+
+<span class="dim">TASK: click Submit</span>
+
+&lt;div id="checkout" …&gt; … <span class="warn">~1.4k tokens HTML alone</span> …
+&lt;/div&gt;
+
+&lt;style&gt; … <span class="warn">+ computed CSS → ~10k total</span> …
+&lt;/style&gt;</pre>
+              <p class="capture-option__note">
+                HTML alone is huge on real sites. Styles still don’t show layout, overlap, or iframes the way the user sees them.
+              </p>
             </div>
+          </article>
 
-            <!-- 3 Act -->
-            <section class="stage stage--act">
-              <div class="stage__head">
-                <span class="stage__num">3</span>
-                <h3 class="stage__title">Act</h3>
-              </div>
-              <div class="stage__panel">
-                <article class="node node--act node--hero">
-                  <div class="node__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M4 4l7 16 2.5-6.5L20 11z"/>
+          <article class="capture-option capture-option--bad">
+            <div class="capture-option__head">Option 2 — CSS selectors + text LLM</div>
+            <div class="capture-option__body">
+              <pre class="capture-mock" aria-label="Example selector output"><span class="dim">TASK: click the Order button</span>
+
+LLM → <span class="warn">button.btn-primary</span>
+     <span class="warn">#checkout-form &gt; div:nth-child(2) button</span>
+
+<span class="warn">Cross-origin iframe → no DOM access</span>
+<span class="warn">Two “Cancel” buttons → which one?</span>
+<span class="warn">Icon-only button → no text to match</span></pre>
+              <p class="capture-option__note">
+                I didn’t ship this path — selectors rot on every deploy, and iframe traversal hits security walls.
+              </p>
+            </div>
+          </article>
+
+          <article class="capture-option capture-option--good">
+            <div class="capture-option__head">Option 3 — Screenshot via clone libs → VLA</div>
+            <div class="capture-option__body">
+              <div class="capture-visual" aria-label="Clone library screenshot capture">
+                <span class="capture-visual__tag">SnapDOM / html-to-image — SVG foreignObject → canvas</span>
+                <div class="capture-visual__frame">
+                  <div class="capture-screenshot__chrome">
+                    <span class="capture-screenshot__dots" aria-hidden="true">●●●</span>
+                    <span class="capture-screenshot__url">clone DOM → rasterize</span>
+                  </div>
+                  <div class="capture-screenshot__bitmap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                      <rect x="3" y="5" width="18" height="14" rx="2"/>
+                      <circle cx="8.5" cy="10.5" r="1.5"/>
+                      <path d="m21 16-5.5-5.5L5 19"/>
                     </svg>
+                    <span class="capture-screenshot__label">fast enough for voice</span>
+                    <span class="capture-screenshot__dims">~2px text drift (FO vs compositor)</span>
                   </div>
-                  <div class="node__body">
-                    <p class="node__title">DOM action</p>
-                    <p class="node__sub">elementFromPoint at grounded point</p>
-                    <div class="node__chips">
-                      <span class="chip">click</span>
-                      <span class="chip">type</span>
-                      <span class="chip">select</span>
-                    </div>
-                  </div>
-                </article>
+                </div>
+                <span class="capture-visual__tokens">→ ~290–672 vision tokens (fixed budget)</span>
               </div>
-            </section>
+              <p class="capture-option__note">
+                What I ship today in <a href="https://github.com/pdufour/browser-use-wasm">browser-use-wasm</a>. html2canvas redraws procedurally; SnapDOM optimizes the foreignObject path — still not the browser’s native paint engine.
+              </p>
+            </div>
+          </article>
+
+          <article class="capture-option capture-option--future">
+            <div class="capture-option__head">Option 4 — HTML-in-Canvas (native spec) → VLA</div>
+            <div class="capture-option__body">
+              <pre class="capture-api" aria-label="HTML-in-Canvas capture sketch"><span class="kw">&lt;canvas</span> layoutsubtree<span class="kw">&gt;</span>
+  <span class="kw">&lt;div</span> id="capture-target"<span class="kw">&gt;</span>…live page…<span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/canvas&gt;</span>
+
+canvas.onpaint = () =&gt; {
+  ctx.drawElementImage(capture_target, 0, 0);
+  // compositor paint — same path as live page
+};</pre>
+              <span class="capture-status">Chrome flag · not drop-in yet</span>
+              <p class="capture-option__note">
+                <a href="https://github.com/WICG/html-in-canvas">WICG HTML-in-Canvas</a> (<span class="lib-entry__stars">★3.6k</span>) — <code>drawElementImage()</code> records the browser’s painted output, bypassing SVG foreignObject. Enable with <code>chrome://flags/#canvas-draw-element</code>.
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <table class="capture-stats" aria-label="Context token comparison">
+          <thead>
+            <tr>
+              <th>Page (measured)</th>
+              <th>HTML only (tokens)</th>
+              <th>HTML + CSS (tokens)</th>
+              <th>Screenshot (VLA tokens)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Checkout fixture (this repo)</td>
+              <td class="bad num">~1.4k</td>
+              <td class="bad num">~10k</td>
+              <td class="num">~290–672</td>
+            </tr>
+            <tr>
+              <td>Hacker News (typical lean page)</td>
+              <td class="bad num">~10k</td>
+              <td class="bad num">~12k</td>
+              <td class="num">~290–672</td>
+            </tr>
+            <tr>
+              <td>MDN docs article</td>
+              <td class="bad num">~45k</td>
+              <td class="bad num">~67k</td>
+              <td class="num">~290–672</td>
+            </tr>
+            <tr>
+              <td>Wikipedia article</td>
+              <td class="bad num">~84k</td>
+              <td class="bad num">~204k</td>
+              <td class="num">~290–672</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="capture-footnote">
+          Options 1–2: tokens ≈ characters ÷ 3.5 (live <code>outerHTML</code> + computed stylesheet rules). Options 3–4: same fixed ShowUI vision-token budget (~290–672), regardless of page size — only the <strong>capture engine</strong> differs. WebGPU/WASM text models often cap at ~2k–4k context (<a href="https://github.com/huggingface/transformers.js/issues/1697">transformers.js #1697</a>).
+        </p>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="libs-export-root" class="export-card">
+        <p class="export-card__intro">
+          JavaScript has had DOM-to-screenshot libraries for years. They fall into <strong>three families</strong> — only one path uses the browser compositor today, and that one still needs a Chrome flag.
+        </p>
+        <div class="lib-grid">
+          <div class="lib-col lib-col--native">
+            <div class="lib-col__head">Native compositor paint</div>
+            <div class="lib-col__body">
+              <article class="lib-entry">
+                <p class="lib-entry__name"><a href="https://github.com/WICG/html-in-canvas">html-in-canvas</a></p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★3,632</span> · WICG spec · <code>drawElementImage()</code></p>
+                <p class="lib-entry__meta">Same paint path as the live page. Chrome flag only — not a drop-in library yet.</p>
+              </article>
+            </div>
+          </div>
+          <div class="lib-col lib-col--procedural">
+            <div class="lib-col__head">Procedural canvas redraw</div>
+            <div class="lib-col__body">
+              <article class="lib-entry">
+                <p class="lib-entry__name"><a href="https://github.com/niklasvh/html2canvas">html2canvas</a></p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★31,878</span> · clones DOM, redraws with canvas commands</p>
+              </article>
+              <article class="lib-entry">
+                <p class="lib-entry__name"><a href="https://github.com/yorickshan/html2canvas-pro">html2canvas-pro</a></p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★522</span> · maintained fork</p>
+              </article>
+            </div>
+          </div>
+          <div class="lib-col lib-col--foreign">
+            <div class="lib-col__head">foreignObject clone → SVG → canvas</div>
+            <div class="lib-col__body">
+              <article class="lib-entry">
+                <p class="lib-entry__name"><a href="https://github.com/bubkoo/html-to-image">html-to-image</a></p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★7,166</span> · serializes clone as SVG</p>
+              </article>
+              <article class="lib-entry lib-entry--pick">
+                <p class="lib-entry__name"><a href="https://github.com/zumerlab/snapdom">SnapDOM</a> ← shipped</p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★7,848</span> · optimized foreignObject path + plugins</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <p class="lib-flow">
+          <strong>Why SnapDOM:</strong> near-realtime capture for voice loops · handles video/canvas in the bitmap · no per-element DOM listeners · still fast enough to re-capture every agent turn. Trade-off: SVG layout ≈ live page, but raster step can drift ~2px on text (<a href="https://github.com/zumerlab/snapdom/issues/421">snapdom #421</a>).
+        </p>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="snapdom-export-root" class="export-card">
+        <p class="export-card__intro">
+          <strong>SnapDOM capture pipeline</strong> — what happens between “Capture page” and the JPEG the VLA reads. Not the compositor; a clone-and-rasterize shortcut.
+        </p>
+        <div class="snapdom-flow" aria-label="SnapDOM pipeline">
+          <div class="snapdom-step">
+            <div class="snapdom-step__box snapdom-step__box--live">
+              <span class="snapdom-step__icon" aria-hidden="true">🌐</span>
+              <p class="snapdom-step__title">Live DOM</p>
+              <p class="snapdom-step__sub">#capture-target under your app</p>
+            </div>
+          </div>
+          <div class="snapdom-arrow" aria-hidden="true">
+            <svg viewBox="0 0 32 20" fill="none"><path d="M2 10h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m20 4 8 6-8 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="snapdom-step">
+            <div class="snapdom-step__box">
+              <span class="snapdom-step__icon" aria-hidden="true">📋</span>
+              <p class="snapdom-step__title">Off-screen clone</p>
+              <p class="snapdom-step__sub">inline computed styles + fonts</p>
+            </div>
+          </div>
+          <div class="snapdom-arrow" aria-hidden="true">
+            <svg viewBox="0 0 32 20" fill="none"><path d="M2 10h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m20 4 8 6-8 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="snapdom-step">
+            <div class="snapdom-step__box">
+              <span class="snapdom-step__icon" aria-hidden="true">📐</span>
+              <p class="snapdom-step__title">SVG foreignObject</p>
+              <p class="snapdom-step__sub">layout in SVG space</p>
+            </div>
+          </div>
+          <div class="snapdom-arrow" aria-hidden="true">
+            <svg viewBox="0 0 32 20" fill="none"><path d="M2 10h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m20 4 8 6-8 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="snapdom-step">
+            <div class="snapdom-step__box">
+              <span class="snapdom-step__icon" aria-hidden="true">🖼</span>
+              <p class="snapdom-step__title">Canvas raster</p>
+              <p class="snapdom-step__sub">DPR × CSS px → device pixels</p>
+            </div>
+          </div>
+          <div class="snapdom-arrow" aria-hidden="true">
+            <svg viewBox="0 0 32 20" fill="none"><path d="M2 10h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m20 4 8 6-8 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="snapdom-step">
+            <div class="snapdom-step__box snapdom-step__box--bitmap">
+              <span class="snapdom-step__icon" aria-hidden="true">🎯</span>
+              <p class="snapdom-step__title">JPEG / PNG buffer</p>
+              <p class="snapdom-step__sub">→ VLA vision encoder</p>
+            </div>
+          </div>
+        </div>
+        <div class="snapdom-reasons">
+          <div class="snapdom-reason">Near-realtime — voice re-capture every turn</div>
+          <div class="snapdom-reason">Video / WebGL visible in the bitmap</div>
+          <div class="snapdom-reason">No per-element mutation listeners</div>
+          <div class="snapdom-reason">LLM sees what the user sees (iframe included)</div>
+        </div>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="drift-export-root" class="export-card">
+        <p class="export-card__intro">
+          <strong>Vertical drift</strong> — text in the screenshot sits ~2px lower than the live page. Not a timing bug; the break happens when SVG becomes canvas pixels. Everything tried before accepting that:
+        </p>
+        <div class="drift-timeline">
+          <article class="drift-item drift-item--fail">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">Wait longer before capture</h4>
+              <span class="drift-item__badge">No fix</span>
+            </div>
+            <p class="drift-item__body">Fonts loaded, image decode, extra rAF passes, intervals, double/triple capture passes — text still shifted. Not a readiness problem.</p>
+          </article>
+          <article class="drift-item drift-item--partial">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">Font metric mirror plugin</h4>
+              <span class="drift-item__badge">Partial</span>
+            </div>
+            <p class="drift-item__body">Canvas-measured sizes, fake @font-face rules, forced font-size/line-height on clone. Helps a little on system-ui; does not kill the ~2px canvas jump. SVG layout was already close — raster step is where it breaks (<a href="https://tonsky.me/blog/font-size/">tonsky on font-size</a>).</p>
+          </article>
+          <article class="drift-item drift-item--fail">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">deviceBackingSize — floor / round / ceil</h4>
+              <span class="drift-item__badge">No fix</span>
+            </div>
+            <p class="drift-item__body">316.3 CSS px × DPR 2 = 632.6 device px — must pick an integer. Ceil sometimes hung capture; round/floor didn’t fix medY drift either.</p>
+            <table class="dpr-table" aria-label="deviceBackingSize rounding">
+              <thead><tr><th>632.6 →</th><th>Effect</th></tr></thead>
+              <tbody>
+                <tr><td>floor → 632</td><td>Shrink bitmap — may clip bottom</td></tr>
+                <tr><td>round → 633</td><td>Nearest pixel — SnapDOM default</td></tr>
+                <tr><td>ceil → 633</td><td>Round up — extra empty band; sometimes broke capture</td></tr>
+              </tbody>
+            </table>
+          </article>
+          <article class="drift-item drift-item--fail">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">Genetic search — 25,000 capture recipes</h4>
+              <span class="drift-item__badge">No fix</span>
+            </div>
+            <p class="drift-item__body">Mutate plugins, CSS flags, timing knobs; score medY + fullPage. Kept rediscovering the same Pareto cliff and “cheating” mutants (landmark fix, broken full-page) — not a real fix.</p>
+          </article>
+          <article class="drift-item drift-item--fail">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">CSS contain / isolation on clone</h4>
+              <span class="drift-item__badge">No fix</span>
+            </div>
+            <p class="drift-item__body"><code>contain: strict</code>, <code>isolation: isolate</code> — stacking-context experiments. Same plateau.</p>
+          </article>
+          <article class="drift-item drift-item--found">
+            <div class="drift-item__head">
+              <h4 class="drift-item__title">Root cause — three-layer ink comparison</h4>
+              <span class="drift-item__badge">Found it</span>
+            </div>
+            <p class="drift-item__body">Overlay live page, SVG, and canvas; match ink positions letter-by-letter. Live ≈ SVG; canvas raster diverges ~2px. Fix when HTML-in-Canvas lands — or let authors opt into predictable fonts.</p>
+          </article>
+        </div>
+        <div class="drift-compare" aria-label="Where drift appears">
+          <div class="drift-layer drift-layer--ok">
+            <p class="drift-layer__label">Live page</p>
+            <p class="drift-layer__note">Compositor paint — ground truth</p>
+          </div>
+          <div class="drift-layer drift-layer--ok">
+            <p class="drift-layer__label">SVG foreignObject</p>
+            <p class="drift-layer__note">Layout ≈ live (~0px medY)</p>
+          </div>
+          <div class="drift-layer drift-layer--bad">
+            <p class="drift-layer__label">Canvas bitmap</p>
+            <p class="drift-layer__note">~2px text shift — VLA reads this layer</p>
           </div>
         </div>
       </div>

@@ -6,13 +6,15 @@ Generic tutorial outline — not tied to Gemini Nano or a single library.
 
 ## Hook
 
-Browser automation without a server: screenshot the page, ask a vision model where to click, act on the live DOM.
+Browser automation without a server: **capture → VLA → act → re-capture** until the task finishes.
 
 ---
 
 ## Pipeline (diagram)
 
-`Live page → capture → vision model → DOM action at [x, y]`
+`Capture → (VLA → Act)+` — the parenthesized steps repeat every turn.
+
+ShowUI navigation mode can emit **several dicts in one decode** (e.g. `CLICK` → `INPUT` → `ENTER`). After actions run, the page changes → **new screenshot** → VLA again.
 
 Export PNG from **http://127.0.0.1:5173/substack/** (with `npm run dev`).
 
@@ -33,36 +35,35 @@ Pick one stack; the rest of the loop is the same.
 
 ## Step 2 — Capture the page
 
-The model only sees a **bitmap** of the UI region you will hit-test later. Client-side capture options:
+The model only sees a **bitmap** of the UI region you will hit-test later. Once you’ve picked screenshot + VLA, you still have to **build the bitmap**. Four common paths:
 
-| Approach | Notes |
-|----------|--------|
-| **SnapDOM** | DOM clone → canvas; same-origin iframes; used in this repo’s operator |
-| **drawElementImage** | Chrome HTML-in-Canvas (`chrome://flags/#canvas-draw-element`); native layout raster |
-| **html2canvas / dom-to-image** | Older `foreignObject` SVG path |
-| **Tab / compositor capture** | Extension APIs or `getDisplayMedia` for full viewport |
+| Library | Mechanism | Typical pain |
+|---------|-----------|--------------|
+| **[html2canvas](https://github.com/niklasvh/html2canvas)** | Walk DOM, repaint with canvas 2D commands | Slow; misses a lot of modern CSS; `<canvas>` / `<video>` often blank |
+| **[html-to-image](https://github.com/bubkoo/html-to-image)** | Clone DOM into SVG `foreignObject`, rasterize | Same FO text path as SnapDOM — drift class of bugs; less tuned for realtime |
+| **[SnapDOM](https://github.com/zumerlab/snapdom)** | Optimized FO clone + optional `drawElementImage` when flag is on | Fast enough for voice; still FO→canvas ink issues (~2px drift, [issue #421](https://github.com/zumerlab/snapdom/issues/421)) |
+| **[HTML-in-Canvas](https://github.com/WICG/html-in-canvas)** (WICG) | Native compositor snapshot via `drawElementImage()` / `captureElementImage()` | Chrome flag only (`chrome://flags/#canvas-draw-element`); page must live under a `layoutsubtree` canvas; needs `onpaint` wiring — not a drop-in SnapDOM swap yet |
 
-Runnable example in repo: `snapdom.toCanvas(target, { width, height, dpr, embedFonts: true })`.
+**Why the last row matters:** clone libraries re-implement layout in SVG/canvas. HTML-in-Canvas asks the **browser’s own paint engine** for a snapshot — the same path that draws the live page. That’s the plausible fix for vertical drift; SnapDOM can call it when the flag is on, but agent capture still needs proper `layoutsubtree` + `paint` event plumbing.
 
----
+Runnable example today: `snapdom.toCanvas(target, { width, height, dpr, embedFonts: true })`.
 
-## Step 3 — Ground with a vision model
-
-**Grounding** = screenshot + goal → structured action, usually normalized `[x, y]` on that image.
-
-| Category | Examples |
-|----------|----------|
-| **GUI / VLA** (tuned for web screenshots) | ShowUI-2B, GUI-G2, UI-TARS, MAI-UI |
-| **On-device browser AI** | Gemini Nano + Prompt API |
-| **General VLMs** | Often weaker on pixel coords unless prompted carefully |
-
-ShowUI-style models output dicts like `{'action': 'CLICK', 'position': [0.42, 0.71]}`.
+You re-run capture **every agent turn** after the DOM changes — not just once at the start.
 
 ---
 
-## Step 4 — Execute on the live page
+## Step 3–4 — Agent loop (VLA + Act)
 
-Map norm coords to pixels on the **same** capture root → `elementFromPoint` → click / type / select.
+Each turn:
+
+1. **VLA** — screenshot + task → action dict(s) (`CLICK`, `INPUT`, `ENTER`, …)
+2. **Act** — `elementFromPoint` at each `position` → click / type / select
+3. **Re-capture** — fresh screenshot for the next observation
+4. Repeat until the task is done
+
+**VLA options:** ShowUI-2B, GUI-G2, MAI-UI (WASM in browser); Gemini Nano (Prompt API); cloud VL APIs.
+
+ShowUI [navigation mode](https://huggingface.co/showlab/ShowUI-2B) can return several dicts per decode; grounding-only prompts return a single `[x, y]`.
 
 No label-text DOM lookup for grounding — the vision point must be load-bearing.
 

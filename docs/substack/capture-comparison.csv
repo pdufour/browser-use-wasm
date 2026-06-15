@@ -1,0 +1,5 @@
+Page (measured),HTML only (tokens),HTML + CSS (tokens),Screenshot (VLA tokens)
+Checkout fixture (this repo),~1.4k,~10k,~290–672
+Hacker News (typical lean page),~10k,~12k,~290–672
+MDN docs article,~45k,~67k,~290–672
+Wikipedia article,~84k,~204k,~290–672
