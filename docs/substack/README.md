@@ -8,9 +8,10 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 |------|---------|
 | `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift debug (export cards) |
 | `diagram.js` | Dark frame toggle, PNG/SVG export (5 PNG targets) |
-| `capture-comparison.csv` | Token table data for the comparison card |
+| `capture-comparison.csv` | Token table data (Datawrapper chart `ZUOL7`) |
+| `capture-libraries.csv` | Capture library landscape table — Library column uses markdown GitHub links (Datawrapper `kJYQ5`) |
 | `measure-web-token-limits.mjs` | DOM token counts (Node) + Chrome WebGPU runtime probe |
-| `push-datawrapper-table.mjs` | Private script to push CSV to Datawrapper (optional) |
+| `push-datawrapper-table.mjs` | Push CSVs to Datawrapper (`--tokens`, `--libraries`, or both) |
 | `article-outline.md` | Article draft |
 
 ## Diagram export
@@ -21,27 +22,61 @@ With the dev server already running:
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/substack/** → export PNGs:
+Open **http://127.0.0.1:5173/substack/** — each diagram card has a **PNG** download button (top-right, 2× retina). Toggle **Dark frame** in the toolbar before exporting if needed.
 
-| Button | Diagram |
-|--------|---------|
-| **PNG pipeline (2×)** | Capture → VLA → Act agent loop |
-| **PNG capture (2×)** | Four capture options + token table |
-| **PNG libraries (2×)** | html-in-canvas vs html2canvas vs SnapDOM landscape |
-| **PNG snapdom (2×)** | SnapDOM clone → SVG → canvas pipeline |
-| **PNG drift (2×)** | Vertical drift debugging timeline |
+**Important:** open via `npm run dev` — not `file://` or a static host without `star-history-svgs/`. If SVG assets 404, Vite’s SPA fallback used to inject the homepage HTML into star chart cards (now blocked with an error message).
+
+| Card | PNG filename |
+|------|----------------|
+| Agent pipeline | `browser-use-pipeline-substack.png` |
+| Capture options | `browser-use-capture-substack.png` |
+| Library landscape | `browser-use-libraries-substack.png` |
+| SnapDOM pipeline | `browser-use-snapdom-substack.png` |
+| Vertical drift | `browser-use-drift-substack.png` |
+| Star history (full card) | `browser-use-stars-substack.png` |
+| Star history (combined) | `browser-use-stars-combined-substack.png` |
+| Star history (each repo) | `browser-use-stars-{repo}-substack.png` |
+
+## Star history data
+
+```bash
+node docs/substack/fetch-star-history.mjs
+GITHUB_TOKEN=ghp_… node docs/substack/fetch-star-history.mjs   # full JSON + refresh SVGs
+```
+
+Caches `star-history.json` (GitHub stargazers) and `star-history-svgs/` (star-history.com charts, light + dark).
 
 ## Token measurement
 
 1. **Node** — fetch HTML, tokenize once per page (Qwen2.5 tokenizer)
-2. **Chrome WebGPU** — load a small text LLM, binary-search max working prompt size, report **75%** as practical budget vs DOM sizes
+2. **Chrome WebGPU** — load Qwen2.5-0.5B Instruct (q4), ascending scan until OOM, report **75%** of max working prompt vs DOM sizes
 
 ```bash
 node docs/substack/measure-web-token-limits.mjs
 node docs/substack/measure-web-token-limits.mjs --tokens-only   # skip Chrome probe
+CHROME_PROBE_HEADED=1 node docs/substack/measure-web-token-limits.mjs   # if headless WebGPU fails
 ```
 
-First Chrome run downloads ~300–500 MB from Hugging Face.
+First Chrome run downloads ~300–500 MB. Probe uses `https://example.com` (secure context required for WebGPU).
+
+## Datawrapper
+
+```bash
+export DATAWRAPPER_TOKEN=...   # app.datawrapper.de/account/api-tokens
+node docs/substack/push-datawrapper-table.mjs           # both tables
+node docs/substack/push-datawrapper-table.mjs --libraries
+```
+
+| Chart | CSV | Embed |
+|-------|-----|-------|
+| `ZUOL7` | `capture-comparison.csv` | https://datawrapper.dwcdn.net/ZUOL7/1/ |
+| `kJYQ5` | `capture-libraries.csv` | https://datawrapper.dwcdn.net/kJYQ5/13/ |
+
+The libraries chart uses a **3-column** layout (one family per column) with colored headers, bordered cells, markdown GitHub links, and intro/footer notes matching the HTML export card. Re-push after CSV edits:
+
+```bash
+node docs/substack/push-datawrapper-table.mjs --libraries
+```
 
 ## Draft
 

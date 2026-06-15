@@ -104,6 +104,89 @@
         filter: brightness(1.05);
       }
 
+      /* ── Per-asset PNG download ── */
+      .export-asset {
+        position: relative;
+      }
+
+      .btn-download-png {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.42rem 0.75rem;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        flex-shrink: 0;
+      }
+
+      .btn-download-png:hover {
+        border-color: #15803d;
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .btn-download-png svg {
+        width: 1.05rem;
+        height: 1.05rem;
+        flex-shrink: 0;
+      }
+
+      .export-asset > .btn-download-png {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        z-index: 3;
+      }
+
+      .dark.export-asset > .btn-download-png,
+      .export-card.dark > .btn-download-png {
+        background: #1e293b;
+        border-color: #475569;
+        color: #e2e8f0;
+      }
+
+      .dark.export-asset > .btn-download-png:hover,
+      .export-card.dark > .btn-download-png:hover {
+        background: #064e3b;
+        border-color: #059669;
+        color: #6ee7b7;
+      }
+
+      .btn-download-png--sm {
+        position: static;
+        padding: 0.28rem 0.5rem;
+        font-size: 0.68rem;
+        border-radius: 8px;
+        box-shadow: none;
+      }
+
+      .btn-download-png--sm svg {
+        width: 0.9rem;
+        height: 0.9rem;
+      }
+
+      .star-chart-combined {
+        position: relative;
+      }
+
+      .star-chart-combined > .btn-download-png {
+        position: absolute;
+        top: 0.65rem;
+        right: 0.65rem;
+        z-index: 2;
+      }
+
+      .star-card__head .btn-download-png {
+        margin-left: auto;
+      }
+
       #export-root {
         width: 100%;
         margin: 0 auto;
@@ -957,7 +1040,10 @@
       #capture-export-root.exporting,
       #libs-export-root.exporting,
       #snapdom-export-root.exporting,
-      #drift-export-root.exporting {
+      #drift-export-root.exporting,
+      #stars-export-root.exporting,
+      #star-chart-combined.exporting,
+      .star-card.exporting {
         width: 1200px;
         max-width: none;
       }
@@ -1182,7 +1268,7 @@
 
       .snapdom-step {
         flex: 1;
-        min-width: 7.5rem;
+        min-width: 10.5rem;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1192,17 +1278,18 @@
 
       .snapdom-step__box {
         width: 100%;
-        padding: 0.85rem 0.65rem;
+        padding: 0.85rem 0.75rem;
         border-radius: 14px;
         background: #fff;
         border: 1px solid #e8edf4;
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-        min-height: 5.5rem;
+        min-height: 7.25rem;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.35rem;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 0.4rem;
+        text-align: left;
       }
 
       .export-card.dark .snapdom-step__box {
@@ -1253,6 +1340,102 @@
         line-height: 1.35;
       }
 
+      .snapdom-step__list {
+        margin: 0;
+        padding: 0 0 0 0.95rem;
+        font-size: 0.62rem;
+        line-height: 1.4;
+        color: #64748b;
+        text-align: left;
+      }
+
+      .export-card.dark .snapdom-step__list {
+        color: #94a3b8;
+      }
+
+      .snapdom-step__list li {
+        margin: 0.15rem 0;
+      }
+
+      .snapdom-step__list code {
+        font-size: 0.58rem;
+        padding: 0.05rem 0.25rem;
+        border-radius: 3px;
+        background: #f1f5f9;
+        color: #1e40af;
+      }
+
+      .export-card.dark .snapdom-step__list code {
+        background: #0f172a;
+        color: #93c5fd;
+      }
+
+      .snapdom-step__num {
+        display: inline-grid;
+        place-items: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: #fff;
+        background: #2563eb;
+        flex-shrink: 0;
+      }
+
+      .snapdom-step__head {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        width: 100%;
+      }
+
+      .snapdom-step:nth-child(5) .snapdom-step__num,
+      .snapdom-step:nth-child(9) .snapdom-step__num {
+        background: #059669;
+      }
+
+      .snapdom-step:nth-child(3) .snapdom-step__num {
+        background: #6366f1;
+      }
+
+      .snapdom-step:nth-child(7) .snapdom-step__num {
+        background: #8b5cf6;
+      }
+
+      .snapdom-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .snapdom-header__title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+      }
+
+      .export-card.dark .snapdom-header__title {
+        color: #f8fafc;
+      }
+
+      .snapdom-header__tag {
+        margin: 0;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+      }
+
+      .export-card.dark .snapdom-header__tag {
+        color: #64748b;
+      }
+
       .export-card.dark .snapdom-step__sub {
         color: #94a3b8;
       }
@@ -1260,7 +1443,7 @@
       .snapdom-arrow {
         display: flex;
         align-items: center;
-        padding: 2rem 0.25rem 0;
+        padding: 3.25rem 0.25rem 0;
         color: var(--blue);
         flex-shrink: 0;
       }
@@ -1545,6 +1728,128 @@
         color: #94a3b8;
       }
 
+      /* ── Star history charts ── */
+      .star-section-title {
+        margin: 0 0 0.85rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+
+      .export-card.dark .star-section-title {
+        color: #94a3b8;
+      }
+
+      .star-chart-combined {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 0.75rem;
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+      }
+
+      .export-card.dark .star-chart-combined {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .star-chart__svg-host svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .star-chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.85rem;
+      }
+
+      .star-card {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .export-card.dark .star-card {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .star-card__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid #e8edf4;
+        background: #f8fafc;
+      }
+
+      .export-card.dark .star-card__head {
+        border-color: #334155;
+        background: #0f172a;
+      }
+
+      .star-card__title {
+        margin: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #0f172a;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      .export-card.dark .star-card__title {
+        color: #e2e8f0;
+      }
+
+      .star-card__stars {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: #d97706;
+        white-space: nowrap;
+      }
+
+      .export-card.dark .star-card__stars {
+        color: #fbbf24;
+      }
+
+      .star-card__chart {
+        padding: 0.5rem 0.65rem 0.65rem;
+        min-height: 11rem;
+      }
+
+      .star-card__chart--inter svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .star-card__chart--svg svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .star-chart__empty {
+        margin: 0;
+        padding: 1.25rem 0.5rem;
+        font-size: 0.72rem;
+        line-height: 1.45;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .export-card.dark .star-chart__empty {
+        color: #94a3b8;
+      }
+
       @media (max-width: 900px) {
         .capture-compare {
           grid-template-columns: 1fr;
@@ -1552,7 +1857,8 @@
 
         .lib-grid,
         .snapdom-reasons,
-        .drift-compare {
+        .drift-compare,
+        .star-chart-grid {
           grid-template-columns: 1fr;
         }
 
@@ -1582,15 +1888,22 @@
         <div class="toolbar__actions">
           <button type="button" id="btn-theme">Dark frame</button>
           <button type="button" id="btn-svg">Download SVG</button>
-          <button type="button" id="btn-png" class="primary">PNG pipeline (2×)</button>
-          <button type="button" id="btn-png-capture">PNG capture (2×)</button>
-          <button type="button" id="btn-png-libs">PNG libraries (2×)</button>
-          <button type="button" id="btn-png-snapdom">PNG snapdom (2×)</button>
-          <button type="button" id="btn-png-drift">PNG drift (2×)</button>
         </div>
       </div>
 
-      <div id="export-root">
+      <div id="export-root" class="export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="export-root"
+          data-export-filename="browser-use-pipeline-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
         <div id="diagram-host" class="pipeline" aria-label="Pipeline diagram">
           <div class="pipeline__grid">
             <!-- 1 Capture -->
@@ -1714,7 +2027,19 @@
 
       <div class="section-gap" aria-hidden="true"></div>
 
-      <div id="capture-export-root">
+      <div id="capture-export-root" class="export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="capture-export-root"
+          data-export-filename="browser-use-capture-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
         <p class="capture-intro">
           <strong>Capture</strong> is the first step in browser-use. Four ways to turn a live page into something a model can act on — only options 3 and 4 scale for vision agents. Token numbers are <strong>estimated LLM context</strong> (options 1–2) or a <strong>fixed VLA vision budget</strong> (options 3–4).
         </p>
@@ -1845,7 +2170,19 @@ canvas.onpaint = () =&gt; {
 
       <div class="section-gap" aria-hidden="true"></div>
 
-      <div id="libs-export-root" class="export-card">
+      <div id="libs-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="libs-export-root"
+          data-export-filename="browser-use-libraries-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
         <p class="export-card__intro">
           JavaScript has had DOM-to-screenshot libraries for years. They fall into <strong>three families</strong> — only one path uses the browser compositor today, and that one still needs a Chrome flag.
         </p>
@@ -1856,7 +2193,7 @@ canvas.onpaint = () =&gt; {
               <article class="lib-entry">
                 <p class="lib-entry__name"><a href="https://github.com/WICG/html-in-canvas">html-in-canvas</a></p>
                 <p class="lib-entry__meta"><span class="lib-entry__stars">★3,632</span> · WICG spec · <code>drawElementImage()</code></p>
-                <p class="lib-entry__meta">Same paint path as the live page. Chrome flag only — not a drop-in library yet.</p>
+                <p class="lib-entry__meta">Lets you draw DOM directly onto canvas, requires Chrome flag to be on to activate</p>
               </article>
             </div>
           </div>
@@ -1865,7 +2202,7 @@ canvas.onpaint = () =&gt; {
             <div class="lib-col__body">
               <article class="lib-entry">
                 <p class="lib-entry__name"><a href="https://github.com/niklasvh/html2canvas">html2canvas</a></p>
-                <p class="lib-entry__meta"><span class="lib-entry__stars">★31,878</span> · clones DOM, redraws with canvas commands</p>
+                <p class="lib-entry__meta"><span class="lib-entry__stars">★31,878</span> · clones DOM and computed styles, redraws with canvas commands</p>
               </article>
               <article class="lib-entry">
                 <p class="lib-entry__name"><a href="https://github.com/yorickshan/html2canvas-pro">html2canvas-pro</a></p>
@@ -1888,22 +2225,40 @@ canvas.onpaint = () =&gt; {
           </div>
         </div>
         <p class="lib-flow">
-          <strong>Why SnapDOM:</strong> near-realtime capture for voice loops · handles video/canvas in the bitmap · no per-element DOM listeners · still fast enough to re-capture every agent turn. Trade-off: SVG layout ≈ live page, but raster step can drift ~2px on text (<a href="https://github.com/zumerlab/snapdom/issues/421">snapdom #421</a>).
+          <strong>Why SnapDOM:</strong> near-instantaneous capture (&lt;10ms many times for complex webpages), no complex DOM traversals. Tradeoff: layout composition within an SVG foreignObject is full of quirks.
         </p>
       </div>
 
       <div class="section-gap" aria-hidden="true"></div>
 
-      <div id="snapdom-export-root" class="export-card">
-        <p class="export-card__intro">
-          <strong>SnapDOM capture pipeline</strong> — what happens between “Capture page” and the JPEG the VLA reads. Not the compositor; a clone-and-rasterize shortcut.
-        </p>
-        <div class="snapdom-flow" aria-label="SnapDOM pipeline">
+      <div id="snapdom-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="snapdom-export-root"
+          data-export-filename="browser-use-snapdom-methodology-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
+        <div class="snapdom-header">
+          <h2 class="snapdom-header__title">SnapDOM</h2>
+          <p class="snapdom-header__tag">Clone → Style → Embed → SVG → Canvas</p>
+        </div>
+        <div class="snapdom-flow" aria-label="SnapDOM methodology">
           <div class="snapdom-step">
             <div class="snapdom-step__box snapdom-step__box--live">
-              <span class="snapdom-step__icon" aria-hidden="true">🌐</span>
-              <p class="snapdom-step__title">Live DOM</p>
-              <p class="snapdom-step__sub">#capture-target under your app</p>
+              <div class="snapdom-step__head">
+                <span class="snapdom-step__num" aria-hidden="true">1</span>
+                <p class="snapdom-step__title">Clone</p>
+              </div>
+              <ul class="snapdom-step__list">
+                <li>DOM + metadata</li>
+                <li>Scroll, filled inputs</li>
+              </ul>
             </div>
           </div>
           <div class="snapdom-arrow" aria-hidden="true">
@@ -1911,9 +2266,14 @@ canvas.onpaint = () =&gt; {
           </div>
           <div class="snapdom-step">
             <div class="snapdom-step__box">
-              <span class="snapdom-step__icon" aria-hidden="true">📋</span>
-              <p class="snapdom-step__title">Off-screen clone</p>
-              <p class="snapdom-step__sub">inline computed styles + fonts</p>
+              <div class="snapdom-step__head">
+                <span class="snapdom-step__num" aria-hidden="true">2</span>
+                <p class="snapdom-step__title">Style</p>
+              </div>
+              <ul class="snapdom-step__list">
+                <li><code>getComputedStyle</code></li>
+                <li>Pseudo-elements inlined</li>
+              </ul>
             </div>
           </div>
           <div class="snapdom-arrow" aria-hidden="true">
@@ -1921,9 +2281,14 @@ canvas.onpaint = () =&gt; {
           </div>
           <div class="snapdom-step">
             <div class="snapdom-step__box">
-              <span class="snapdom-step__icon" aria-hidden="true">📐</span>
-              <p class="snapdom-step__title">SVG foreignObject</p>
-              <p class="snapdom-step__sub">layout in SVG space</p>
+              <div class="snapdom-step__head">
+                <span class="snapdom-step__num" aria-hidden="true">3</span>
+                <p class="snapdom-step__title">Embed</p>
+              </div>
+              <ul class="snapdom-step__list">
+                <li>Fonts for SVG context</li>
+                <li>Images → data URLs</li>
+              </ul>
             </div>
           </div>
           <div class="snapdom-arrow" aria-hidden="true">
@@ -1931,9 +2296,14 @@ canvas.onpaint = () =&gt; {
           </div>
           <div class="snapdom-step">
             <div class="snapdom-step__box">
-              <span class="snapdom-step__icon" aria-hidden="true">🖼</span>
-              <p class="snapdom-step__title">Canvas raster</p>
-              <p class="snapdom-step__sub">DPR × CSS px → device pixels</p>
+              <div class="snapdom-step__head">
+                <span class="snapdom-step__num" aria-hidden="true">4</span>
+                <p class="snapdom-step__title">Serialize</p>
+              </div>
+              <ul class="snapdom-step__list">
+                <li>Wrap in <code>&lt;foreignObject&gt;</code></li>
+                <li>Full page inside SVG</li>
+              </ul>
             </div>
           </div>
           <div class="snapdom-arrow" aria-hidden="true">
@@ -1941,23 +2311,34 @@ canvas.onpaint = () =&gt; {
           </div>
           <div class="snapdom-step">
             <div class="snapdom-step__box snapdom-step__box--bitmap">
-              <span class="snapdom-step__icon" aria-hidden="true">🎯</span>
-              <p class="snapdom-step__title">JPEG / PNG buffer</p>
-              <p class="snapdom-step__sub">→ VLA vision encoder</p>
+              <div class="snapdom-step__head">
+                <span class="snapdom-step__num" aria-hidden="true">5</span>
+                <p class="snapdom-step__title">Render</p>
+              </div>
+              <ul class="snapdom-step__list">
+                <li>SVG → <code>&lt;canvas&gt;</code></li>
+                <li>Export PNG · JPG</li>
+              </ul>
             </div>
           </div>
-        </div>
-        <div class="snapdom-reasons">
-          <div class="snapdom-reason">Near-realtime — voice re-capture every turn</div>
-          <div class="snapdom-reason">Video / WebGL visible in the bitmap</div>
-          <div class="snapdom-reason">No per-element mutation listeners</div>
-          <div class="snapdom-reason">LLM sees what the user sees (iframe included)</div>
         </div>
       </div>
 
       <div class="section-gap" aria-hidden="true"></div>
 
-      <div id="drift-export-root" class="export-card">
+      <div id="drift-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="drift-export-root"
+          data-export-filename="browser-use-drift-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
         <p class="export-card__intro">
           <strong>Vertical drift</strong> — text in the screenshot sits ~2px lower than the live page. Not a timing bug; the break happens when SVG becomes canvas pixels. Everything tried before accepting that:
         </p>
@@ -2027,6 +2408,50 @@ canvas.onpaint = () =&gt; {
             <p class="drift-layer__note">~2px text shift — VLA reads this layer</p>
           </div>
         </div>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="stars-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="stars-export-root"
+          data-export-filename="browser-use-stars-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
+        <p class="export-card__intro">
+          <strong>GitHub star history</strong> for every capture library in the article — combined growth and per-repo charts. Data from <a href="https://star-history.com">star-history.com</a> (full history via GitHub stargazers). Re-fetch: <code>node docs/substack/fetch-star-history.mjs</code> (<code>GITHUB_TOKEN</code> recommended).
+        </p>
+
+        <h3 class="star-section-title">All libraries — cumulative stars</h3>
+        <div id="star-chart-combined" class="star-chart-combined export-asset">
+          <button
+            type="button"
+            class="btn-download-png btn-download-png--sm"
+            data-export-target="star-chart-combined"
+            data-export-filename="browser-use-stars-combined-substack.png"
+            title="Download combined chart PNG (2×)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+            </svg>
+            PNG
+          </button>
+          <div class="star-chart__svg-host" aria-label="Combined star history chart"></div>
+        </div>
+
+        <h3 class="star-section-title">Individual repositories</h3>
+        <div id="star-chart-grid" class="star-chart-grid" aria-label="Individual star history charts"></div>
+
+        <p class="capture-footnote">
+          html2canvas launched ~2012 and dominates by stars; html-in-canvas is newer WICG spec work; SnapDOM and html-to-image grew on the foreignObject path. Charts cached in <code>docs/substack/star-history-svgs/</code>.
+        </p>
       </div>
     </div>
 

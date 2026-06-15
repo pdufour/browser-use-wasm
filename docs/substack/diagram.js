@@ -1,17 +1,14 @@
 import { toPng, toSvg } from 'html-to-image';
+import { initStarCharts } from './star-charts.js';
 
 const exportRoot = document.getElementById('export-root');
 const captureExportRoot = document.getElementById('capture-export-root');
 const libsExportRoot = document.getElementById('libs-export-root');
 const snapdomExportRoot = document.getElementById('snapdom-export-root');
 const driftExportRoot = document.getElementById('drift-export-root');
+const starsExportRoot = document.getElementById('stars-export-root');
 const btnTheme = document.getElementById('btn-theme');
 const btnSvg = document.getElementById('btn-svg');
-const btnPng = document.getElementById('btn-png');
-const btnPngCapture = document.getElementById('btn-png-capture');
-const btnPngLibs = document.getElementById('btn-png-libs');
-const btnPngSnapdom = document.getElementById('btn-png-snapdom');
-const btnPngDrift = document.getElementById('btn-png-drift');
 
 const themedRoots = [
   exportRoot,
@@ -19,7 +16,10 @@ const themedRoots = [
   libsExportRoot,
   snapdomExportRoot,
   driftExportRoot,
+  starsExportRoot,
 ];
+
+let starCharts = null;
 
 function isDark() {
   return exportRoot.classList.contains('dark');
@@ -30,6 +30,7 @@ function setDark(dark) {
     root?.classList.toggle('dark', dark);
   }
   btnTheme.textContent = dark ? 'Light frame' : 'Dark frame';
+  starCharts?.refresh(dark);
 }
 
 function downloadBlob(blob, filename) {
@@ -49,6 +50,7 @@ async function captureNode(node, toImage) {
       pixelRatio: 2,
       cacheBust: true,
       backgroundColor: isDark() ? '#0f172a' : '#ffffff',
+      filter: (el) => !(el.classList?.contains('btn-download-png')),
     });
   } finally {
     node.classList.remove('exporting');
@@ -60,6 +62,26 @@ async function downloadPng(node, filename) {
   const res = await fetch(dataUrl);
   downloadBlob(await res.blob(), filename);
 }
+
+export function wireExportButtons(root = document) {
+  root.querySelectorAll('.btn-download-png[data-export-target]').forEach((btn) => {
+    if (btn.dataset.wired) return;
+    btn.dataset.wired = '1';
+    btn.addEventListener('click', async () => {
+      const node = document.getElementById(btn.dataset.exportTarget);
+      if (!node) return;
+      const prev = btn.disabled;
+      btn.disabled = true;
+      try {
+        await downloadPng(node, btn.dataset.exportFilename);
+      } finally {
+        btn.disabled = prev;
+      }
+    });
+  });
+}
+
+wireExportButtons();
 
 btnTheme.addEventListener('click', () => {
   setDark(!isDark());
@@ -73,22 +95,5 @@ btnSvg.addEventListener('click', async () => {
   downloadBlob(await res.blob(), 'browser-use-pipeline.svg');
 });
 
-btnPng.addEventListener('click', () =>
-  downloadPng(exportRoot, 'browser-use-pipeline-substack.png')
-);
-
-btnPngCapture.addEventListener('click', () =>
-  downloadPng(captureExportRoot, 'browser-use-capture-substack.png')
-);
-
-btnPngLibs.addEventListener('click', () =>
-  downloadPng(libsExportRoot, 'browser-use-libraries-substack.png')
-);
-
-btnPngSnapdom.addEventListener('click', () =>
-  downloadPng(snapdomExportRoot, 'browser-use-snapdom-substack.png')
-);
-
-btnPngDrift.addEventListener('click', () =>
-  downloadPng(driftExportRoot, 'browser-use-drift-substack.png')
-);
+starCharts = await initStarCharts(isDark());
+wireExportButtons(document.getElementById('star-chart-grid'));

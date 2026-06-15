@@ -15,6 +15,7 @@ import { AutoTokenizer } from '@huggingface/transformers';
 const TOKENS_ONLY = process.argv.includes('--tokens-only');
 const HEADED = process.env.CHROME_PROBE_HEADED === '1';
 const PROBE_ORIGIN = 'https://example.com';
+const PROBE_STEP_TIMEOUT_MS = Number(process.env.PROBE_STEP_TIMEOUT_MS ?? 120_000);
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const FIXTURE_DIR = path.join(ROOT, 'examples/operator/fixtures/shop-demo');
@@ -134,7 +135,7 @@ async function probeChromeContext() {
     console.log(`[chrome] loading ${PROBE_MODEL.label} (first run downloads ~300–500 MB)…`);
 
     return await page.evaluate(
-      async ({ probeModel, transformersCdn }) => {
+      async ({ probeModel, transformersCdn, stepTimeoutMs }) => {
         const log = (msg) => console.log(`[probe] ${msg}`);
         const { pipeline, AutoTokenizer, env } = await import(transformersCdn);
         env.allowLocalModels = false;
@@ -190,36 +191,43 @@ async function probeChromeContext() {
           const text = padChunk.repeat(repeats);
           const actual = countIds(await tok(text, { add_special_tokens: false }));
           const t0 = performance.now();
-          await gen(text, { max_new_tokens: 1, do_sample: false });
+          const infer = gen(text, { max_new_tokens: 1, do_sample: false });
+          const timed = Promise.race([
+            infer,
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`timeout ${stepTimeoutMs}ms`)), stepTimeoutMs)
+            ),
+          ]);
+          await timed;
           return { actual, ms: Math.round(performance.now() - t0) };
         }
 
         log(`config max_position_embeddings=${maxPos}`);
-        log('binary search for max working prompt tokens…');
+        log('ascending scan for max working prompt (stop at first failure)…');
 
-        let lo = 256;
-        let hi = maxPos;
+        const scanTargets = [512, 2048, 4096, 8192, 12288, 16384, 20480, 24576, 28672, maxPos].filter(
+          (v, i, a) => v > 0 && a.indexOf(v) === i
+        );
+
         let maxWorking = 0;
         let maxWorkingMs = 0;
         const attempts = [];
 
-        while (lo <= hi) {
-          const mid = Math.floor((lo + hi) / 2);
+        for (const target of scanTargets) {
           try {
-            const { actual, ms } = await runPromptTokens(mid);
+            const { actual, ms } = await runPromptTokens(target);
             maxWorking = actual;
             maxWorkingMs = ms;
-            attempts.push({ target: mid, actual, ok: true, ms });
-            log(`OK target≈${mid.toLocaleString()} actual=${actual.toLocaleString()} (${ms}ms)`);
-            lo = mid + 1;
+            attempts.push({ target, actual, ok: true, ms });
+            log(`OK target≈${target.toLocaleString()} actual=${actual.toLocaleString()} (${ms}ms)`);
           } catch (err) {
             attempts.push({
-              target: mid,
+              target,
               ok: false,
               error: String(err?.message ?? err).slice(0, 120),
             });
-            log(`FAIL target≈${mid.toLocaleString()} — ${String(err?.message ?? err).slice(0, 80)}`);
-            hi = mid - 1;
+            log(`FAIL target≈${target.toLocaleString()} — ${String(err?.message ?? err).slice(0, 80)}`);
+            break;
           }
         }
 
@@ -240,7 +248,7 @@ async function probeChromeContext() {
           attempts,
         };
       },
-      { probeModel: PROBE_MODEL, transformersCdn: TRANSFORMERS_CDN }
+      { probeModel: PROBE_MODEL, transformersCdn: TRANSFORMERS_CDN, stepTimeoutMs: PROBE_STEP_TIMEOUT_MS }
     );
   } finally {
     await browser.close();
