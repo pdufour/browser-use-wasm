@@ -36,6 +36,7 @@ alignment-visual/
 e2e-results-multi.txt
 e2e-results.txt
 e2e-benchmark-results.txt
+capture-benchmark-results.txt
 mind2web-grounding-results.txt
 mind2web-model-comparison.txt
 intent-parsing-results.txt

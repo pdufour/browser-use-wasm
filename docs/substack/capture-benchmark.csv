@@ -1,0 +1,5 @@
+Fixture,Library,Capture time (ms)
+Simple webpage,SnapDOM,2
+Simple webpage,html2canvas-pro,56
+Checkout page,SnapDOM,3
+Checkout page,html2canvas-pro,58

@@ -8,10 +8,14 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 |------|---------|
 | `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift debug (export cards) |
 | `diagram.js` | Dark frame toggle, PNG/SVG export (5 PNG targets) |
+| `capture-benchmark.csv` | SnapDOM vs html2canvas-pro timings (Datawrapper chart `OYr7Q`) |
 | `capture-comparison.csv` | Token table data (Datawrapper chart `ZUOL7`) |
 | `capture-libraries.csv` | Capture library landscape table — Library column uses markdown GitHub links (Datawrapper `kJYQ5`) |
 | `measure-web-token-limits.mjs` | DOM token counts (Node) + Chrome WebGPU runtime probe |
-| `push-datawrapper-table.mjs` | Push CSVs to Datawrapper (`--tokens`, `--libraries`, or both) |
+| `capture-benchmark.html` | Interactive SnapDOM vs [html2canvas-pro](https://github.com/yorickshan/html2canvas-pro) timing page |
+| `capture-benchmark.mjs` | Shared browser benchmark (product SnapDOM path) |
+| `benchmark-capture.mjs` | Playwright driver → `capture-benchmark.csv` |
+| `push-datawrapper-table.mjs` | Push CSVs to Datawrapper (`--tokens`, `--libraries`, `--runtime`, `--benchmark`) |
 | `article-outline.md` | Article draft |
 
 ## Diagram export
@@ -59,18 +63,45 @@ CHROME_PROBE_HEADED=1 node docs/substack/measure-web-token-limits.mjs   # if hea
 
 First Chrome run downloads ~300–500 MB. Probe uses `https://example.com` (secure context required for WebGPU).
 
+## Capture benchmark (SnapDOM vs html2canvas-pro)
+
+Interactive page (with dev server):
+
+```bash
+npm run dev
+# http://127.0.0.1:5173/substack/capture-benchmark.html
+```
+
+Automated run (writes `capture-benchmark.csv`):
+
+```bash
+npm install   # pulls html2canvas-pro devDependency
+npm run dev   # separate terminal
+npm run benchmark:capture
+```
+
+Options: `BENCHMARK_RUNS=10`, `BENCHMARK_WARMUP=1`, `BENCHMARK_HEADED=1`, `BENCHMARK_BASE_URL=…`. Re-push chart after re-run:
+
+```bash
+npm run benchmark:capture
+node docs/substack/push-datawrapper-table.mjs --benchmark
+```
+
 ## Datawrapper
 
 ```bash
 export DATAWRAPPER_TOKEN=...   # app.datawrapper.de/account/api-tokens
 node docs/substack/push-datawrapper-table.mjs           # both tables
 node docs/substack/push-datawrapper-table.mjs --libraries
+node docs/substack/push-datawrapper-table.mjs --benchmark
 ```
 
 | Chart | CSV | Embed |
 |-------|-----|-------|
 | `ZUOL7` | `capture-comparison.csv` | https://datawrapper.dwcdn.net/ZUOL7/1/ |
 | `kJYQ5` | `capture-libraries.csv` | https://datawrapper.dwcdn.net/kJYQ5/13/ |
+| `tFStz` | `runtime-context-limits.csv` | https://datawrapper.dwcdn.net/tFStz/7/ |
+| `OYr7Q` | `capture-benchmark.csv` | https://datawrapper.dwcdn.net/OYr7Q/5/ |
 
 The libraries chart uses a **3-column** layout (one family per column) with colored headers, bordered cells, markdown GitHub links, and intro/footer notes matching the HTML export card. Re-push after CSV edits:
 

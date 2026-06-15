@@ -7,6 +7,8 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
+import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
@@ -115,22 +117,75 @@ async function measureDomTokens() {
   return { pageRows };
 }
 
-async function probeChromeContext() {
-  console.log('[chrome] launching with WebGPU…');
-  const browser = await chromium.launch({
-    channel: 'chrome',
-    headless: !HEADED,
-    ignoreDefaultArgs: ['--disable-gpu'],
-    args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist'],
+async function collectMachineContext(browser) {
+  const ctx = {
+    ramGb: Math.round(os.totalmem() / 1e9),
+    cpu: os.cpus()[0]?.model ?? 'unknown',
+    chromeHeadless: !HEADED,
+    probeOrigin: PROBE_ORIGIN,
+    probeStepTimeoutMs: PROBE_STEP_TIMEOUT_MS,
+  };
+
+  if (process.platform === 'darwin') {
+    try {
+      const raw = execSync('system_profiler SPHardwareDataType -json', { encoding: 'utf8' });
+      const hw = JSON.parse(raw)?.SPHardwareDataType?.[0] ?? {};
+      ctx.macModel = hw.machine_name?.trim();
+      ctx.macChip = hw.chip_type?.trim();
+      ctx.macMemory = hw.physical_memory?.trim();
+      ctx.macModelId = hw.machine_model?.trim();
+    } catch {
+      /* optional */
+    }
+    try {
+      const ver = execSync('sw_vers', { encoding: 'utf8' });
+      const product = ver.match(/ProductName:\s*(.+)/)?.[1]?.trim();
+      const version = ver.match(/ProductVersion:\s*(.+)/)?.[1]?.trim();
+      ctx.macos = [product, version].filter(Boolean).join(' ');
+    } catch {
+      /* optional */
+    }
+  } else {
+    ctx.os = `${process.platform} ${os.release()}`;
+  }
+
+  if (browser) {
+    try {
+      ctx.chromeVersion = browser.version();
+    } catch {
+      /* optional */
+    }
+  }
+
+  return ctx;
+}
+
+function formatMachineContext(ctx) {
+  const lines = [];
+  if (ctx.macModel || ctx.macChip) {
+    const parts = [ctx.macModel, ctx.macChip, ctx.macMemory].filter(Boolean);
+    if (ctx.macModelId) parts.push(`(${ctx.macModelId})`);
+    lines.push(parts.join(' · '));
+  }
+  if (ctx.macos) lines.push(ctx.macos);
+  else if (ctx.os) lines.push(ctx.os);
+  lines.push(`RAM (OS report): ${ctx.ramGb} GB`);
+  if (ctx.chromeVersion) {
+    lines.push(`Chrome ${ctx.chromeVersion} · ${ctx.chromeHeadless ? 'headless' : 'headed'} · Playwright launch`);
+  }
+  lines.push(`Probe origin: ${ctx.probeOrigin} · step timeout: ${ctx.probeStepTimeoutMs / 1000}s`);
+  return lines;
+}
+
+async function probeChromeContext(browser) {
+  console.log('[chrome] loading page + model…');
+  const page = await browser.newPage();
+  page.on('console', (msg) => {
+    const t = msg.text();
+    if (/\[probe\]/i.test(t)) console.log(`[browser] ${t.slice(0, 320)}`);
   });
 
   try {
-    const page = await browser.newPage();
-    page.on('console', (msg) => {
-      const t = msg.text();
-      if (/\[probe\]/i.test(t)) console.log(`[browser] ${t.slice(0, 320)}`);
-    });
-
     await page.goto(PROBE_ORIGIN, { waitUntil: 'domcontentloaded' });
     console.log(`[chrome] loading ${PROBE_MODEL.label} (first run downloads ~300–500 MB)…`);
 
@@ -142,20 +197,17 @@ async function probeChromeContext() {
         env.useBrowserCache = false;
 
         const webgpu = !!navigator.gpu;
-        let adapterInfo = null;
+        let gpuBackend = null;
         if (navigator.gpu) {
           try {
             const adapter = await navigator.gpu.requestAdapter();
-            if (adapter?.info) {
-              adapterInfo = {
-                vendor: adapter.info.vendor,
-                architecture: adapter.info.architecture,
-              };
-            }
+            gpuBackend = adapter ? 'WebGPU adapter available' : 'no adapter';
           } catch {
-            /* ignore */
+            gpuBackend = 'requestAdapter failed';
           }
         }
+
+        const browserUa = navigator.userAgent;
 
         const countIds = (out) => {
           const ids = out?.input_ids;
@@ -237,7 +289,8 @@ async function probeChromeContext() {
 
         return {
           webgpu,
-          adapterInfo,
+          gpuBackend,
+          browserUa,
           model: probeModel.id,
           label: probeModel.label,
           device: webgpu ? 'webgpu' : 'wasm',
@@ -251,11 +304,11 @@ async function probeChromeContext() {
       { probeModel: PROBE_MODEL, transformersCdn: TRANSFORMERS_CDN, stepTimeoutMs: PROBE_STEP_TIMEOUT_MS }
     );
   } finally {
-    await browser.close();
+    await page.close();
   }
 }
 
-function printReport({ pageRows, runtime }) {
+function printReport({ pageRows, runtime, machine }) {
   console.log('\n=== DOM capture sizes (Node tokenizer) ===\n');
   for (const row of pageRows) {
     console.log(`## ${row.page}`);
@@ -270,7 +323,15 @@ function printReport({ pageRows, runtime }) {
   }
 
   console.log('\n=== Chrome runtime context probe ===\n');
-  console.log(`WebGPU: ${runtime.webgpu}${runtime.adapterInfo ? ` (${JSON.stringify(runtime.adapterInfo)})` : ''}`);
+  if (machine) {
+    console.log('This machine:');
+    for (const line of formatMachineContext(machine)) {
+      console.log(`  ${line}`);
+    }
+    console.log('');
+  }
+  console.log(`WebGPU in Chrome: ${runtime.webgpu ? 'yes' : 'no'}${runtime.gpuBackend ? ` (${runtime.gpuBackend})` : ''}`);
+  if (runtime.browserUa) console.log(`User-Agent: ${runtime.browserUa}`);
   console.log(`Model: ${runtime.label}`);
   console.log(`Device: ${runtime.device}`);
   console.log(`config max_position_embeddings: ${runtime.configMaxPos?.toLocaleString() ?? '?'}`);
@@ -296,8 +357,24 @@ function printReport({ pageRows, runtime }) {
 
 async function main() {
   const { pageRows } = await measureDomTokens();
-  const runtime = TOKENS_ONLY ? null : await probeChromeContext();
-  printReport({ pageRows, runtime });
+  let machine = await collectMachineContext(null);
+  let runtime = null;
+  if (!TOKENS_ONLY) {
+    console.log('[chrome] launching (WebGPU flags, ignore --disable-gpu)…');
+    const browser = await chromium.launch({
+      channel: 'chrome',
+      headless: !HEADED,
+      ignoreDefaultArgs: ['--disable-gpu'],
+      args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist'],
+    });
+    try {
+      machine = await collectMachineContext(browser);
+      runtime = await probeChromeContext(browser);
+    } finally {
+      await browser.close();
+    }
+  }
+  printReport({ pageRows, runtime, machine });
 }
 
 main().catch((err) => {
