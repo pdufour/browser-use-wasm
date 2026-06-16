@@ -127,7 +127,7 @@ async function fetchStarHistorySvgs() {
 }
 
 async function main() {
-  console.log(`GitHub token: ${TOKEN ? 'yes' : 'no (60 req/hr — partial fetch likely)'}`);
+  console.log(`GitHub token: ${TOKEN ? 'yes' : 'no (60 req/hr - partial fetch likely)'}`);
   const existing = await loadExisting();
   const out = {
     fetchedAt: new Date().toISOString(),

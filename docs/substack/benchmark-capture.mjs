@@ -79,7 +79,7 @@ async function main() {
     const outCsv = path.join(dir, 'capture-benchmark.csv');
 
     const banner = [
-      `# capture benchmark — ${payload.ranAt}`,
+      `# capture benchmark - ${payload.ranAt}`,
       `# ${machineLine()}`,
       `# DPR ${payload.devicePixelRatio} · warmup ${payload.warmup} · runs ${payload.runs}`,
       '',

@@ -81,7 +81,7 @@ async function benchLibrary(label, captureFn, { warmup = DEFAULT_WARMUP, runs = 
 }
 
 /**
- * @param {Element} element — `#capture-target` (or equivalent)
+ * @param {Element} element - `#capture-target` (or equivalent)
  * @param {{ warmup?: number, runs?: number, fixture?: string }} opts
  */
 export async function benchmarkCaptureTarget(element, opts = {}) {

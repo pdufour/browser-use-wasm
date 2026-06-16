@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Browser-use pipeline — Substack diagram</title>
+    <title>Browser-use pipeline - Substack diagram</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -104,12 +104,33 @@
         filter: brightness(1.05);
       }
 
-      /* ── Per-asset PNG download ── */
+      /* ── Per-asset PNG download + alt copy ── */
       .export-asset {
         position: relative;
       }
 
-      .btn-download-png {
+      .export-asset__actions {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        z-index: 3;
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+      }
+
+      .export-asset__actions--inline {
+        position: static;
+        margin-left: auto;
+      }
+
+      .star-chart-combined > .export-asset__actions {
+        top: 0.65rem;
+        right: 0.65rem;
+      }
+
+      .btn-download-png,
+      .btn-copy-alt {
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
@@ -132,34 +153,52 @@
         color: #15803d;
       }
 
-      .btn-download-png svg {
+      .btn-copy-alt:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+
+      .btn-copy-alt.is-copied {
+        border-color: #2563eb;
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .btn-download-png svg,
+      .btn-copy-alt svg {
         width: 1.05rem;
         height: 1.05rem;
         flex-shrink: 0;
       }
 
-      .export-asset > .btn-download-png {
-        position: absolute;
-        top: 0.85rem;
-        right: 0.85rem;
-        z-index: 3;
-      }
-
-      .dark.export-asset > .btn-download-png,
-      .export-card.dark > .btn-download-png {
+      .dark.export-asset .btn-download-png,
+      .dark.export-asset .btn-copy-alt,
+      .export-card.dark .btn-download-png,
+      .export-card.dark .btn-copy-alt {
         background: #1e293b;
         border-color: #475569;
         color: #e2e8f0;
       }
 
-      .dark.export-asset > .btn-download-png:hover,
-      .export-card.dark > .btn-download-png:hover {
+      .dark.export-asset .btn-download-png:hover,
+      .export-card.dark .btn-download-png:hover {
         background: #064e3b;
         border-color: #059669;
         color: #6ee7b7;
       }
 
-      .btn-download-png--sm {
+      .dark.export-asset .btn-copy-alt:hover,
+      .export-card.dark .btn-copy-alt:hover,
+      .dark.export-asset .btn-copy-alt.is-copied,
+      .export-card.dark .btn-copy-alt.is-copied {
+        background: #1e3a8a;
+        border-color: #3b82f6;
+        color: #bfdbfe;
+      }
+
+      .btn-download-png--sm,
+      .btn-copy-alt--sm {
         position: static;
         padding: 0.28rem 0.5rem;
         font-size: 0.68rem;
@@ -167,7 +206,8 @@
         box-shadow: none;
       }
 
-      .btn-download-png--sm svg {
+      .btn-download-png--sm svg,
+      .btn-copy-alt--sm svg {
         width: 0.9rem;
         height: 0.9rem;
       }
@@ -176,14 +216,7 @@
         position: relative;
       }
 
-      .star-chart-combined > .btn-download-png {
-        position: absolute;
-        top: 0.65rem;
-        right: 0.65rem;
-        z-index: 2;
-      }
-
-      .star-card__head .btn-download-png {
+      .star-card__head .export-asset__actions {
         margin-left: auto;
       }
 
@@ -1040,6 +1073,7 @@
       #capture-export-root.exporting,
       #libs-export-root.exporting,
       #snapdom-export-root.exporting,
+      #font-metrics-export-root.exporting,
       #drift-export-root.exporting,
       #drift-debug-export-root.exporting,
       #dpr-rounding-export-root.exporting,
@@ -1643,6 +1677,61 @@
         color: #cbd5e1;
       }
 
+      /* ── Font metrics primer (static) ── */
+      .font-primer {
+        margin-top: 0.35rem;
+      }
+
+      .font-primer__diagram {
+        padding: 1rem 1.1rem 1.1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+
+      .export-card.dark .font-primer__diagram {
+        border-color: #475569;
+        background: #1e293b;
+        color: #f8fafc;
+      }
+
+      .font-primer__diagram svg {
+        display: block;
+        width: 100%;
+        max-width: 36rem;
+        height: auto;
+        margin: 0 auto;
+      }
+
+      .font-primer__caption {
+        margin: 0.65rem 0 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .export-card.dark .font-primer__caption {
+        color: #94a3b8;
+      }
+
+      .font-primer__bullets {
+        margin: 0.85rem 0 0;
+        padding-left: 1.15rem;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        color: #475569;
+      }
+
+      .export-card.dark .font-primer__bullets {
+        color: #94a3b8;
+      }
+
+      .font-primer__bullets li + li {
+        margin-top: 0.35rem;
+      }
+
       /* ── Vertical drift demo (static side-by-side) ── */
       .drift-demo {
         margin: 1rem 0 1.25rem;
@@ -1905,6 +1994,7 @@
         }
       }
 
+
       /* ── Vertical drift debug timeline ── */
       .drift-timeline {
         display: flex;
@@ -2151,69 +2241,60 @@
         color: #94a3b8;
       }
 
-      /* ── DPR rounding asset ── */
-      .dpr-rounding {
+      /* ── DPR fractional pixels asset ── */
+      .dpr-frac {
         margin-top: 0.5rem;
       }
 
-      .dpr-live__measure {
-        position: absolute;
-        width: 280px;
-        left: -9999px;
-        pointer-events: none;
-      }
-
-      .dpr-live__problem {
+      .dpr-frac__math {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 0.5rem 0.75rem;
-        margin: 0 0 1.25rem;
+        margin: 0 0 1.1rem;
         padding: 0.9rem 1rem;
         border-radius: 12px;
         border: 1px solid #cbd5e1;
         background: #f8fafc;
       }
 
-      .export-card.dark .dpr-live__problem {
+      .export-card.dark .dpr-frac__math {
         border-color: #475569;
         background: #0f172a;
       }
 
-      .dpr-live__step {
+      .dpr-frac__step {
         display: flex;
         align-items: flex-start;
         gap: 0.45rem;
-        min-width: 0;
       }
 
-      .dpr-live__step p {
+      .dpr-frac__step p {
         margin: 0;
         font-size: 0.82rem;
         line-height: 1.45;
         color: #334155;
       }
 
-      .export-card.dark .dpr-live__step p {
+      .export-card.dark .dpr-frac__step p {
         color: #e2e8f0;
       }
 
-      .dpr-live__step--op {
+      .dpr-frac__step--op {
         font-size: 1.1rem;
         font-weight: 700;
         color: #94a3b8;
-        padding-top: 0.1rem;
       }
 
-      .dpr-live__step--problem p strong {
+      .dpr-frac__step--result p strong {
         color: #b45309;
       }
 
-      .export-card.dark .dpr-live__step--problem p strong {
+      .export-card.dark .dpr-frac__step--result p strong {
         color: #fbbf24;
       }
 
-      .dpr-live__step-num {
+      .dpr-frac__step-num {
         flex-shrink: 0;
         width: 1.35rem;
         height: 1.35rem;
@@ -2226,137 +2307,90 @@
         place-items: center;
       }
 
-      .export-card.dark .dpr-live__step-num {
+      .export-card.dark .dpr-frac__step-num {
         background: #334155;
         color: #e2e8f0;
       }
 
-      .dpr-live__source-title,
-      .dpr-live__grid-title {
-        margin: 0 0 0.5rem;
-        font-size: 0.72rem;
+      .dpr-frac__measure {
+        position: absolute;
+        width: 280px;
+        left: -9999px;
+        pointer-events: none;
+      }
+
+      .dpr-frac__compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .dpr-frac__pane-label {
+        margin: 0 0 0.45rem;
+        font-size: 0.68rem;
         font-weight: 800;
         letter-spacing: 0.05em;
         text-transform: uppercase;
         color: #64748b;
       }
 
-      .export-card.dark .dpr-live__source-title,
-      .export-card.dark .dpr-live__grid-title {
+      .export-card.dark .dpr-frac__pane-label {
         color: #94a3b8;
       }
 
-      .dpr-live__grid-title {
-        margin-top: 1.25rem;
-      }
-
-      #dpr-rounding-source-host {
-        margin-bottom: 0.25rem;
-      }
-
-      .dpr-live__source-frame {
-        display: inline-block;
-        max-width: 100%;
+      .dpr-frac__frame {
         border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        overflow: hidden;
+        border: 1px solid #e2e8f0;
         background: #fff;
+        overflow: hidden;
       }
 
-      .export-card.dark .dpr-live__source-frame {
+      .export-card.dark .dpr-frac__frame {
         border-color: #475569;
         background: #1e293b;
       }
 
-      .dpr-live__grid {
-        display: grid;
-        gap: 0.85rem;
-      }
-
-      .dpr-live__grid--three {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .dpr-live__col {
-        padding: 0.75rem;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        background: #fff;
-      }
-
-      .export-card.dark .dpr-live__col {
-        border-color: #475569;
-        background: #1e293b;
-      }
-
-      .dpr-live__formula {
-        margin: 0 0 0.2rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #0f172a;
-      }
-
-      .export-card.dark .dpr-live__formula {
-        color: #f8fafc;
-      }
-
-      .dpr-live__backing {
-        margin: 0 0 0.55rem;
-        font-size: 0.72rem;
-        color: #64748b;
-      }
-
-      .export-card.dark .dpr-live__backing {
-        color: #94a3b8;
-      }
-
-      .dpr-live__frame {
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        background: #f8fafc;
+      .dpr-frac__frame--canvas {
         line-height: 0;
       }
 
-      .export-card.dark .dpr-live__frame {
-        border-color: #475569;
-        background: #0f172a;
-      }
-
-      .dpr-live__panel {
+      .dpr-frac__panel {
+        box-sizing: border-box;
+        width: 280px;
+        max-width: 100%;
         padding: 0.85rem 0.85rem 0.75rem;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       }
 
-      .dpr-live__panel h3 {
+      .dpr-frac__panel h3 {
         margin: 0 0 0.35rem;
         font-size: 0.95rem;
         line-height: 1.25;
         color: #0f172a;
       }
 
-      .export-card.dark .dpr-live__panel h3 {
+      .export-card.dark .dpr-frac__panel h3 {
         color: #f8fafc;
       }
 
-      .dpr-live__panel p {
+      .dpr-frac__panel p {
         margin: 0 0 0.65rem;
         font-size: 0.72rem;
         color: #64748b;
         line-height: 1.4;
       }
 
-      .export-card.dark .dpr-live__panel p {
+      .export-card.dark .dpr-frac__panel p {
         color: #94a3b8;
       }
 
-      .dpr-live__actions {
+      .dpr-frac__actions {
         display: flex;
         gap: 0.4rem;
       }
 
-      .dpr-live__btn {
+      .dpr-frac__btn {
         font: inherit;
         font-size: 0.72rem;
         font-weight: 700;
@@ -2365,164 +2399,314 @@
         border: 1px solid #cbd5e1;
       }
 
-      .dpr-live__btn--submit {
+      .dpr-frac__btn--submit {
         background: #059669;
         color: #fff;
         border-color: #059669;
       }
 
-      .dpr-live__btn--cancel {
+      .dpr-frac__btn--cancel {
         background: #fff;
         color: #475569;
       }
 
-      .export-card.dark .dpr-live__btn--cancel {
+      .export-card.dark .dpr-frac__btn--cancel {
         background: #334155;
         color: #e2e8f0;
         border-color: #64748b;
       }
 
-      .dpr-live__bitmap {
+      #dpr-frac-capture-preview {
         display: block;
         width: 100%;
         height: auto;
       }
 
-      .dpr-live__bitmap--hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
-        overflow: hidden;
+      .dpr-frac__caption {
+        margin: 0 0 0.85rem;
+        font-size: 0.8rem;
+        color: #475569;
+        line-height: 1.55;
       }
 
-      .dpr-live__edge-focus {
-        margin-top: 0.35rem;
+      .export-card.dark .dpr-frac__caption {
+        color: #cbd5e1;
       }
 
-      .dpr-live__edge-focus-title {
-        margin: 0 0 0.4rem;
-        font-size: 0.66rem;
-        font-weight: 700;
-        letter-spacing: 0.03em;
+      .dpr-frac__grid-title {
+        margin: 0 0 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: #64748b;
       }
 
-      .export-card.dark .dpr-live__edge-focus-title {
+      .export-card.dark .dpr-frac__grid-title {
         color: #94a3b8;
       }
 
-      .dpr-live__edge-canvas {
-        display: block;
-        width: 100%;
-        height: auto;
-        min-height: 72px;
+      .dpr-frac__round-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .dpr-frac__round-col {
+        padding: 0.75rem;
+        border-radius: 12px;
         border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        image-rendering: pixelated;
         background: #fff;
       }
 
-      .export-card.dark .dpr-live__edge-canvas {
+      .export-card.dark .dpr-frac__round-col {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .dpr-frac__round-col--clip {
+        outline: 2px solid #fecaca;
+        outline-offset: 1px;
+      }
+
+      .dpr-frac__round-col--pad {
+        outline: 2px solid #fde68a;
+        outline-offset: 1px;
+      }
+
+      .dpr-frac__formula {
+        margin: 0 0 0.15rem;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .export-card.dark .dpr-frac__formula {
+        color: #f8fafc;
+      }
+
+      .dpr-frac__backing {
+        margin: 0 0 0.55rem;
+        font-size: 0.7rem;
+        color: #64748b;
+      }
+
+      .export-card.dark .dpr-frac__backing {
+        color: #94a3b8;
+      }
+
+      .dpr-frac__tie {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #94a3b8;
+      }
+
+      .dpr-frac__round-thumb {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        line-height: 0;
+        margin-bottom: 0.45rem;
+        max-height: 120px;
+      }
+
+      .export-card.dark .dpr-frac__round-thumb {
+        border-color: #475569;
+      }
+
+      .dpr-frac__round-bitmap {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .dpr-frac__delta {
+        margin: 0 0 0.55rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.68rem;
+        font-weight: 700;
+      }
+
+      .dpr-frac__delta--clip {
+        color: #991b1b;
+        background: #fef2f2;
+      }
+
+      .dpr-frac__delta--pad {
+        color: #92400e;
+        background: #fffbeb;
+      }
+
+      .dpr-frac__delta--neutral {
+        color: #475569;
+        background: #f8fafc;
+      }
+
+      .dpr-frac__mini-label {
+        margin: 0.45rem 0 0.25rem;
+        font-size: 0.6rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #94a3b8;
+      }
+
+      .dpr-frac__ruler {
+        margin-bottom: 0.85rem;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+      }
+
+      .export-card.dark .dpr-frac__ruler {
         border-color: #475569;
         background: #0f172a;
       }
 
-      .dpr-live__delta {
-        margin: 0.55rem 0 0;
-        padding: 0.45rem 0.55rem;
-        border-radius: 8px;
+      .dpr-frac__ruler-title {
+        margin: 0 0 0.65rem;
         font-size: 0.72rem;
         font-weight: 700;
-        line-height: 1.4;
-      }
-
-      .dpr-live__delta--clip {
-        color: #991b1b;
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-      }
-
-      .export-card.dark .dpr-live__delta--clip {
-        color: #fecaca;
-        background: #450a0a;
-        border-color: #991b1b;
-      }
-
-      .dpr-live__delta--pad {
-        color: #92400e;
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-      }
-
-      .export-card.dark .dpr-live__delta--pad {
-        color: #fde68a;
-        background: #422006;
-        border-color: #b45309;
-      }
-
-      .dpr-live__delta--neutral {
         color: #475569;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
       }
 
-      .dpr-live__tie {
-        font-size: 0.62rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
+      .export-card.dark .dpr-frac__ruler-title {
+        color: #cbd5e1;
+      }
+
+      .dpr-frac__ruler-track {
+        position: relative;
+        height: 96px;
+        margin-right: 5.5rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        overflow: visible;
+      }
+
+      .export-card.dark .dpr-frac__ruler-track {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .dpr-frac__ruler-mark {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 0;
+        border-top: 3px solid;
+        pointer-events: none;
+      }
+
+      .dpr-frac__ruler-mark span {
+        position: absolute;
+        left: calc(100% + 8px);
+        top: -0.55rem;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 0.68rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .dpr-frac__ruler-mark--layout {
+        border-color: #f59e0b;
+        border-top-style: dashed;
+        z-index: 4;
+      }
+
+      .dpr-frac__ruler-mark--layout span {
+        color: #b45309;
+      }
+
+      .dpr-frac__ruler-mark--floor {
+        border-color: #dc2626;
+        z-index: 3;
+      }
+
+      .dpr-frac__ruler-mark--floor span {
+        color: #dc2626;
+      }
+
+      .dpr-frac__ruler-mark--round {
+        border-color: #2563eb;
+        z-index: 2;
+      }
+
+      .dpr-frac__ruler-mark--round span {
+        color: #2563eb;
+      }
+
+      .dpr-frac__ruler-mark--ceil {
+        border-color: #7c3aed;
+        z-index: 1;
+      }
+
+      .dpr-frac__ruler-mark--ceil span {
+        color: #7c3aed;
+      }
+
+      .export-card.dark .dpr-frac__ruler-mark--layout span {
+        color: #fbbf24;
+      }
+
+      .export-card.dark .dpr-frac__ruler-mark--floor span {
+        color: #fca5a5;
+      }
+
+      .export-card.dark .dpr-frac__ruler-mark--round span {
+        color: #93c5fd;
+      }
+
+      .export-card.dark .dpr-frac__ruler-mark--ceil span {
+        color: #c4b5fd;
+      }
+
+      .dpr-frac__ruler-key {
+        margin: 0.65rem 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 0.68rem;
+        line-height: 1.55;
         color: #64748b;
-        margin-left: 0.35rem;
       }
 
-      .dpr-live__col--clip {
-        outline: 2px solid #fecaca;
-        outline-offset: 2px;
-      }
-
-      .dpr-live__col--pad {
-        outline: 2px solid #fde68a;
-        outline-offset: 2px;
-      }
-
-      .dpr-live__edge-key {
-        margin: 0.45rem 0 0;
-        font-size: 0.66rem;
-        color: #64748b;
-      }
-
-      .export-card.dark .dpr-live__edge-key {
+      .export-card.dark .dpr-frac__ruler-key {
         color: #94a3b8;
       }
 
-      .dpr-live__key-line {
-        display: inline-block;
-        width: 1.25rem;
+      .dpr-frac__ruler-key li {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .dpr-frac__key-swatch {
+        flex-shrink: 0;
+        width: 1rem;
         height: 0;
-        vertical-align: middle;
-        margin-right: 0.15rem;
+        border-top: 2px solid;
       }
 
-      .dpr-live__key-line--layout {
-        border-top: 2px dashed #f59e0b;
+      .dpr-frac__key-swatch--layout {
+        border-color: #f59e0b;
+        border-top-style: dashed;
       }
 
-      .dpr-live__key-line--bitmap {
-        border-top: 2px solid #dc2626;
+      .dpr-frac__key-swatch--floor {
+        border-color: #dc2626;
       }
 
-      .dpr-live__note {
-        margin: 0.55rem 0 0;
-        font-size: 0.72rem;
-        color: #475569;
-        line-height: 1.45;
+      .dpr-frac__key-swatch--round {
+        border-color: #2563eb;
       }
 
-      .export-card.dark .dpr-live__note {
-        color: #cbd5e1;
+      .dpr-frac__key-swatch--ceil {
+        border-color: #7c3aed;
       }
 
       .dpr-rounding__verdict {
@@ -2550,7 +2734,7 @@
       }
 
       @media (max-width: 720px) {
-        .dpr-live__grid--three {
+        .dpr-frac__round-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -2769,7 +2953,7 @@
                   </div>
                   <div class="node__body">
                     <p class="node__title">Screenshot buffer</p>
-                    <p class="node__sub">Bitmap the VLA reads — not the live DOM tree</p>
+                    <p class="node__sub">Bitmap the VLA reads - not the live DOM tree</p>
                     <div class="node__chips">
                       <span class="chip">SnapDOM</span>
                       <span class="chip">drawElementImage</span>
@@ -2868,12 +3052,12 @@
           PNG
         </button>
         <p class="capture-intro">
-          <strong>Capture</strong> is the first step in browser-use. Four ways to turn a live page into something a model can act on — only options 3 and 4 scale for vision agents. Token numbers are <strong>estimated LLM context</strong> (options 1–2) or a <strong>fixed VLA vision budget</strong> (options 3–4).
+          <strong>Capture</strong> is the first step in browser-use. Four ways to turn a live page into something a model can act on - only options 3 and 4 scale for vision agents. Token numbers are <strong>estimated LLM context</strong> (options 1–2) or a <strong>fixed VLA vision budget</strong> (options 3–4).
         </p>
 
         <div class="capture-compare">
           <article class="capture-option capture-option--bad">
-            <div class="capture-option__head">Option 1 — DOM + text LLM</div>
+            <div class="capture-option__head">Option 1 - DOM + text LLM</div>
             <div class="capture-option__body">
               <pre class="capture-mock" aria-label="Example text prompt"><span class="dim">SYSTEM: Output click coords from the DOM below.</span>
 
@@ -2891,7 +3075,7 @@
           </article>
 
           <article class="capture-option capture-option--bad">
-            <div class="capture-option__head">Option 2 — CSS selectors + text LLM</div>
+            <div class="capture-option__head">Option 2 - CSS selectors + text LLM</div>
             <div class="capture-option__body">
               <pre class="capture-mock" aria-label="Example selector output"><span class="dim">TASK: click the Order button</span>
 
@@ -2902,16 +3086,16 @@ LLM → <span class="warn">button.btn-primary</span>
 <span class="warn">Two “Cancel” buttons → which one?</span>
 <span class="warn">Icon-only button → no text to match</span></pre>
               <p class="capture-option__note">
-                I didn’t ship this path — selectors rot on every deploy, and iframe traversal hits security walls.
+                I didn’t ship this path - selectors rot on every deploy, and iframe traversal hits security walls.
               </p>
             </div>
           </article>
 
           <article class="capture-option capture-option--good">
-            <div class="capture-option__head">Option 3 — Screenshot via clone libs → VLA</div>
+            <div class="capture-option__head">Option 3 - Screenshot via clone libs → VLA</div>
             <div class="capture-option__body">
               <div class="capture-visual" aria-label="Clone library screenshot capture">
-                <span class="capture-visual__tag">SnapDOM / html-to-image — SVG foreignObject → canvas</span>
+                <span class="capture-visual__tag">SnapDOM / html-to-image - SVG foreignObject → canvas</span>
                 <div class="capture-visual__frame">
                   <div class="capture-screenshot__chrome">
                     <span class="capture-screenshot__dots" aria-hidden="true">●●●</span>
@@ -2930,13 +3114,13 @@ LLM → <span class="warn">button.btn-primary</span>
                 <span class="capture-visual__tokens">→ ~290–672 vision tokens (fixed budget)</span>
               </div>
               <p class="capture-option__note">
-                What I ship today in <a href="https://github.com/pdufour/browser-use-wasm">browser-use-wasm</a>. html2canvas redraws procedurally; SnapDOM optimizes the foreignObject path — still not the browser’s native paint engine.
+                What I ship today in <a href="https://github.com/pdufour/browser-use-wasm">browser-use-wasm</a>. html2canvas redraws procedurally; SnapDOM optimizes the foreignObject path - still not the browser’s native paint engine.
               </p>
             </div>
           </article>
 
           <article class="capture-option capture-option--future">
-            <div class="capture-option__head">Option 4 — HTML-in-Canvas (native spec) → VLA</div>
+            <div class="capture-option__head">Option 4 - HTML-in-Canvas (native spec) → VLA</div>
             <div class="capture-option__body">
               <pre class="capture-api" aria-label="HTML-in-Canvas capture sketch"><span class="kw">&lt;canvas</span> layoutsubtree<span class="kw">&gt;</span>
   <span class="kw">&lt;div</span> id="capture-target"<span class="kw">&gt;</span>…live page…<span class="kw">&lt;/div&gt;</span>
@@ -2944,11 +3128,11 @@ LLM → <span class="warn">button.btn-primary</span>
 
 canvas.onpaint = () =&gt; {
   ctx.drawElementImage(capture_target, 0, 0);
-  // compositor paint — same path as live page
+  // compositor paint - same path as live page
 };</pre>
               <span class="capture-status">Chrome flag · not drop-in yet</span>
               <p class="capture-option__note">
-                <a href="https://github.com/WICG/html-in-canvas">WICG HTML-in-Canvas</a> (<span class="lib-entry__stars">★3.6k</span>) — <code>drawElementImage()</code> records the browser’s painted output, bypassing SVG foreignObject. Enable with <code>chrome://flags/#canvas-draw-element</code>.
+                <a href="https://github.com/WICG/html-in-canvas">WICG HTML-in-Canvas</a> (<span class="lib-entry__stars">★3.6k</span>) - <code>drawElementImage()</code> records the browser’s painted output, bypassing SVG foreignObject. Enable with <code>chrome://flags/#canvas-draw-element</code>.
               </p>
             </div>
           </article>
@@ -2991,7 +3175,7 @@ canvas.onpaint = () =&gt; {
           </tbody>
         </table>
         <p class="capture-footnote">
-          Options 1–2: tokens ≈ characters ÷ 3.5 (live <code>outerHTML</code> + computed stylesheet rules). Options 3–4: same fixed ShowUI vision-token budget (~290–672), regardless of page size — only the <strong>capture engine</strong> differs. WebGPU/WASM text models often cap at ~2k–4k context (<a href="https://github.com/huggingface/transformers.js/issues/1697">transformers.js #1697</a>).
+          Options 1–2: tokens ≈ characters ÷ 3.5 (live <code>outerHTML</code> + computed stylesheet rules). Options 3–4: same fixed ShowUI vision-token budget (~290–672), regardless of page size - only the <strong>capture engine</strong> differs. WebGPU/WASM text models often cap at ~2k–4k context (<a href="https://github.com/huggingface/transformers.js/issues/1697">transformers.js #1697</a>).
         </p>
       </div>
 
@@ -3011,7 +3195,7 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          JavaScript has had DOM-to-screenshot libraries for years. They fall into <strong>three families</strong> — only one path uses the browser compositor today, and that one still needs a Chrome flag.
+          JavaScript has had DOM-to-screenshot libraries for years. They fall into <strong>three families</strong> - only one path uses the browser compositor today, and that one still needs a Chrome flag.
         </p>
         <div class="lib-grid">
           <div class="lib-col lib-col--native">
@@ -3188,6 +3372,66 @@ canvas.onpaint = () =&gt; {
 
       <div class="section-gap" aria-hidden="true"></div>
 
+      <div id="font-metrics-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="font-metrics-export-root"
+          data-export-filename="browser-use-font-metrics-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
+        <p class="export-card__intro">
+          <strong>How CSS places text.</strong> <code>font-family</code> is only a name. The engine lays out each line using metrics baked into the font file - ascender height, descender depth, cap height, x-height, and baseline. Change the file (or substitute a fallback) and the same CSS moves ink even when the family name stays the same.
+        </p>
+
+        <div class="font-primer" aria-label="CSS font metrics primer">
+          <div class="font-primer__diagram">
+            <svg viewBox="0 0 480 168" role="img" aria-label="Font em box: ascender, cap height, x-height, baseline, descender on Hh gyp">
+              <!-- Tuned for system-ui at 54px; baseline y=110 -->
+              <line x1="32" y1="62" x2="272" y2="62" stroke="#2563eb" stroke-width="2"/>
+              <line x1="32" y1="71" x2="272" y2="71" stroke="#3b82f6" stroke-width="1.5"/>
+              <line x1="32" y1="82" x2="272" y2="82" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <line x1="32" y1="110" x2="272" y2="110" stroke="#475569" stroke-width="2"/>
+              <line x1="32" y1="122" x2="272" y2="122" stroke="#dc2626" stroke-width="2"/>
+
+              <rect x="24" y="62" width="256" height="60" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="6 4" rx="4"/>
+              <text x="32" y="54" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">em box (line box)</text>
+
+              <text
+                x="40"
+                y="110"
+                class="font-primer__glyph"
+                font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+                font-size="54"
+                font-weight="400"
+                fill="currentColor"
+                letter-spacing="-0.02em"
+              >Hh gyp</text>
+
+              <text x="284" y="66" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#2563eb">ascender</text>
+              <text x="284" y="75" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#3b82f6">cap height</text>
+              <text x="284" y="86" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#64748b">x-height</text>
+              <text x="284" y="114" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#475569">baseline</text>
+              <text x="284" y="126" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#dc2626">descender</text>
+            </svg>
+            <p class="font-primer__caption">Real <code>system-ui</code> text on one baseline. Metric lines show where the font file places ascender, cap height, x-height, baseline, and descender.</p>
+          </div>
+
+          <ul class="font-primer__bullets">
+            <li><code>line-height</code> and vertical alignment use the font’s ascender/descender tables - not the painted glyph bbox alone.</li>
+            <li><code>system-ui</code> resolves to an OS face at runtime; there is often no <code>.woff2</code> URL for capture tools to load.</li>
+            <li>A loaded webfont (<code>@font-face</code>, Google Fonts, CDN) ships the same metrics file the layout engine already used live.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
       <div id="drift-export-root" class="export-card export-asset">
         <button
           type="button"
@@ -3202,7 +3446,7 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          <strong>Vertical drift</strong> — for browser-use, pixels matter: clicking <code>[10, 11]</code> vs <code>[10, 12]</code> can be a button vs whitespace. SnapDOM’s canvas export paints text slightly lower than the live page. The break is SVG → canvas rasterization, not “wait longer for fonts.”
+          <strong>Vertical drift</strong> - for browser-use, pixels matter: clicking <code>[10, 11]</code> vs <code>[10, 12]</code> can be a button vs whitespace. SnapDOM’s canvas export paints text slightly lower than the live page. The break is SVG → canvas rasterization, not “wait longer for fonts.”
         </p>
 
         <div class="drift-demo" id="drift-demo">
@@ -3212,7 +3456,7 @@ canvas.onpaint = () =&gt; {
               <div class="drift-demo__frame">
                 <article id="drift-capture-target" class="drift-demo__panel">
                   <h3 id="drift-heading">Complete your order</h3>
-                  <p>Review details — the VLA only sees the screenshot, not this live DOM.</p>
+                  <p>Review details - the VLA only sees the screenshot, not this live DOM.</p>
                   <div class="drift-demo__actions">
                     <span class="drift-demo__btn drift-demo__btn--cancel">Cancel</span>
                     <span class="drift-demo__btn drift-demo__btn--submit" id="drift-submit">Submit</span>
@@ -3235,7 +3479,7 @@ canvas.onpaint = () =&gt; {
             <span><i class="canvas"></i> <span id="drift-legend-canvas-label">Same top coord on canvas</span></span>
           </div>
 
-          <div class="drift-zoom-row" aria-label="Heading zoom — same crop on live and canvas">
+          <div class="drift-zoom-row" aria-label="Heading zoom - same crop on live and canvas">
             <div class="drift-zoom-pane">
               <p class="drift-zoom-pane__label">Live heading (4× zoom)</p>
               <div class="drift-zoom-live-clip" id="drift-zoom-live-clip"></div>
@@ -3268,7 +3512,7 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          <strong>Everything tried before accepting that</strong> — the ~2px shift is structural to SVG → canvas rasterization, not a missing wait or CSS knob.
+          <strong>Everything tried before accepting that</strong> - the ~2px shift is structural to SVG → canvas rasterization, not a missing wait or CSS knob.
         </p>
         <div class="drift-timeline">
           <article class="drift-item drift-item--fail">
@@ -3276,48 +3520,48 @@ canvas.onpaint = () =&gt; {
               <h4 class="drift-item__title">Wait longer before capture</h4>
               <span class="drift-item__badge">No fix</span>
             </div>
-            <p class="drift-item__body">Fonts loaded, image decode, extra rAF passes, intervals, double/triple capture passes — text still shifted. Not a readiness problem.</p>
+            <p class="drift-item__body">Fonts loaded, image decode, extra rAF passes, intervals, double/triple capture passes - text still shifted. Not a readiness problem.</p>
           </article>
           <article class="drift-item drift-item--partial">
             <div class="drift-item__head">
               <h4 class="drift-item__title">Font metric mirror plugin</h4>
               <span class="drift-item__badge">Partial</span>
             </div>
-            <p class="drift-item__body">Canvas-measured sizes, fake @font-face rules, forced font-size/line-height on clone. Helps a little on system-ui; does not kill the ~2px canvas jump. SVG layout was already close — raster step is where it breaks (<a href="https://tonsky.me/blog/font-size/">tonsky on font-size</a>).</p>
+            <p class="drift-item__body">Canvas-measured sizes, fake @font-face rules, forced font-size/line-height on clone. Helps a little on system-ui; does not kill the ~2px canvas jump. SVG layout was already close - raster step is where it breaks (<a href="https://tonsky.me/blog/font-size/">tonsky on font-size</a>).</p>
           </article>
           <article class="drift-item drift-item--fail">
             <div class="drift-item__head">
-              <h4 class="drift-item__title">deviceBackingSize — floor / round / ceil</h4>
+              <h4 class="drift-item__title">deviceBackingSize - floor / round / ceil</h4>
               <span class="drift-item__badge">No fix</span>
             </div>
-            <p class="drift-item__body">Tried <code>floor</code>, <code>round</code>, and <code>ceil</code> on fractional device heights — see the rounding card. None fixed medY drift; ceil sometimes hung capture.</p>
+            <p class="drift-item__body">Tried <code>floor</code>, <code>round</code>, and <code>ceil</code> on fractional device heights - see the DPR card. None fixed medY drift; ceil sometimes hung capture.</p>
           </article>
           <article class="drift-item drift-item--fail">
             <div class="drift-item__head">
-              <h4 class="drift-item__title">Genetic search — 25,000 capture recipes</h4>
+              <h4 class="drift-item__title">Genetic search - 25,000 capture recipes</h4>
               <span class="drift-item__badge">No fix</span>
             </div>
-            <p class="drift-item__body">Mutate plugins, CSS flags, timing knobs; score medY + fullPage. Kept rediscovering the same Pareto cliff and “cheating” mutants (landmark fix, broken full-page) — not a real fix.</p>
+            <p class="drift-item__body">Mutate plugins, CSS flags, timing knobs; score medY + fullPage. Kept rediscovering the same Pareto cliff and “cheating” mutants (landmark fix, broken full-page) - not a real fix.</p>
           </article>
           <article class="drift-item drift-item--fail">
             <div class="drift-item__head">
               <h4 class="drift-item__title">CSS contain / isolation on clone</h4>
               <span class="drift-item__badge">No fix</span>
             </div>
-            <p class="drift-item__body"><code>contain: strict</code>, <code>isolation: isolate</code> — stacking-context experiments. Same plateau.</p>
+            <p class="drift-item__body"><code>contain: strict</code>, <code>isolation: isolate</code> - stacking-context experiments. Same plateau.</p>
           </article>
           <article class="drift-item drift-item--found">
             <div class="drift-item__head">
-              <h4 class="drift-item__title">Root cause — three-layer ink comparison</h4>
+              <h4 class="drift-item__title">Root cause - three-layer ink comparison</h4>
               <span class="drift-item__badge">Found it</span>
             </div>
-            <p class="drift-item__body">Overlay live page, SVG, and canvas; match ink positions letter-by-letter. Live ≈ SVG; canvas raster diverges ~2px. Fix when HTML-in-Canvas lands — or let authors opt into predictable fonts.</p>
+            <p class="drift-item__body">Overlay live page, SVG, and canvas; match ink positions letter-by-letter. Live ≈ SVG; canvas raster diverges ~2px. Fix when HTML-in-Canvas lands - or let authors opt into predictable fonts.</p>
           </article>
         </div>
         <div class="drift-compare" aria-label="Where drift appears">
           <div class="drift-layer drift-layer--ok">
             <p class="drift-layer__label">Live page</p>
-            <p class="drift-layer__note">Compositor paint — ground truth</p>
+            <p class="drift-layer__note">Compositor paint - ground truth</p>
           </div>
           <div class="drift-layer drift-layer--ok">
             <p class="drift-layer__label">SVG foreignObject</p>
@@ -3325,7 +3569,7 @@ canvas.onpaint = () =&gt; {
           </div>
           <div class="drift-layer drift-layer--bad">
             <p class="drift-layer__label">Canvas bitmap</p>
-            <p class="drift-layer__note">~2px text shift — VLA reads this layer</p>
+            <p class="drift-layer__note">~2px text shift - VLA reads this layer</p>
           </div>
         </div>
       </div>
@@ -3346,31 +3590,32 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          <strong>Rounding consistency fix</strong> — On Retina, <code>316.3px × 2 = 632.6</code> device px. The full card looks identical for every rounding choice; only the bottom edge moves by a fraction of a pixel. The zoom strips below show that gap — and why it still didn’t fix heading drift.
+          <strong>Fractional pixels.</strong> To render the DOM to canvas you need real device pixels. If the layout height is fractional, like <code>316.3px</code>, you multiply by <code>devicePixelRatio</code> and the canvas engine has to round the result. Different rendering engines may round differently. 
         </p>
 
-        <div class="dpr-rounding" aria-label="deviceBackingSize live canvas demo">
-          <div class="dpr-live__measure" aria-hidden="true">
-            <article id="dpr-rounding-source" class="dpr-live__panel" style="width: 280px; height: 316.3px">
+        <div class="dpr-frac" aria-label="Fractional device pixels on a text card">
+          <div class="dpr-frac__measure" aria-hidden="true">
+            <article id="dpr-frac-stage" class="dpr-frac__panel" style="width: 280px; height: 316.3px">
               <h3>Complete your order</h3>
-              <p>Review details — canvas backing size is set in device pixels.</p>
-              <div class="dpr-live__actions">
-                <span class="dpr-live__btn dpr-live__btn--cancel">Cancel</span>
-                <span class="dpr-live__btn dpr-live__btn--submit">Submit</span>
+              <p>Review details before you submit.</p>
+              <div class="dpr-frac__actions">
+                <span class="dpr-frac__btn dpr-frac__btn--cancel">Cancel</span>
+                <span class="dpr-frac__btn dpr-frac__btn--submit">Submit</span>
               </div>
             </article>
           </div>
 
-          <div class="dpr-live__problem" id="dpr-rounding-problem">Measuring…</div>
+          <div class="dpr-frac__math" id="dpr-frac-math">Measuring…</div>
 
-          <p class="dpr-live__source-title">Element SnapDOM captures</p>
-          <div id="dpr-rounding-source-host"></div>
+          <p class="dpr-frac__grid-title">floor / round / ceil on canvas.height</p>
+          <div class="dpr-frac__round-grid" id="dpr-frac-round-grid"></div>
 
-          <p class="dpr-live__grid-title">Only the bottom edge differs — compare 16× zoom</p>
-          <div class="dpr-live__grid dpr-live__grid--three" id="dpr-rounding-grid"></div>
+          <div id="dpr-frac-ruler"></div>
+
+          <p class="dpr-frac__caption" id="dpr-frac-caption">Capturing with SnapDOM…</p>
 
           <p class="dpr-rounding__verdict">
-            <strong>Result:</strong> The full card looks the same in every column — only the bottom edge shifts by a fraction of a pixel. That still did not fix heading ink drifting ~2px after SVG → canvas rasterization.
+            <strong>Takeaway:</strong> Rounding fractional pixels may be an issue, and rounding everything beforehand to whole numbers does fix some issues, but the font issue still persists.
           </p>
         </div>
       </div>
@@ -3391,10 +3636,10 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          <strong>GitHub star history</strong> for every capture library in the article — combined growth and per-repo charts. Data from <a href="https://star-history.com">star-history.com</a> (full history via GitHub stargazers). Re-fetch: <code>node docs/substack/fetch-star-history.mjs</code> (<code>GITHUB_TOKEN</code> recommended).
+          <strong>GitHub star history</strong> for every capture library in the article - combined growth and per-repo charts. Data from <a href="https://star-history.com">star-history.com</a> (full history via GitHub stargazers). Re-fetch: <code>node docs/substack/fetch-star-history.mjs</code> (<code>GITHUB_TOKEN</code> recommended).
         </p>
 
-        <h3 class="star-section-title">All libraries — cumulative stars</h3>
+        <h3 class="star-section-title">All libraries - cumulative stars</h3>
         <div id="star-chart-combined" class="star-chart-combined export-asset">
           <button
             type="button"

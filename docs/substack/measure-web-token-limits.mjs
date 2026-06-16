@@ -278,7 +278,7 @@ async function probeChromeContext(browser) {
               ok: false,
               error: String(err?.message ?? err).slice(0, 120),
             });
-            log(`FAIL target≈${target.toLocaleString()} — ${String(err?.message ?? err).slice(0, 80)}`);
+            log(`FAIL target≈${target.toLocaleString()} - ${String(err?.message ?? err).slice(0, 80)}`);
             break;
           }
         }
@@ -318,7 +318,7 @@ function printReport({ pageRows, runtime, machine }) {
   }
 
   if (!runtime) {
-    console.log('\n(skipped Chrome runtime probe — pass without --tokens-only to measure)\n');
+    console.log('\n(skipped Chrome runtime probe - pass without --tokens-only to measure)\n');
     return;
   }
 
@@ -340,7 +340,7 @@ function printReport({ pageRows, runtime, machine }) {
 
   console.log('\n## DOM vs 75% runtime budget');
   if (!runtime.limit75) {
-    console.log('  (probe found no working context — check WebGPU / model load)');
+    console.log('  (probe found no working context - check WebGPU / model load)');
   }
   for (const row of pageRows) {
     const dom = row.tokens.htmlPlusCss;
@@ -350,7 +350,7 @@ function printReport({ pageRows, runtime, machine }) {
     }
     const pct = Math.round((dom / runtime.limit75) * 100);
     const fits = dom <= runtime.limit75 ? 'FITS' : 'OVER';
-    console.log(`  ${row.page}: ${dom.toLocaleString()} tokens (${pct}% of 75% budget) — ${fits}`);
+    console.log(`  ${row.page}: ${dom.toLocaleString()} tokens (${pct}% of 75% budget) - ${fits}`);
   }
   console.log('');
 }

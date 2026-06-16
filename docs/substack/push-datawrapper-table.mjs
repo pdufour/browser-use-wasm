@@ -368,7 +368,7 @@ for (const table of tables) {
   let { name, chartId, csvPath, patchMetadata, createIfMissing } = table;
   if (!chartId && createIfMissing) {
     chartId = await createChart(createIfMissing);
-    console.log(`${name}: created chart ${chartId} — set DATAWRAPPER_${name.toUpperCase()}_CHART_ID=${chartId}`);
+    console.log(`${name}: created chart ${chartId} - set DATAWRAPPER_${name.toUpperCase()}_CHART_ID=${chartId}`);
   }
   if (!chartId) {
     console.error(`${name}: missing chart ID`);
@@ -396,7 +396,7 @@ for (const table of tables) {
       await patchChart(chartId, patchMetadata);
       console.log(`${name}: applied intro, notes, column colors`);
     } catch (err) {
-      console.warn(`${name}: metadata patch warning — ${err.message}`);
+      console.warn(`${name}: metadata patch warning - ${err.message}`);
       console.warn(`${name}: open editor to finish column styling if colors missing`);
     }
   }

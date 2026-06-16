@@ -1,5 +1,5 @@
 /**
- * Star history charts — embed cached star-history.com SVGs + optional Inter charts from JSON.
+ * Star history charts - embed cached star-history.com SVGs + optional Inter charts from JSON.
  */
 
 const SVG_FILES = {
@@ -32,7 +32,7 @@ async function loadSvgInto(el, baseFile, dark) {
   const text = await res.text();
   const trimmed = text.trimStart();
   if (!type.includes('svg') && !trimmed.startsWith('<svg')) {
-    throw new Error(`${url} returned HTML, not SVG — serve via npm run dev or host star-history-svgs/`);
+    throw new Error(`${url} returned HTML, not SVG - serve via npm run dev or host star-history-svgs/`);
   }
   el.innerHTML = text;
   const svg = el.querySelector('svg');
@@ -106,7 +106,7 @@ const PNG_BTN = `<button type="button" class="btn-download-png btn-download-png-
 function buildIndividualCards(root, json) {
   root.innerHTML = INDIVIDUAL.map(({ key, repo }) => {
     const meta = json?.repos?.[repo];
-    const stars = meta?.stars ? formatStars(meta.stars) : '—';
+    const stars = meta?.stars ? formatStars(meta.stars) : '-';
     const complete = meta?.complete ? '' : ' · partial cache';
     const cardId = `star-card-${key}`;
     const filename = `browser-use-stars-${key}-substack.png`;

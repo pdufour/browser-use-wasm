@@ -1,27 +1,13 @@
 /**
- * Live canvas demo — fractional CSS × DPR → integer canvas.height.
+ * Fractional CSS × DPR → floor / round / ceil on canvas.height (normal text card).
  */
 import { snapdom } from '@zumer/snapdom';
+import { snapdomCaptureToCanvas } from '../../src/snapdom/capture.ts';
 
 const MODES = [
-  {
-    id: 'floor',
-    label: 'floor',
-    fn: Math.floor,
-    explain: 'Bitmap is shorter than layout — bottom pixels get clipped.',
-  },
-  {
-    id: 'round',
-    label: 'round',
-    fn: Math.round,
-    explain: 'Nearest integer — what SnapDOM uses today.',
-  },
-  {
-    id: 'ceil',
-    label: 'ceil',
-    fn: Math.ceil,
-    explain: 'Bitmap is taller than layout — empty pixels below the content.',
-  },
+  { id: 'floor', label: 'floor', fn: Math.floor, tone: 'clip' },
+  { id: 'round', label: 'round', fn: Math.round, tone: 'pad', note: 'SnapDOM default' },
+  { id: 'ceil', label: 'ceil', fn: Math.ceil, tone: 'pad' },
 ];
 
 function fmt(n, digits = 1) {
@@ -32,19 +18,18 @@ function isFractional(n) {
   return Math.abs(n - Math.round(n)) > 0.01;
 }
 
-/** SnapDOM skips painting when ancestors use visibility:hidden — stage on-screen briefly. */
-async function captureReference(source, cssW, cssH, dpr) {
-  const measure = source.closest('.dpr-live__measure');
+function stageBox(element) {
+  const rect = element.getBoundingClientRect();
+  return {
+    width: Math.max(1, Math.round(rect.width)),
+    height: Math.max(1, Math.round(rect.height)),
+  };
+}
+
+async function captureStage(stage) {
+  const measure = stage.closest('.dpr-frac__measure');
   const prev = measure
-    ? {
-        position: measure.style.position,
-        left: measure.style.left,
-        top: measure.style.top,
-        visibility: measure.style.visibility,
-        opacity: measure.style.opacity,
-        zIndex: measure.style.zIndex,
-        pointerEvents: measure.style.pointerEvents,
-      }
+    ? { position: measure.style.position, left: measure.style.left, visibility: measure.style.visibility, opacity: measure.style.opacity, zIndex: measure.style.zIndex }
     : null;
 
   if (measure) {
@@ -62,48 +47,55 @@ async function captureReference(source, cssW, cssH, dpr) {
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
   try {
-    return await snapdom.toCanvas(source, {
-      width: cssW,
-      height: cssH,
-      dpr: Math.min(2, dpr),
-      scale: 1,
-      embedFonts: true,
-    });
+    return await snapdomCaptureToCanvas(snapdom, stage);
   } finally {
     if (measure && prev) {
       measure.style.position = prev.position;
       measure.style.left = prev.left;
-      measure.style.top = prev.top;
       measure.style.visibility = prev.visibility;
       measure.style.opacity = prev.opacity;
       measure.style.zIndex = prev.zIndex;
-      measure.style.pointerEvents = prev.pointerEvents;
     }
   }
 }
 
-function displayCanvas(ref, cssW, cssH) {
-  const out = document.createElement('canvas');
-  out.width = ref.width;
-  out.height = ref.height;
-  out.style.width = `${cssW}px`;
-  out.style.height = `${cssH}px`;
-  out.className = 'dpr-live__bitmap';
-  out.getContext('2d')?.drawImage(ref, 0, 0);
-  return out;
+function buildMath(cssW, cssH, dpr) {
+  const exactH = cssH * dpr;
+  const tail = isFractional(exactH)
+    ? 'not an integer - <code>canvas.height</code> must pick <code>floor</code>, <code>round</code>, or <code>ceil</code>.'
+    : 'lands on integers on this display - open on Retina (DPR=2) to see a fractional result.';
+
+  return `
+    <div class="dpr-frac__step"><span class="dpr-frac__step-num">1</span><p>CSS height: <code>${fmt(cssH)} px</code></p></div>
+    <div class="dpr-frac__step dpr-frac__step--op">×</div>
+    <div class="dpr-frac__step"><span class="dpr-frac__step-num">2</span><p>DPR: <code>${fmt(dpr, 2)}</code></p></div>
+    <div class="dpr-frac__step dpr-frac__step--op">=</div>
+    <div class="dpr-frac__step dpr-frac__step--result"><span class="dpr-frac__step-num">3</span><p><code>${fmt(exactH)}</code> device px - ${tail}</p></div>
+  `;
 }
 
-function backingCanvas(ref, cssW, cssH, deviceW, deviceH, dark) {
+function roundingDelta(exactH, deviceH, dpr) {
+  const delta = deviceH - exactH;
+  if (Math.abs(delta) < 0.01) return { text: 'Matches layout exactly.', tone: 'neutral' };
+  if (delta < 0) {
+    return {
+      text: `${(-delta).toFixed(1)} device px clipped (~${(-delta / dpr).toFixed(2)} CSS px)`,
+      tone: 'clip',
+    };
+  }
+  return {
+    text: `${delta.toFixed(1)} device px empty below (~${(delta / dpr).toFixed(2)} CSS px)`,
+    tone: 'pad',
+  };
+}
+
+function backingCanvas(ref, deviceW, deviceH, dark) {
   const out = document.createElement('canvas');
   out.width = deviceW;
   out.height = deviceH;
-  out.style.width = `${cssW}px`;
-  out.style.height = `${cssH}px`;
-  out.className = 'dpr-live__bitmap dpr-live__bitmap--hidden';
-
+  out.className = 'dpr-frac__round-bitmap';
   const ctx = out.getContext('2d');
   if (!ctx) return out;
-
   ctx.fillStyle = dark ? '#1e293b' : '#ffffff';
   ctx.fillRect(0, 0, deviceW, deviceH);
   const srcH = Math.min(ref.height, deviceH);
@@ -111,104 +103,81 @@ function backingCanvas(ref, cssW, cssH, deviceW, deviceH, dark) {
   return out;
 }
 
-function hatchBand(ctx, x, y, w, h, stroke) {
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(x, y, w, h);
-  ctx.clip();
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = 1;
-  for (let i = -h; i < w + h; i += 5) {
-    ctx.beginPath();
-    ctx.moveTo(x + i, y);
-    ctx.lineTo(x + i + h, y + h);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
+/** One magnified ruler - all three canvas bottoms vs layout (per-column bars were invisible). */
+function buildCombinedRuler(exactH, choices) {
+  const minY = Math.floor(exactH) - 0.5;
+  const maxY = Math.ceil(exactH) + 0.5;
+  const span = maxY - minY;
+  const toPct = (y) => ((y - minY) / span) * 100;
 
-/** 16× strip of the last device pixels — the only place rounding choices diverge. */
-function buildEdgeFocusCanvas(bitmap, exactH, deviceH, dark, zoom = 16, band = 14) {
-  const z = document.createElement('canvas');
-  const srcY = Math.max(0, Math.min(bitmap.height - band, Math.floor(exactH - band)));
-  z.width = bitmap.width * zoom;
-  z.height = band * zoom;
-  z.className = 'dpr-live__edge-canvas';
+  const wrap = document.createElement('div');
+  wrap.className = 'dpr-frac__ruler';
 
-  const ctx = z.getContext('2d');
-  if (!ctx) return z;
+  const title = document.createElement('p');
+  title.className = 'dpr-frac__ruler-title';
+  title.textContent = `Bottom edge magnified - only the last ~${span.toFixed(1)} device px (real gap is sub-pixel)`;
 
-  ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = dark ? '#0f172a' : '#f1f5f9';
-  ctx.fillRect(0, 0, z.width, z.height);
-  ctx.drawImage(bitmap, 0, srcY, bitmap.width, band, 0, 0, z.width, z.height);
+  const track = document.createElement('div');
+  track.className = 'dpr-frac__ruler-track';
+  track.setAttribute('aria-hidden', 'true');
 
-  const layoutY = (exactH - srcY) * zoom;
-  const bitmapY = (deviceH - srcY) * zoom;
-  const top = Math.min(layoutY, bitmapY);
-  const bottom = Math.max(layoutY, bitmapY);
+  const layout = document.createElement('div');
+  layout.className = 'dpr-frac__ruler-mark dpr-frac__ruler-mark--layout';
+  layout.style.bottom = `calc(${toPct(exactH)}% - 1px)`;
+  layout.innerHTML = `<span>layout ${fmt(exactH)}</span>`;
+  track.append(layout);
 
-  if (bottom - top > 0.5) {
-    const tone = deviceH < exactH ? 'rgba(220, 38, 38, 0.22)' : 'rgba(245, 158, 11, 0.28)';
-    ctx.fillStyle = tone;
-    ctx.fillRect(0, top, z.width, bottom - top);
-    hatchBand(ctx, 0, top, z.width, bottom - top, deviceH < exactH ? '#dc2626' : '#d97706');
+  for (const { id, label, deviceH } of choices) {
+    const mark = document.createElement('div');
+    mark.className = `dpr-frac__ruler-mark dpr-frac__ruler-mark--${id}`;
+    mark.style.bottom = `calc(${toPct(deviceH)}% - 1px)`;
+    mark.innerHTML = `<span>${label} → ${deviceH}</span>`;
+    track.append(mark);
   }
 
-  if (layoutY >= 0 && layoutY <= z.height) {
-    ctx.strokeStyle = '#f59e0b';
-    ctx.setLineDash([5, 4]);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, layoutY + 0.5);
-    ctx.lineTo(z.width, layoutY + 0.5);
-    ctx.stroke();
+  // Stack labels when round/ceil share the same integer
+  const marks = [...track.querySelectorAll('.dpr-frac__ruler-mark:not(.dpr-frac__ruler-mark--layout)')];
+  const byBottom = new Map();
+  for (const m of marks) {
+    const b = m.style.bottom;
+    if (!byBottom.has(b)) byBottom.set(b, []);
+    byBottom.get(b).push(m);
+  }
+  for (const group of byBottom.values()) {
+    if (group.length < 2) continue;
+    const labels = group.map((m) => m.querySelector('span')?.textContent?.split(' → ')[0]).filter(Boolean);
+    const h = group[0].querySelector('span')?.textContent?.split(' → ')[1];
+    group[0].querySelector('span').textContent = `${labels.join(' / ')} → ${h}`;
+    for (let i = 1; i < group.length; i++) group[i].remove();
   }
 
-  if (bitmapY >= 0 && bitmapY <= z.height) {
-    ctx.strokeStyle = '#dc2626';
-    ctx.setLineDash([]);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, bitmapY + 0.5);
-    ctx.lineTo(z.width, bitmapY + 0.5);
-    ctx.stroke();
-  }
+  const key = document.createElement('ul');
+  key.className = 'dpr-frac__ruler-key';
+  key.innerHTML = `
+    <li><span class="dpr-frac__key-swatch dpr-frac__key-swatch--layout"></span> Layout bottom - ${fmt(exactH)} device px</li>
+    ${choices
+      .map(
+        (c) =>
+          `<li><span class="dpr-frac__key-swatch dpr-frac__key-swatch--${c.id}"></span> <code>${c.label}</code> canvas - ${c.deviceH} device px</li>`
+      )
+      .join('')}
+  `;
 
-  return z;
-}
-
-function roundingDelta(exactH, deviceH, dpr) {
-  const delta = deviceH - exactH;
-  if (Math.abs(delta) < 0.01) {
-    return { text: 'Bitmap height matches layout exactly.', tone: 'neutral' };
-  }
-  if (delta < 0) {
-    const lost = (-delta).toFixed(1);
-    const css = (-delta / dpr).toFixed(2);
-    return {
-      text: `Canvas is ${lost} device px shorter (~${css} CSS px) — bottom clipped.`,
-      tone: 'clip',
-    };
-  }
-  const extra = delta.toFixed(1);
-  const css = (delta / dpr).toFixed(2);
-  return {
-    text: `Canvas is ${extra} device px taller (~${css} CSS px) — empty band below layout.`,
-    tone: 'pad',
-  };
+  wrap.append(title, track, key);
+  return wrap;
 }
 
 /**
- * @param {HTMLElement} root — `#dpr-rounding-export-root`
+ * @param {HTMLElement} root
  */
 export async function initDprRoundingDemo(root = document.getElementById('dpr-rounding-export-root')) {
-  const source = root?.querySelector('#dpr-rounding-source');
-  const problemEl = root?.querySelector('#dpr-rounding-problem');
-  const sourceHost = root?.querySelector('#dpr-rounding-source-host');
-  const grid = root?.querySelector('#dpr-rounding-grid');
-  const edgeHost = root?.querySelector('#dpr-rounding-edge');
-  if (!source || !problemEl || !sourceHost || !grid) return;
+  const stage = root?.querySelector('#dpr-frac-stage');
+  const mathEl = root?.querySelector('#dpr-frac-math');
+  const grid = root?.querySelector('#dpr-frac-round-grid');
+  const rulerHost = root?.querySelector('#dpr-frac-ruler');
+  const caption = root?.querySelector('#dpr-frac-caption');
+
+  if (!stage || !mathEl || !grid || !rulerHost || !caption) return;
 
   const dark = () => root.classList.contains('dark');
 
@@ -216,102 +185,71 @@ export async function initDprRoundingDemo(root = document.getElementById('dpr-ro
     await document.fonts?.ready;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    const rect = source.getBoundingClientRect();
+    const rect = stage.getBoundingClientRect();
     const cssW = rect.width;
     const cssH = rect.height;
     const dpr = globalThis.devicePixelRatio ?? 1;
     const exactW = cssW * dpr;
     const exactH = cssH * dpr;
 
-    const reference = await captureReference(source, cssW, cssH, dpr);
+    mathEl.innerHTML = buildMath(cssW, cssH, dpr);
 
-    const problemTail = isFractional(exactH)
-      ? '<strong>not an integer</strong>. Canvas <code>.height</code> must pick floor, round, or ceil.'
-      : 'an integer — floor, round, and ceil all agree.';
-
-    problemEl.innerHTML = `
-      <div class="dpr-live__step">
-        <span class="dpr-live__step-num">1</span>
-        <p>CSS box height: <code>${fmt(cssH)} px</code></p>
-      </div>
-      <div class="dpr-live__step dpr-live__step--op">×</div>
-      <div class="dpr-live__step">
-        <span class="dpr-live__step-num">2</span>
-        <p>devicePixelRatio: <code>${fmt(dpr, 2)}</code></p>
-      </div>
-      <div class="dpr-live__step dpr-live__step--op">=</div>
-      <div class="dpr-live__step dpr-live__step--problem">
-        <span class="dpr-live__step-num">3</span>
-        <p><code>${fmt(exactH)}</code> device px — ${problemTail}</p>
-      </div>
-    `;
-
-    sourceHost.replaceChildren();
-    const previewWrap = document.createElement('div');
-    previewWrap.className = 'dpr-live__source-frame';
-    previewWrap.append(displayCanvas(reference, cssW, cssH));
-    sourceHost.append(previewWrap);
-
-    grid.replaceChildren();
+    const reference = await captureStage(stage);
+    const { width, height } = stageBox(stage);
     const floorH = Math.floor(exactH);
     const roundH = Math.round(exactH);
-    const ceilH = Math.ceil(exactH);
+
+    grid.replaceChildren();
+    const rulerChoices = [];
 
     for (const mode of MODES) {
       const deviceW = mode.fn(exactW);
       const deviceH = mode.fn(exactH);
-      const bitmap = backingCanvas(reference, cssW, cssH, deviceW, deviceH, dark());
+      const bitmap = backingCanvas(reference, deviceW, deviceH, dark());
       const delta = roundingDelta(exactH, deviceH, dpr);
       const tie =
         mode.id === 'ceil' && deviceH === roundH
           ? 'same as round'
           : mode.id === 'round' && deviceH === floorH
             ? 'same as floor'
-            : mode.id === 'round' && deviceH === ceilH
-              ? 'same as ceil'
-              : '';
+            : '';
 
       const col = document.createElement('article');
-      col.className = 'dpr-live__col';
-      if (mode.id === 'floor') col.classList.add('dpr-live__col--clip');
-      if (deviceH > exactH) col.classList.add('dpr-live__col--pad');
+      col.className = `dpr-frac__round-col dpr-frac__round-col--${delta.tone}`;
       col.innerHTML = `
-        <p class="dpr-live__formula"><code>${mode.label}(${fmt(exactH)}) = ${deviceH}</code></p>
-        <p class="dpr-live__backing">canvas.height = <strong>${deviceH}</strong> device px${
-          tie ? ` <span class="dpr-live__tie">${tie}</span>` : ''
-        }</p>
+        <p class="dpr-frac__formula"><code>${mode.label}(${fmt(exactH)}) = ${deviceH}</code></p>
+        <p class="dpr-frac__backing">canvas.height = <strong>${deviceH}</strong>${tie ? ` <span class="dpr-frac__tie">${tie}</span>` : ''}${mode.note ? ` · ${mode.note}` : ''}</p>
       `;
 
-      const focus = document.createElement('div');
-      focus.className = 'dpr-live__edge-focus';
-      const focusTitle = document.createElement('p');
-      focusTitle.className = 'dpr-live__edge-focus-title';
-      focusTitle.textContent = 'Bottom edge — 16× zoom (rest of card is identical)';
-      focus.append(focusTitle, buildEdgeFocusCanvas(bitmap, exactH, deviceH, dark()));
+      const thumb = document.createElement('div');
+      thumb.className = 'dpr-frac__round-thumb';
+      const shown = document.createElement('canvas');
+      shown.width = bitmap.width;
+      shown.height = bitmap.height;
+      shown.className = 'dpr-frac__round-bitmap';
+      shown.style.width = `${width}px`;
+      shown.style.height = `${height}px`;
+      shown.getContext('2d')?.drawImage(bitmap, 0, 0);
+      thumb.append(shown);
 
       const deltaEl = document.createElement('p');
-      deltaEl.className = `dpr-live__delta dpr-live__delta--${delta.tone}`;
+      deltaEl.className = `dpr-frac__delta dpr-frac__delta--${delta.tone}`;
       deltaEl.textContent = delta.text;
 
-      const key = document.createElement('p');
-      key.className = 'dpr-live__edge-key';
-      key.innerHTML =
-        '<span class="dpr-live__key-line dpr-live__key-line--layout"></span> layout bottom &nbsp; ' +
-        '<span class="dpr-live__key-line dpr-live__key-line--bitmap"></span> canvas bottom';
-
-      const note = document.createElement('p');
-      note.className = 'dpr-live__note';
-      note.textContent = mode.explain;
-
-      col.append(focus, deltaEl, key, note);
+      col.append(thumb, deltaEl);
       grid.append(col);
+      rulerChoices.push({ id: mode.id, label: mode.label, deviceH });
     }
 
-    if (edgeHost) edgeHost.replaceChildren();
+    rulerHost.replaceChildren(buildCombinedRuler(exactH, rulerChoices));
+
+    caption.textContent = isFractional(exactH)
+      ? `Card previews look the same, but when you zoom in you can see the difference - the magnified ruler shows how much floor, round, and ceil can shift the layout.`
+      : `Use a Retina display (DPR=2) to compare floor / round / ceil on fractional device pixels.`;
 
     root.dataset.dprReady = '1';
   } catch (err) {
-    problemEl.textContent = String(err?.message ?? err);
+    caption.textContent = String(err?.message ?? err);
     root.dataset.dprReady = 'error';
   }
 }

@@ -1,11 +1,11 @@
 /**
- * Static live vs SnapDOM canvas comparison — vertical drift demo.
+ * Static live vs SnapDOM canvas comparison - vertical drift demo.
  */
 import { snapdom } from '@zumer/snapdom';
 import { snapdomCaptureToCanvas } from '../../src/snapdom/capture.ts';
 
 const ZOOM_SCALE = 4;
-/** Stylized drift when live capture aligns — article still shows SVG → canvas shift. */
+/** Stylized drift when live capture aligns - article still shows SVG → canvas shift. */
 const DEMO_DRIFT_CSS_PX = 2;
 
 function stageBox(element) {
@@ -63,7 +63,7 @@ function headingCrop(stage, heading, pad) {
   };
 }
 
-/** Same 4× CSS clip for live DOM or canvas bitmap — avoids stretched bitmap upscale. */
+/** Same 4× CSS clip for live DOM or canvas bitmap - avoids stretched bitmap upscale. */
 function buildZoomClip(clip, content, stage, heading, pad) {
   const crop = headingCrop(stage, heading, pad);
   clip.replaceChildren();
@@ -96,7 +96,7 @@ function addZoomGuides(clip, crop, shiftCss) {
 }
 
 /**
- * @param {HTMLElement} root — `#drift-export-root`
+ * @param {HTMLElement} root - `#drift-export-root`
  */
 export async function initDriftDemo(root = document.getElementById('drift-export-root')) {
   const stage = root?.querySelector('#drift-capture-target');
@@ -154,7 +154,6 @@ export async function initDriftDemo(root = document.getElementById('drift-export
       }
 
       liveGuide.style.top = `${liveInkCss}px`;
-      // Nominal coord (matches live) on canvas pane; bitmap sits lower when faking drift.
       canvasGuide.style.top = useFakeDrift
         ? `${liveInkCss}px`
         : `${liveInkCss + displayShift}px`;
