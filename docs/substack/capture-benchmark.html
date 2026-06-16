@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Capture benchmark - SnapDOM vs html2canvas-pro</title>
+    <style>
+      :root {
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --green: #059669;
+        --amber: #d97706;
+        --blue: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--text);
+        background: #f8fafc;
+        padding: 1.5rem;
+        line-height: 1.5;
+      }
+      h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.35rem;
+      }
+      .lead {
+        margin: 0 0 1.25rem;
+        color: var(--muted);
+        max-width: 52rem;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.25rem;
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
+      button.primary {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+      }
+      .status {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      table {
+        width: 100%;
+        max-width: 56rem;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+      }
+      th,
+      td {
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f1f5f9;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .snapdom {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .h2c {
+        color: var(--amber);
+        font-weight: 700;
+      }
+      .ratio {
+        color: var(--blue);
+        font-weight: 700;
+      }
+      .targets {
+        display: grid;
+        gap: 1rem;
+        max-width: 56rem;
+      }
+      .target-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+      }
+      .target-card h2 {
+        margin: 0 0 0.5rem;
+        font-size: 0.95rem;
+      }
+      .bench-frame {
+        width: 100%;
+        max-width: 720px;
+        height: 380px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
+      pre {
+        max-width: 56rem;
+        overflow: auto;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SnapDOM vs html2canvas-pro</h1>
+    <p class="lead">
+      Same element, same CSS box, same DPR cap (<code>min(2, devicePixelRatio)</code>). SnapDOM uses the
+      shipped <code>snapdomCaptureToCanvas</code> path; html2canvas-pro redraws procedurally.
+    </p>
+
+    <div class="toolbar">
+      <button type="button" class="primary" id="btn-run">Run benchmark</button>
+      <span class="status" id="status">Waiting for fixture…</span>
+    </div>
+
+    <table id="results-table" hidden>
+      <thead>
+        <tr>
+          <th>Fixture</th>
+          <th>SnapDOM median</th>
+          <th>html2canvas-pro median</th>
+          <th>SnapDOM faster by</th>
+          <th>Canvas (SnapDOM)</th>
+        </tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+    </table>
+
+    <div class="targets">
+      <section class="target-card">
+        <h2>Simple webpage</h2>
+        <iframe
+          id="bench-simple-frame"
+          class="bench-frame"
+          src="/substack/fixtures/simple-page/index.html"
+          title="simple webpage fixture"
+        ></iframe>
+      </section>
+
+      <section class="target-card">
+        <h2>Checkout page</h2>
+        <iframe
+          id="bench-fixture-frame"
+          class="bench-frame"
+          src="/browse-fixture/index.html"
+          title="checkout page fixture"
+        ></iframe>
+      </section>
+    </div>
+
+    <pre id="json-out" hidden></pre>
+
+    <script type="module">
+      import { runCaptureBenchmark } from './capture-benchmark.mjs';
+
+      const btn = document.getElementById('btn-run');
+      const statusEl = document.getElementById('status');
+      const table = document.getElementById('results-table');
+      const tbody = document.getElementById('results-body');
+      const jsonOut = document.getElementById('json-out');
+      const simpleFrame = document.getElementById('bench-simple-frame');
+      const checkoutFrame = document.getElementById('bench-fixture-frame');
+
+      const params = new URLSearchParams(location.search);
+      const autorun = params.has('autorun');
+      const runs = Number(params.get('runs') ?? 5);
+      const warmup = Number(params.get('warmup') ?? 1);
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function renderResults(payload) {
+        tbody.replaceChildren(
+          ...payload.results.map((row) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.fixture}</td>
+              <td class="snapdom">${row.snapdom.median} ms <span style="font-weight:400;color:var(--muted)">(${row.snapdom.min}–${row.snapdom.max})</span></td>
+              <td class="h2c">${row.html2canvasPro.median} ms <span style="font-weight:400;color:var(--muted)">(${row.html2canvasPro.min}–${row.html2canvasPro.max})</span></td>
+              <td class="ratio">${row.snapdomFasterBy ?? '-'}×</td>
+              <td>${row.snapdom.canvas.width}×${row.snapdom.canvas.height}</td>
+            `;
+            return tr;
+          })
+        );
+        table.hidden = false;
+        jsonOut.hidden = false;
+        jsonOut.textContent = JSON.stringify(payload, null, 2);
+        window.__benchmarkResults = payload;
+      }
+
+      async function run() {
+        btn.disabled = true;
+        setStatus('Running…');
+        try {
+          const payload = await runCaptureBenchmark({ runs, warmup });
+          renderResults(payload);
+          setStatus(`Done - ${payload.runs} timed runs after ${payload.warmup} warmup (DPR ${payload.devicePixelRatio})`);
+        } catch (err) {
+          setStatus(`Error: ${err.message}`);
+          window.__benchmarkError = String(err?.message ?? err);
+          throw err;
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      btn.addEventListener('click', () => void run());
+
+      const frames = [simpleFrame, checkoutFrame].filter(Boolean);
+      let loaded = 0;
+      const onFrameReady = () => {
+        loaded += 1;
+        if (loaded < frames.length) return;
+        setStatus('Fixtures loaded - click Run benchmark');
+        if (autorun) void run();
+      };
+
+      for (const frame of frames) {
+        frame.addEventListener('load', onFrameReady);
+        if (frame.contentDocument?.readyState === 'complete') onFrameReady();
+      }
+    </script>
+  </body>
+</html>

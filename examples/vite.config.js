@@ -8,6 +8,7 @@ import { modelCachePlugin } from '../vite.model-cache.js';
 import { wllamaWasmPlugin } from '../vite.wllama-wasm.js';
 import { coopCoepCorpPlugin } from '../vite.coop-corp.js';
 import { createDemoPagesPlugins } from '../vite.demo-pages.js';
+import { substackEmbedsPlugin } from '../vite.substack-embeds.js';
 import { wllamaPlugins } from '../vite.wllama-plugins.js';
 
 const examplesDir = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,7 @@ export default defineConfig({
   root: path.join(examplesDir, 'home'),
   publicDir: false,
   plugins: [
+    substackEmbedsPlugin(),
     ...createDemoPagesPlugins(),
     react(),
     coopCoepCorpPlugin(),

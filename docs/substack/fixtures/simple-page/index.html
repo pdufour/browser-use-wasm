@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple page - capture benchmark</title>
+    <link rel="stylesheet" href="fixture.css" />
+  </head>
+  <body>
+    <article id="capture-target" class="page">
+      <header class="page__header">
+        <span class="page__logo">Acme</span>
+        <nav class="page__nav">
+          <a href="#">Docs</a>
+          <a href="#">Pricing</a>
+          <a href="#" id="nav-sign-in">Sign in</a>
+        </nav>
+      </header>
+
+      <main class="page__main">
+        <h1>Ship faster with less context</h1>
+        <p class="page__lead">
+          A minimal page for capture benchmarks - header, copy, form, and two actions.
+        </p>
+
+        <form class="page__form" onsubmit="return false">
+          <label>
+            Work email
+            <input type="email" placeholder="you@company.com" />
+          </label>
+          <label>
+            Plan
+            <select>
+              <option>Starter</option>
+              <option selected>Pro</option>
+              <option>Enterprise</option>
+            </select>
+          </label>
+        </form>
+      </main>
+
+      <footer class="page__footer">
+        <button type="button" class="btn btn--ghost" id="btn-cancel">Cancel</button>
+        <button type="button" class="btn btn--primary" id="btn-submit">Get started</button>
+      </footer>
+    </article>
+  </body>
+</html>

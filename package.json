@@ -47,7 +47,8 @@
     "eval:mind2web:models": "MIND2WEB_EVAL_LIMIT=15 MIND2WEB_EVAL_FAIL_EARLY_PCT=0 node tests/mind2web/mind2web-model-benchmark.mjs",
     "cache:miniwob": "node scripts/cache-miniwob.mjs",
     "cache:previews": "node scripts/cache-gallery-previews.mjs",
-    "eval:miniwob": "node tests/miniwob/miniwob-eval.mjs"
+    "eval:miniwob": "node tests/miniwob/miniwob-eval.mjs",
+    "benchmark:capture": "node docs/substack/benchmark-capture.mjs"
   },
   "dependencies": {
     "@wllama/wllama": "^3.1.0",
@@ -56,9 +57,13 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "@playwright/test": "^1.52.0",
     "@vitejs/plugin-react": "^5.2.0",
     "coi-serviceworker": "^0.1.7",
+    "html-to-image": "^1.11.13",
+    "html2canvas-pro": "^2.0.4",
+    "mermaid": "^11.15.0",
     "typescript": "^6.0.3",
     "vite": "^6.3.5"
   }
