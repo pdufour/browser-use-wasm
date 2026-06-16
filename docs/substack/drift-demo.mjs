@@ -111,6 +111,10 @@ export async function initDriftDemo(root = document.getElementById('drift-export
 
   if (!stage || !preview || !caption) return;
 
+  preview.style.transform = '';
+  preview.style.width = '';
+  preview.style.height = '';
+
   try {
     await document.fonts?.ready;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));

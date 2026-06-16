@@ -23,6 +23,10 @@
         --amber-soft: #fffbeb;
         --green: #059669;
         --green-soft: #ecfdf5;
+        /* Substack embed: 16px preview → 28.2px PNG capture → ~16px in post column */
+        --substack-preview-font: 1rem;
+        --substack-export-font: 28.2px;
+        --substack-export-padding: 42px 50px 46px;
       }
 
       * {
@@ -268,11 +272,6 @@
         align-items: stretch;
         gap: 0;
         width: 100%;
-      }
-
-      #export-root.exporting {
-        width: 1200px;
-        max-width: none;
       }
 
       #export-root.exporting .pipeline__grid {
@@ -1084,6 +1083,139 @@
         max-width: none;
       }
 
+      /* ── Substack PNG export scale (all assets) ── */
+      #capture-export-root,
+      #libs-export-root,
+      #snapdom-export-root,
+      #font-metrics-export-root,
+      #drift-export-root,
+      #drift-debug-export-root,
+      #dpr-rounding-export-root,
+      #stars-export-root,
+      #star-chart-combined {
+        font-size: var(--substack-preview-font);
+      }
+
+      #capture-export-root.exporting,
+      #libs-export-root.exporting,
+      #snapdom-export-root.exporting,
+      #font-metrics-export-root.exporting,
+      #drift-export-root.exporting,
+      #drift-debug-export-root.exporting,
+      #dpr-rounding-export-root.exporting,
+      #stars-export-root.exporting,
+      #star-chart-combined.exporting {
+        font-size: var(--substack-export-font);
+        overflow: visible;
+      }
+
+      /* Pipeline diagram: keep native rem layout (no text-only scaling — breaks grid) */
+      #export-root.exporting {
+        padding: 2.25rem 2.5rem 2.5rem;
+        overflow: visible;
+      }
+
+      #capture-export-root.exporting,
+      #libs-export-root.exporting,
+      #snapdom-export-root.exporting,
+      #font-metrics-export-root.exporting,
+      #drift-export-root.exporting,
+      #drift-debug-export-root.exporting,
+      #dpr-rounding-export-root.exporting,
+      #stars-export-root.exporting {
+        padding: var(--substack-export-padding);
+      }
+
+      #capture-export-root .capture-intro,
+      #libs-export-root .export-card__intro,
+      #snapdom-export-root .export-card__intro,
+      #font-metrics-export-root .export-card__intro,
+      #drift-export-root .export-card__intro,
+      #drift-debug-export-root .export-card__intro,
+      #dpr-rounding-export-root .export-card__intro,
+      #stars-export-root .export-card__intro {
+        font-size: 1em;
+        max-width: none;
+        line-height: 1.55;
+      }
+
+      /* Capture comparison */
+      #capture-export-root .capture-option__head { font-size: 0.72em; }
+      #capture-export-root .capture-mock { font-size: 0.62em; }
+      #capture-export-root .capture-screenshot__chrome { font-size: 0.58em; }
+      #capture-export-root .capture-screenshot__dots { font-size: 0.45em; }
+      #capture-export-root .capture-screenshot__url { font-size: 0.52em; }
+      #capture-export-root .capture-screenshot__label { font-size: 0.62em; }
+      #capture-export-root .capture-screenshot__dims { font-size: 0.55em; }
+      #capture-export-root .capture-visual__tag { font-size: 0.62em; }
+      #capture-export-root .capture-visual__tokens { font-size: 0.7em; }
+      #capture-export-root .capture-api { font-size: 0.58em; }
+      #capture-export-root .capture-status { font-size: 0.62em; }
+      #capture-export-root .capture-option__note { font-size: 0.78em; }
+      #capture-export-root .capture-stats th,
+      #capture-export-root .capture-stats td { font-size: 0.68em; }
+      #capture-export-root .capture-footnote { font-size: 0.68em; }
+
+      /* Libraries grid */
+      #libs-export-root .lib-col__head { font-size: 0.68em; }
+      #libs-export-root .lib-entry__name { font-size: 0.82em; }
+      #libs-export-root .lib-entry__meta { font-size: 0.68em; }
+      #libs-export-root .lib-flow { font-size: 0.78em; }
+      #libs-export-root .lib-benchmark__title { font-size: 0.78em; }
+      #libs-export-root .bench-chart__legend { font-size: 0.72em; }
+      #libs-export-root .bench-chart__bars { font-size: 0.68em; }
+      #libs-export-root .bench-chart__label { font-size: 0.78em; }
+      #libs-export-root .bench-chart__note { font-size: 0.72em; }
+
+      /* SnapDOM flow */
+      #snapdom-export-root .snapdom-header__title { font-size: 1.1em; }
+      #snapdom-export-root .snapdom-header__tag { font-size: 0.68em; }
+      #snapdom-export-root .snapdom-step__icon { font-size: 1.35em; }
+      #snapdom-export-root .snapdom-step__title { font-size: 0.78em; }
+      #snapdom-export-root .snapdom-step__sub { font-size: 0.65em; }
+      #snapdom-export-root .snapdom-step__list { font-size: 0.62em; }
+      #snapdom-export-root .snapdom-step__list code { font-size: 0.58em; }
+      #snapdom-export-root .snapdom-step__num { font-size: 0.62em; }
+      #snapdom-export-root .snapdom-reason { font-size: 0.72em; }
+      #snapdom-export-root .capture-footnote { font-size: 0.68em; }
+
+      /* Vertical drift demo */
+      /* Drift fixture: fixed 16px scale so live panel matches SnapDOM bitmap */
+      #drift-export-root .drift-demo {
+        font-size: 1rem;
+      }
+
+      #drift-export-root.exporting .drift-demo {
+        font-size: 16px;
+      }
+
+      #drift-export-root .drift-demo__compare {
+        max-width: none;
+      }
+
+      #drift-export-root .drift-demo__panel p {
+        white-space: nowrap;
+      }
+
+      #drift-export-root .drift-demo__pane-label,
+      #drift-export-root .drift-zoom-pane__label { font-size: 0.68em; }
+      #drift-export-root .drift-demo__legend { font-size: 0.72em; }
+      #drift-export-root .drift-demo__caption { font-size: 0.76em; }
+
+      /* Drift debug timeline */
+      #drift-debug-export-root .drift-item__title { font-size: 0.84em; }
+      #drift-debug-export-root .drift-item__badge { font-size: 0.62em; }
+      #drift-debug-export-root .drift-item__body { font-size: 0.78em; max-width: none; }
+      #drift-debug-export-root .drift-layer__label { font-size: 0.72em; }
+      #drift-debug-export-root .drift-layer__note { font-size: 0.72em; }
+
+      /* Star charts */
+      #stars-export-root .star-section-title { font-size: 0.78em; }
+      #stars-export-root .star-card__title { font-size: 0.72em; }
+      #stars-export-root .star-card__stars { font-size: 0.68em; }
+      #stars-export-root .star-chart__empty { font-size: 0.72em; }
+      #stars-export-root .capture-footnote { font-size: 0.68em; }
+
       /* ── Shared card shell for extra diagrams ── */
       .export-card {
         width: 100%;
@@ -1679,35 +1811,12 @@
 
       /* ── Font metrics primer (static) ── */
       #font-metrics-export-root {
-        font-size: 1.4rem;
         padding: 2.5rem 2.75rem 2.75rem;
-      }
-
-      #font-metrics-export-root .export-card__intro {
-        font-size: 1em;
-        line-height: 1.65;
-        margin-bottom: 1.5rem;
-        max-width: none;
       }
 
       #font-metrics-export-root .font-primer__caption,
       #font-metrics-export-root .font-primer__bullets {
         font-size: 0.94em;
-      }
-
-      /* PNG capture: card widens to 1200px but html rem stays 16px — scale type so
-         embedded Substack text ≈ 20px when the image spans the column (~680px).
-         Keep 1200px width (same as layout) so html-to-image does not clip reflow. */
-      #font-metrics-export-root.exporting {
-        font-size: 36px;
-        padding: 48px 56px 52px;
-        overflow: visible;
-      }
-
-      #font-metrics-export-root.exporting .export-card__intro {
-        font-size: 1em;
-        line-height: 1.55;
-        margin-bottom: 1.1em;
       }
 
       #font-metrics-export-root.exporting .font-primer__caption,
@@ -1892,8 +2001,6 @@
 
       #drift-capture-preview {
         display: block;
-        width: 100% !important;
-        height: auto !important;
         vertical-align: top;
       }
 
@@ -2280,6 +2387,82 @@
       .export-card.dark .dpr-table th {
         background: #1e293b;
         color: #94a3b8;
+      }
+
+      /* ── DPR rounding card: em-scaled text (root size in shared Substack block) ── */
+      #dpr-rounding-export-root {
+        padding: 2.5rem 2.75rem 2.75rem;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__step p {
+        font-size: 0.94em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__step--op {
+        font-size: 1.15em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__step-num {
+        width: 1.5em;
+        height: 1.5em;
+        font-size: 0.78em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__caption {
+        font-size: 0.92em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__grid-title {
+        font-size: 0.84em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__formula {
+        font-size: 0.94em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__backing {
+        font-size: 0.84em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__tie {
+        font-size: 0.72em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__delta {
+        font-size: 0.8em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__mini-label {
+        font-size: 0.72em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__ruler-title {
+        font-size: 0.84em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__ruler-mark span {
+        font-size: 0.8em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__ruler-key {
+        font-size: 0.8em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__ruler-track {
+        margin-right: 6.5em;
+        height: 6.5em;
+      }
+
+      #dpr-rounding-export-root .dpr-frac__round-thumb {
+        max-height: 8.5em;
+      }
+
+      #dpr-rounding-export-root .dpr-rounding__verdict {
+        font-size: 0.9em;
+      }
+
+      #dpr-rounding-export-root .dpr-rounding__verdict strong {
+        font-size: 0.78em;
       }
 
       /* ── DPR fractional pixels asset ── */
@@ -3020,7 +3203,7 @@
               </div>
               <div class="stage__panel stage__panel--loop">
                 <div class="loop__row">
-                  <article class="node node--ground node--hero">
+                  <article class="node node--ground">
                     <div class="node__icon" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3a7 7 0 0 1 7 7c0 3-2 5.5-4 7l-3 4-3-4c-2-1.5-4-4-4-7a7 7 0 0 1 7-7z"/>
@@ -3031,9 +3214,9 @@
                       <p class="node__title">VLA grounding</p>
                       <p class="node__sub">Task + screenshot → action dict(s) with position</p>
                       <div class="node__chips">
-                        <span class="chip">CLICK</span>
-                        <span class="chip">INPUT</span>
-                        <span class="chip">ENTER</span>
+                        <span class="chip">click</span>
+                        <span class="chip">input</span>
+                        <span class="chip">enter</span>
                       </div>
                     </div>
                   </article>
@@ -3046,7 +3229,7 @@
                     <p class="connector__label">actions</p>
                   </div>
 
-                  <article class="node node--act node--hero">
+                  <article class="node node--act">
                     <div class="node__icon" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4l7 16 2.5-6.5L20 11z"/>
@@ -3497,7 +3680,7 @@ canvas.onpaint = () =&gt; {
               <div class="drift-demo__frame">
                 <article id="drift-capture-target" class="drift-demo__panel">
                   <h3 id="drift-heading">Complete your order</h3>
-                  <p>Review details - the VLA only sees the screenshot, not this live DOM.</p>
+                  <p>Review details before you submit.</p>
                   <div class="drift-demo__actions">
                     <span class="drift-demo__btn drift-demo__btn--cancel">Cancel</span>
                     <span class="drift-demo__btn drift-demo__btn--submit" id="drift-submit">Submit</span>

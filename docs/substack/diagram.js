@@ -132,6 +132,10 @@ async function captureNode(node, toImage) {
   node.classList.add('exporting');
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
   try {
+    if (node.id === 'drift-export-root') {
+      delete node.dataset.driftReady;
+      await initDriftDemo(node);
+    }
     return await toImage(node, {
       pixelRatio: 2,
       cacheBust: true,
