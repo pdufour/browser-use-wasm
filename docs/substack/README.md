@@ -6,7 +6,7 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift demo + drift debug timeline + star charts (export cards) |
+| `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift demo + drift debug timeline + DPR rounding + star charts (export cards) |
 | `diagram.js` | Dark frame toggle, PNG/SVG export (per-card PNG targets) |
 | `capture-benchmark.csv` | SnapDOM vs html2canvas-pro timings (Datawrapper chart `OYr7Q`) |
 | `capture-comparison.csv` | Token table data (Datawrapper chart `ZUOL7`) |
@@ -16,6 +16,8 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 | `capture-benchmark.mjs` | Shared browser benchmark (product SnapDOM path) |
 | `benchmark-capture.mjs` | Playwright driver → `capture-benchmark.csv` |
 | `drift-demo.mjs` | Static live vs SnapDOM side-by-side on drift card |
+| `dpr-rounding-demo.mjs` | Live floor/round/ceil canvas demo on DPR rounding card |
+| `dpr-rounding-demo.html` | Standalone page for the live canvas demo |
 | `embeds.json` | Datawrapper chart ids/revisions for standalone embed pages |
 | `embed-shell.html` | Template for `embeds/*.html` |
 | `generate-embeds.mjs` | Regenerate `embeds/*.html` from `embeds.json` |
@@ -43,6 +45,7 @@ Open **http://127.0.0.1:5173/substack/** — each diagram card has a **PNG** dow
 | SnapDOM pipeline | `browser-use-snapdom-substack.png` |
 | Vertical drift (demo) | `browser-use-drift-substack.png` |
 | Drift debug timeline | `browser-use-drift-debug-substack.png` |
+| DPR rounding fix | `browser-use-dpr-rounding-substack.png` |
 | Star history (full card) | `browser-use-stars-substack.png` |
 | Star history (combined) | `browser-use-stars-combined-substack.png` |
 | Star history (each repo) | `browser-use-stars-{repo}-substack.png` |
@@ -120,6 +123,16 @@ The libraries chart uses a **3-column** layout (one family per column) with colo
 
 ```bash
 node docs/substack/push-datawrapper-table.mjs --libraries
+```
+
+## DPR rounding (live canvas)
+
+Measures a real `316.3px` CSS box × `devicePixelRatio`, SnapDOM-captures it, then builds **real** `<canvas>` elements with `canvas.width` / `canvas.height` from `floor`, `round`, and `ceil`.
+
+```bash
+npm run dev
+# http://127.0.0.1:5173/substack/  — DPR rounding export card
+# http://127.0.0.1:5173/substack/dpr-rounding-demo.html
 ```
 
 ## Draft

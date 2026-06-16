@@ -1,6 +1,7 @@
 import { toPng, toSvg } from 'html-to-image';
 import { initStarCharts } from './star-charts.js';
 import { initDriftDemo } from './drift-demo.mjs';
+import { initDprRoundingDemo } from './dpr-rounding-demo.mjs';
 
 const exportRoot = document.getElementById('export-root');
 const captureExportRoot = document.getElementById('capture-export-root');
@@ -8,6 +9,7 @@ const libsExportRoot = document.getElementById('libs-export-root');
 const snapdomExportRoot = document.getElementById('snapdom-export-root');
 const driftExportRoot = document.getElementById('drift-export-root');
 const driftDebugExportRoot = document.getElementById('drift-debug-export-root');
+const dprRoundingExportRoot = document.getElementById('dpr-rounding-export-root');
 const starsExportRoot = document.getElementById('stars-export-root');
 const btnTheme = document.getElementById('btn-theme');
 const btnSvg = document.getElementById('btn-svg');
@@ -19,6 +21,7 @@ const themedRoots = [
   snapdomExportRoot,
   driftExportRoot,
   driftDebugExportRoot,
+  dprRoundingExportRoot,
   starsExportRoot,
 ];
 
@@ -83,6 +86,23 @@ async function waitDriftReady() {
   });
 }
 
+async function waitDprRoundingReady() {
+  const root = document.getElementById('dpr-rounding-export-root');
+  if (root?.dataset.dprReady === '1') return;
+  await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('dpr rounding demo timeout')), 30_000);
+    const check = () => {
+      if (root?.dataset.dprReady === '1') {
+        clearTimeout(t);
+        resolve();
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+
 export function wireExportButtons(root = document) {
   root.querySelectorAll('.btn-download-png[data-export-target]').forEach((btn) => {
     if (btn.dataset.wired) return;
@@ -95,6 +115,9 @@ export function wireExportButtons(root = document) {
       try {
         if (btn.dataset.exportTarget === 'drift-export-root') {
           await waitDriftReady();
+        }
+        if (btn.dataset.exportTarget === 'dpr-rounding-export-root') {
+          await waitDprRoundingReady();
         }
         await downloadPng(node, btn.dataset.exportFilename);
       } finally {
@@ -119,5 +142,6 @@ btnSvg.addEventListener('click', async () => {
 });
 
 await initDriftDemo(driftExportRoot);
+await initDprRoundingDemo(dprRoundingExportRoot);
 starCharts = await initStarCharts(isDark());
 wireExportButtons(document.getElementById('star-chart-grid'));
