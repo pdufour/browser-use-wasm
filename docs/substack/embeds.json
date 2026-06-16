@@ -1,0 +1,30 @@
+{
+  "benchmark": {
+    "chartId": "OYr7Q",
+    "revision": 6,
+    "title": "SnapDOM vs html2canvas-pro capture time",
+    "file": "benchmark.html",
+    "height": 400
+  },
+  "runtime": {
+    "chartId": "tFStz",
+    "revision": 7,
+    "title": "Chrome WebGPU max context (Qwen2.5-0.5B q4)",
+    "file": "runtime.html",
+    "height": 260
+  },
+  "tokens": {
+    "chartId": "ZUOL7",
+    "revision": 1,
+    "title": "Capture token comparison",
+    "file": "tokens.html",
+    "height": 420
+  },
+  "libraries": {
+    "chartId": "kJYQ5",
+    "revision": 13,
+    "title": "DOM-to-screenshot capture libraries",
+    "file": "libraries.html",
+    "height": 480
+  }
+}

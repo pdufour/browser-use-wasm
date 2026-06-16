@@ -1041,6 +1041,7 @@
       #libs-export-root.exporting,
       #snapdom-export-root.exporting,
       #drift-export-root.exporting,
+      #drift-debug-export-root.exporting,
       #stars-export-root.exporting,
       #star-chart-combined.exporting,
       .star-card.exporting {
@@ -1279,6 +1280,7 @@
         overflow: hidden;
         border: 1px solid #e2e8f0;
         background: #fff;
+        padding: 1rem 1.1rem 1.15rem;
       }
 
       .export-card.dark .lib-benchmark__embed {
@@ -1286,11 +1288,133 @@
         background: #0f172a;
       }
 
-      .lib-benchmark__embed iframe {
-        display: block;
+      .bench-chart {
+        --bench-max: 65;
+        --bench-snapdom: #059669;
+        --bench-h2c: #d97706;
+      }
+
+      .bench-chart__legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem 1.25rem;
+        margin-bottom: 0.85rem;
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+
+      .export-card.dark .bench-chart__legend {
+        color: #94a3b8;
+      }
+
+      .bench-chart__legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .bench-chart__legend i {
+        display: inline-block;
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 2px;
+        font-style: normal;
+      }
+
+      .bench-chart__legend i.snapdom {
+        background: var(--bench-snapdom);
+      }
+
+      .bench-chart__legend i.h2c {
+        background: var(--bench-h2c);
+      }
+
+      .bench-chart__plot {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: end;
+        min-height: 220px;
+        padding: 0.25rem 0.35rem 0;
+      }
+
+      .bench-chart__group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .bench-chart__bars {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 0.55rem;
         width: 100%;
-        min-height: 400px;
-        border: 0;
+        height: 200px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      .export-card.dark .bench-chart__bars {
+        border-bottom-color: #475569;
+      }
+
+      .bench-chart__bar {
+        width: 2.4rem;
+        height: calc(var(--h) / var(--bench-max) * 100%);
+        min-height: 4px;
+        border-radius: 6px 6px 2px 2px;
+        position: relative;
+      }
+
+      .bench-chart__bar span {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 0.3rem);
+        transform: translateX(-50%);
+        font-size: 0.68rem;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #334155;
+      }
+
+      .export-card.dark .bench-chart__bar span {
+        color: #e2e8f0;
+      }
+
+      .bench-chart__bar--snapdom {
+        background: var(--bench-snapdom);
+      }
+
+      .bench-chart__bar--h2c {
+        background: var(--bench-h2c);
+      }
+
+      .bench-chart__label {
+        margin: 0;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+        text-align: center;
+      }
+
+      .export-card.dark .bench-chart__label {
+        color: #cbd5e1;
+      }
+
+      .bench-chart__note {
+        margin: 0.85rem 0 0;
+        font-size: 0.72rem;
+        color: #64748b;
+        line-height: 1.45;
+      }
+
+      .export-card.dark .bench-chart__note {
+        color: #94a3b8;
+      }
+
+      .bench-chart__note a {
+        color: #2563eb;
       }
 
       /* ── SnapDOM pipeline ── */
@@ -1516,6 +1640,268 @@
         background: #1e293b;
         border-color: #475569;
         color: #cbd5e1;
+      }
+
+      /* ── Vertical drift demo (static side-by-side) ── */
+      .drift-demo {
+        margin: 1rem 0 1.25rem;
+        padding: 1rem;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        opacity: 0.35;
+        transition: opacity 0.2s ease;
+      }
+
+      .drift-demo[data-ready='1'] {
+        opacity: 1;
+      }
+
+      .export-card.dark .drift-demo {
+        border-color: #334155;
+        background: #0f172a;
+      }
+
+      .drift-demo__compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+        max-width: 40rem;
+        margin: 0 auto 0.75rem;
+      }
+
+      .drift-demo__pane-label {
+        margin: 0 0 0.4rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .export-card.dark .drift-demo__pane-label {
+        color: #94a3b8;
+      }
+
+      .drift-demo__frame {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+      }
+
+      .export-card.dark .drift-demo__frame {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .drift-demo__panel {
+        padding: 1rem 1rem 0.85rem;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+
+      .drift-demo__panel h3 {
+        margin: 0 0 0.35rem;
+        font-size: 1.05rem;
+        line-height: 1.25;
+        color: #0f172a;
+      }
+
+      .export-card.dark .drift-demo__panel h3 {
+        color: #f8fafc;
+      }
+
+      .drift-demo__panel p {
+        margin: 0 0 0.85rem;
+        font-size: 0.82rem;
+        color: #64748b;
+        line-height: 1.45;
+      }
+
+      .export-card.dark .drift-demo__panel p {
+        color: #94a3b8;
+      }
+
+      .drift-demo__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .drift-demo__btn {
+        font: inherit;
+        font-weight: 700;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        padding: 0.48rem 0.9rem;
+        border: 1px solid transparent;
+        pointer-events: none;
+      }
+
+      .drift-demo__btn--submit {
+        background: #059669;
+        color: #fff;
+        border-color: #059669;
+      }
+
+      .drift-demo__btn--cancel {
+        background: #fff;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
+
+      .export-card.dark .drift-demo__btn--cancel {
+        background: #334155;
+        color: #e2e8f0;
+        border-color: #64748b;
+      }
+
+      #drift-capture-preview {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+        vertical-align: top;
+      }
+
+      .drift-demo__frame--canvas {
+        line-height: 0;
+      }
+
+      .drift-demo__guide {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      .drift-demo__guide--live {
+        background: #2563eb;
+      }
+
+      .drift-demo__guide--canvas {
+        background: #dc2626;
+      }
+
+      .drift-demo__legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem 1.25rem;
+        justify-content: center;
+        margin-bottom: 0.65rem;
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+
+      .export-card.dark .drift-demo__legend {
+        color: #94a3b8;
+      }
+
+      .drift-demo__legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .drift-demo__legend i {
+        display: inline-block;
+        width: 1.1rem;
+        height: 0.2rem;
+        border-radius: 1px;
+        font-style: normal;
+      }
+
+      .drift-demo__legend i.live {
+        background: #2563eb;
+      }
+
+      .drift-demo__legend i.canvas {
+        background: #dc2626;
+      }
+
+      .drift-demo__caption {
+        margin: 0.65rem 0 0;
+        font-size: 0.76rem;
+        line-height: 1.5;
+        color: #475569;
+      }
+
+      .export-card.dark .drift-demo__caption {
+        color: #94a3b8;
+      }
+
+      .drift-demo__caption a {
+        color: #2563eb;
+      }
+
+      .drift-zoom-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 0.85rem;
+      }
+
+      .drift-zoom-pane__label {
+        margin: 0 0 0.35rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .export-card.dark .drift-zoom-pane__label {
+        color: #94a3b8;
+      }
+
+      .drift-zoom-live-clip,
+      .drift-zoom-canvas-clip {
+        width: 100%;
+        height: 96px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .export-card.dark .drift-zoom-live-clip,
+      .export-card.dark .drift-zoom-canvas-clip {
+        border-color: #475569;
+        background: #1e293b;
+      }
+
+      .drift-zoom-clip__inner {
+        transform-origin: top left;
+      }
+
+      .drift-zoom-clip__guide {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .drift-zoom-clip__guide--live {
+        background: #2563eb;
+      }
+
+      .drift-zoom-clip__guide--canvas {
+        background: #dc2626;
+      }
+
+      @media (max-width: 720px) {
+        .drift-demo__compare,
+        .drift-zoom-row {
+          grid-template-columns: 1fr;
+        }
       }
 
       /* ── Vertical drift debug timeline ── */
@@ -2266,14 +2652,36 @@ canvas.onpaint = () =&gt; {
         <div class="lib-benchmark">
           <p class="lib-benchmark__title">Measured capture time (median ms)</p>
           <div class="lib-benchmark__embed">
-            <iframe
-              title="SnapDOM vs html2canvas-pro capture benchmark"
-              aria-label="Grouped bar chart: SnapDOM vs html2canvas-pro median capture time on two fixtures"
-              src="https://datawrapper.dwcdn.net/OYr7Q/5/"
-              scrolling="no"
-              frameborder="0"
-              height="400"
-            ></iframe>
+            <div
+              class="bench-chart"
+              role="img"
+              aria-label="Grouped bar chart: SnapDOM vs html2canvas-pro median capture time on Simple webpage and Checkout page"
+            >
+              <div class="bench-chart__legend" aria-hidden="true">
+                <span><i class="snapdom"></i> SnapDOM</span>
+                <span><i class="h2c"></i> html2canvas-pro</span>
+              </div>
+              <div class="bench-chart__plot">
+                <div class="bench-chart__group">
+                  <div class="bench-chart__bars">
+                    <div class="bench-chart__bar bench-chart__bar--snapdom" style="--h: 2"><span>2 ms</span></div>
+                    <div class="bench-chart__bar bench-chart__bar--h2c" style="--h: 58"><span>58 ms</span></div>
+                  </div>
+                  <p class="bench-chart__label">Simple webpage</p>
+                </div>
+                <div class="bench-chart__group">
+                  <div class="bench-chart__bars">
+                    <div class="bench-chart__bar bench-chart__bar--snapdom" style="--h: 3"><span>3 ms</span></div>
+                    <div class="bench-chart__bar bench-chart__bar--h2c" style="--h: 59"><span>59 ms</span></div>
+                  </div>
+                  <p class="bench-chart__label">Checkout page</p>
+                </div>
+              </div>
+            </div>
+            <p class="bench-chart__note">
+              MacBook Pro · Apple M4 Max · 64 GB · median of 5 runs.
+              Substack iframe: <a href="/substack/embeds/benchmark.html">embeds/benchmark.html</a>
+            </p>
           </div>
         </div>
       </div>
@@ -2389,7 +2797,73 @@ canvas.onpaint = () =&gt; {
           PNG
         </button>
         <p class="export-card__intro">
-          <strong>Vertical drift</strong> — text in the screenshot sits ~2px lower than the live page. Not a timing bug; the break happens when SVG becomes canvas pixels. Everything tried before accepting that:
+          <strong>Vertical drift</strong> — for browser-use, pixels matter: clicking <code>[10, 11]</code> vs <code>[10, 12]</code> can be a button vs whitespace. SnapDOM’s canvas export paints text slightly lower than the live page. The break is SVG → canvas rasterization, not “wait longer for fonts.”
+        </p>
+
+        <div class="drift-demo" id="drift-demo">
+          <div class="drift-demo__compare" aria-label="Live page vs SnapDOM capture">
+            <div class="drift-demo__pane">
+              <p class="drift-demo__pane-label">Live compositor</p>
+              <div class="drift-demo__frame">
+                <article id="drift-capture-target" class="drift-demo__panel">
+                  <h3 id="drift-heading">Complete your order</h3>
+                  <p>Review details — the VLA only sees the screenshot, not this live DOM.</p>
+                  <div class="drift-demo__actions">
+                    <span class="drift-demo__btn drift-demo__btn--cancel">Cancel</span>
+                    <span class="drift-demo__btn drift-demo__btn--submit" id="drift-submit">Submit</span>
+                  </div>
+                </article>
+                <div class="drift-demo__guide drift-demo__guide--live" id="drift-live-guide"></div>
+              </div>
+            </div>
+            <div class="drift-demo__pane">
+              <p class="drift-demo__pane-label">SnapDOM canvas (what the VLA sees)</p>
+              <div class="drift-demo__frame drift-demo__frame--canvas" id="drift-canvas-frame">
+                <canvas id="drift-capture-preview" aria-label="SnapDOM capture"></canvas>
+                <div class="drift-demo__guide drift-demo__guide--canvas" id="drift-canvas-guide"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drift-demo__legend" aria-hidden="true">
+            <span><i class="live"></i> Live heading top</span>
+            <span><i class="canvas"></i> <span id="drift-legend-canvas-label">Same top coord on canvas</span></span>
+          </div>
+
+          <div class="drift-zoom-row" aria-label="Heading zoom — same crop on live and canvas">
+            <div class="drift-zoom-pane">
+              <p class="drift-zoom-pane__label">Live heading (4× zoom)</p>
+              <div class="drift-zoom-live-clip" id="drift-zoom-live-clip"></div>
+            </div>
+            <div class="drift-zoom-pane">
+              <p class="drift-zoom-pane__label">Canvas heading (4× zoom)</p>
+              <div class="drift-zoom-canvas-clip" id="drift-zoom-canvas-clip"></div>
+            </div>
+          </div>
+
+          <p class="drift-demo__caption" id="drift-demo-caption">
+            Capturing with SnapDOM…
+          </p>
+        </div>
+      </div>
+
+      <div class="section-gap" aria-hidden="true"></div>
+
+      <div id="drift-debug-export-root" class="export-card export-asset">
+        <button
+          type="button"
+          class="btn-download-png"
+          data-export-target="drift-debug-export-root"
+          data-export-filename="browser-use-drift-debug-substack.png"
+          title="Download PNG (2× retina)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+          PNG
+        </button>
+        <p class="export-card__intro">
+          <strong>Everything tried before accepting that</strong> — the ~2px shift is structural to SVG → canvas rasterization, not a missing wait or CSS knob.
         </p>
         <div class="drift-timeline">
           <article class="drift-item drift-item--fail">

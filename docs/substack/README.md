@@ -6,8 +6,8 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift debug (export cards) |
-| `diagram.js` | Dark frame toggle, PNG/SVG export (5 PNG targets) |
+| `index.html` | Pipeline + capture options + library landscape + SnapDOM pipeline + drift demo + drift debug timeline + star charts (export cards) |
+| `diagram.js` | Dark frame toggle, PNG/SVG export (per-card PNG targets) |
 | `capture-benchmark.csv` | SnapDOM vs html2canvas-pro timings (Datawrapper chart `OYr7Q`) |
 | `capture-comparison.csv` | Token table data (Datawrapper chart `ZUOL7`) |
 | `capture-libraries.csv` | Capture library landscape table — Library column uses markdown GitHub links (Datawrapper `kJYQ5`) |
@@ -15,6 +15,11 @@ Draft assets for a **generic** browser-use article — separate from the [Gemini
 | `capture-benchmark.html` | Interactive SnapDOM vs [html2canvas-pro](https://github.com/yorickshan/html2canvas-pro) timing page |
 | `capture-benchmark.mjs` | Shared browser benchmark (product SnapDOM path) |
 | `benchmark-capture.mjs` | Playwright driver → `capture-benchmark.csv` |
+| `drift-demo.mjs` | Static live vs SnapDOM side-by-side on drift card |
+| `embeds.json` | Datawrapper chart ids/revisions for standalone embed pages |
+| `embed-shell.html` | Template for `embeds/*.html` |
+| `generate-embeds.mjs` | Regenerate `embeds/*.html` from `embeds.json` |
+| `embeds/*.html` | One Datawrapper iframe per chart (Substack paste — no COEP) |
 | `push-datawrapper-table.mjs` | Push CSVs to Datawrapper (`--tokens`, `--libraries`, `--runtime`, `--benchmark`) |
 | `article-outline.md` | Article draft |
 
@@ -36,7 +41,8 @@ Open **http://127.0.0.1:5173/substack/** — each diagram card has a **PNG** dow
 | Capture options | `browser-use-capture-substack.png` |
 | Library landscape | `browser-use-libraries-substack.png` |
 | SnapDOM pipeline | `browser-use-snapdom-substack.png` |
-| Vertical drift | `browser-use-drift-substack.png` |
+| Vertical drift (demo) | `browser-use-drift-substack.png` |
+| Drift debug timeline | `browser-use-drift-debug-substack.png` |
 | Star history (full card) | `browser-use-stars-substack.png` |
 | Star history (combined) | `browser-use-stars-combined-substack.png` |
 | Star history (each repo) | `browser-use-stars-{repo}-substack.png` |
@@ -89,6 +95,13 @@ node docs/substack/push-datawrapper-table.mjs --benchmark
 
 ## Datawrapper
 
+Charts for **Substack** live in `embeds/` — one HTML file per chart, served without COEP so Datawrapper iframes load. The main `index.html` export cards use native HTML/SVG previews (not iframes).
+
+```bash
+node docs/substack/generate-embeds.mjs   # after hand-editing embeds.json
+# http://127.0.0.1:5173/substack/embeds/benchmark.html
+```
+
 ```bash
 export DATAWRAPPER_TOKEN=...   # app.datawrapper.de/account/api-tokens
 node docs/substack/push-datawrapper-table.mjs           # both tables
@@ -96,12 +109,12 @@ node docs/substack/push-datawrapper-table.mjs --libraries
 node docs/substack/push-datawrapper-table.mjs --benchmark
 ```
 
-| Chart | CSV | Embed |
-|-------|-----|-------|
-| `ZUOL7` | `capture-comparison.csv` | https://datawrapper.dwcdn.net/ZUOL7/1/ |
-| `kJYQ5` | `capture-libraries.csv` | https://datawrapper.dwcdn.net/kJYQ5/13/ |
-| `tFStz` | `runtime-context-limits.csv` | https://datawrapper.dwcdn.net/tFStz/7/ |
-| `OYr7Q` | `capture-benchmark.csv` | https://datawrapper.dwcdn.net/OYr7Q/5/ |
+| Chart | CSV | Embed asset |
+|-------|-----|-------------|
+| `ZUOL7` | `capture-comparison.csv` | `/substack/embeds/tokens.html` |
+| `kJYQ5` | `capture-libraries.csv` | `/substack/embeds/libraries.html` |
+| `tFStz` | `runtime-context-limits.csv` | `/substack/embeds/runtime.html` |
+| `OYr7Q` | `capture-benchmark.csv` | `/substack/embeds/benchmark.html` |
 
 The libraries chart uses a **3-column** layout (one family per column) with colored headers, bordered cells, markdown GitHub links, and intro/footer notes matching the HTML export card. Re-push after CSV edits:
 

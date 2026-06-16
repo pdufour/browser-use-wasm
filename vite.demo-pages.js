@@ -137,6 +137,7 @@ export function demoAssetsPlugin(demoDir, route) {
       if (!pathname.startsWith(prefix)) return next();
       const rel = pathname.slice(prefix.length);
       if (!rel || rel.includes('..') || rel === 'index.html') return next();
+      if (route === '/substack' && rel.startsWith('embeds/')) return next();
       const file = path.join(demoDir, rel);
       if (!file.startsWith(demoDir) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
         return next();

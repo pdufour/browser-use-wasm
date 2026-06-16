@@ -18,9 +18,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
+const embedsPath = path.join(dir, 'embeds.json');
 const token = process.env.DATAWRAPPER_TOKEN;
 const args = new Set(process.argv.slice(2));
 const pushTokens = args.size === 0 || args.has('--tokens');
@@ -410,7 +412,21 @@ for (const table of tables) {
   }
 
   const meta = await pub.json();
+  const publicUrl = meta.publicUrl ?? meta.url ?? '';
+  const revision = meta.publicVersion ?? Number(publicUrl.match(/\/(\d+)\/?$/)?.[1]);
+  let embedFile = '';
+  if (revision && fs.existsSync(embedsPath)) {
+    const manifest = JSON.parse(fs.readFileSync(embedsPath, 'utf8'));
+    if (manifest[name]?.chartId === chartId) {
+      manifest[name].revision = revision;
+      embedFile = manifest[name].file;
+      fs.writeFileSync(embedsPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      spawnSync(process.execPath, [path.join(dir, 'generate-embeds.mjs')], { stdio: 'inherit' });
+    }
+  }
+
   console.log(`Uploaded ${path.basename(csvPath)} → chart ${chartId}`);
   console.log(`Edit: https://app.datawrapper.de/edit/${chartId}/`);
-  console.log(`Embed: ${meta.publicUrl ?? meta.url ?? '(see editor)'}`);
+  console.log(`Embed: ${publicUrl || '(see editor)'}`);
+  if (embedFile) console.log(`Asset: /substack/embeds/${embedFile}`);
 }

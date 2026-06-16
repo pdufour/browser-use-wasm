@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapDOM vs html2canvas-pro capture time</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        background: #fff;
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 1rem 1.25rem 1.5rem;
+      }
+      h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .lead {
+        margin: 0 0 1rem;
+        font-size: 0.82rem;
+        color: #64748b;
+        line-height: 1.45;
+      }
+      .lead a {
+        color: #2563eb;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>SnapDOM vs html2canvas-pro capture time</h1>
+      <p class="lead">
+        Datawrapper embed for Substack — paste the iframe from
+        <a href="https://app.datawrapper.de/edit/OYr7Q/">the editor</a>
+        or use this standalone page (no COEP).
+      </p>
+      <iframe
+        id="datawrapper-chart-OYr7Q"
+        title="SnapDOM vs html2canvas-pro capture time"
+        src="https://datawrapper.dwcdn.net/OYr7Q/6/"
+        scrolling="no"
+        frameborder="0"
+        height="400"
+        data-external="1"
+      ></iframe>
+    </div>
+    <script>
+      (function () {
+        function resize() {
+          window.addEventListener('message', function (e) {
+            if (e.data['datawrapper-height'] === undefined) return;
+            var heights = e.data['datawrapper-height'];
+            var iframe = document.querySelector('iframe[data-external]');
+            if (!iframe) return;
+            for (var id in heights) {
+              if (iframe.id === 'datawrapper-chart-' + id) {
+                iframe.style.height = heights[id] + 'px';
+              }
+            }
+          });
+        }
+        resize();
+      })();
+    </script>
+  </body>
+</html>

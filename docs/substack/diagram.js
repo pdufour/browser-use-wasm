@@ -1,11 +1,13 @@
 import { toPng, toSvg } from 'html-to-image';
 import { initStarCharts } from './star-charts.js';
+import { initDriftDemo } from './drift-demo.mjs';
 
 const exportRoot = document.getElementById('export-root');
 const captureExportRoot = document.getElementById('capture-export-root');
 const libsExportRoot = document.getElementById('libs-export-root');
 const snapdomExportRoot = document.getElementById('snapdom-export-root');
 const driftExportRoot = document.getElementById('drift-export-root');
+const driftDebugExportRoot = document.getElementById('drift-debug-export-root');
 const starsExportRoot = document.getElementById('stars-export-root');
 const btnTheme = document.getElementById('btn-theme');
 const btnSvg = document.getElementById('btn-svg');
@@ -16,6 +18,7 @@ const themedRoots = [
   libsExportRoot,
   snapdomExportRoot,
   driftExportRoot,
+  driftDebugExportRoot,
   starsExportRoot,
 ];
 
@@ -50,7 +53,7 @@ async function captureNode(node, toImage) {
       pixelRatio: 2,
       cacheBust: true,
       backgroundColor: isDark() ? '#0f172a' : '#ffffff',
-      filter: (el) => !(el.classList?.contains('btn-download-png')),
+      filter: (el) => !el.classList?.contains('btn-download-png'),
     });
   } finally {
     node.classList.remove('exporting');
@@ -63,6 +66,23 @@ async function downloadPng(node, filename) {
   downloadBlob(await res.blob(), filename);
 }
 
+async function waitDriftReady() {
+  const root = document.getElementById('drift-export-root');
+  if (root?.dataset.driftReady === '1') return;
+  await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('drift demo timeout')), 30_000);
+    const check = () => {
+      if (root?.dataset.driftReady === '1') {
+        clearTimeout(t);
+        resolve();
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+
 export function wireExportButtons(root = document) {
   root.querySelectorAll('.btn-download-png[data-export-target]').forEach((btn) => {
     if (btn.dataset.wired) return;
@@ -73,6 +93,9 @@ export function wireExportButtons(root = document) {
       const prev = btn.disabled;
       btn.disabled = true;
       try {
+        if (btn.dataset.exportTarget === 'drift-export-root') {
+          await waitDriftReady();
+        }
         await downloadPng(node, btn.dataset.exportFilename);
       } finally {
         btn.disabled = prev;
@@ -95,5 +118,6 @@ btnSvg.addEventListener('click', async () => {
   downloadBlob(await res.blob(), 'browser-use-pipeline.svg');
 });
 
+await initDriftDemo(driftExportRoot);
 starCharts = await initStarCharts(isDark());
 wireExportButtons(document.getElementById('star-chart-grid'));
